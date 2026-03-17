@@ -1,9 +1,7 @@
-import LandingPage from './LandingPage'
+import TeacherScormPage from './teacher/TeacherScormPage'
 
 function App() {
-    return (
-        <LandingPage />
-    )
+  return <TeacherScormPage />
 }
 
 export default App

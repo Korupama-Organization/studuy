@@ -3,30 +3,28 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-primary: #6366f1;
-  --color-background-light: #f8fafc;
-  --color-background-dark: #0f172a;
-  --font-display: "Inter", sans-serif;
+  --color-primary: #5e81ac;
+  --color-background-light: #eceff4;
+  --color-background-dark: #2e3440;
+  --font-display: "Manrope", "Segoe UI", sans-serif;
   --radius-default: 0.75rem;
 }
 
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: #2e3440;
+  background: #eceff4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-}
-
-/* Custom styles from the provided code */
-.course-card {
-  transition: transform 0.3s ease;
-}
-
-.course-card:hover {
-  transform: translateY(-4px);
+  background: #eceff4;
 }
 
 /* Smooth scrolling */
