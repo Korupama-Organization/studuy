@@ -24,6 +24,10 @@ const ForgotPasswordPage: React.FC = () => {
 
     // Gọi API reset password ở đây
     setMessage('Một email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư đến.');
+
+    setTimeout(() => {
+      navigate(`/opt-forgot-password?email=${encodeURIComponent(email)}`);
+    }, 1000);
   };
 
   return (
