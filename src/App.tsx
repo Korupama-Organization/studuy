@@ -1,8 +1,8 @@
-import LandingPage from './LandingPage'
+import LoginPage from './auth/login'
 
 function App() {
     return (
-        <LandingPage />
+        <LoginPage />
     )
 }
 
