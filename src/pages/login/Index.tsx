@@ -1,18 +1,63 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import avatarImage from "../../assets/Avatar.png";
 import backgroundForPC from "../../assets/BackgroundforPC.png";
+import {
+    getStoredAccessToken,
+    loginNormalAuth,
+    storeAuthSession,
+} from "../../services/auth";
 
 const EMAIL_ICON_CDN = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/envelope.svg";
 const PASSWORD_ICON_CDN = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/key.svg";
 
 export default function LoginPage() {
-    const [email, setEmail] = useState("");
+    const navigate = useNavigate();
+    const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    useEffect(() => {
+        if (getStoredAccessToken()) {
+            navigate("/", { replace: true });
+        }
+    }, [navigate]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle login logic here
+
+        const normalizedIdentifier = identifier.trim().toLowerCase();
+        const normalizedPassword = password.trim();
+
+        setErrorMessage("");
+
+        if (!normalizedIdentifier || !normalizedPassword) {
+            setErrorMessage("Vui lòng nhập đầy đủ email và mật khẩu.");
+            return;
+        }
+
+        if (!normalizedIdentifier.includes("@")) {
+            setErrorMessage("Người dùng thường vui lòng đăng nhập bằng email.");
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+
+            const result = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
+            storeAuthSession(result);
+            navigate("/", { replace: true });
+        } catch (error) {
+            const fallbackMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
+            setErrorMessage(
+                error instanceof Error && error.message.trim()
+                    ? error.message
+                    : fallbackMessage,
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -49,13 +94,13 @@ export default function LoginPage() {
                     </h1>
 
                     <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5 lg:gap-4">
-                        {/* Email / Student ID field */}
+                        {/* Email field for normal user */}
                         <div className="flex flex-col gap-2">
                             <label
                                 className="text-[#0A0A0A] font-inter font-light"
                                 style={{ fontSize: "clamp(0.825rem, 2.2vw, 1rem)" }}
                             >
-                                Mã sinh viên hoặc Email
+                                Email
                             </label>
                             <div className="relative flex items-center h-[56px]">
                                 {/* Outer pill - purple */}
@@ -75,8 +120,8 @@ export default function LoginPage() {
                                     <div className="h-[56px] rounded-full bg-[#F4F7FB] overflow-hidden">
                                         <input
                                             type="text"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            value={identifier}
+                                            onChange={(e) => setIdentifier(e.target.value)}
                                             placeholder="name@work-email.com"
                                             className="w-full h-full bg-transparent px-4 text-[#0A0A0A80] font-inter font-normal border-none outline-none appearance-none placeholder:text-[#0A0A0A80]"
                                             style={{ fontSize: "clamp(0.8rem, 2.2vw, 0.95rem)" }}
@@ -137,14 +182,24 @@ export default function LoginPage() {
                         {/* Login button */}
                         <button
                             type="submit"
-                            className="w-full py-3 lg:py-2.5 rounded-[50px] bg-[#E484EB] text-white font-nunito font-black text-center transition-opacity hover:opacity-90 active:opacity-80"
+                            disabled={isSubmitting}
+                            className="w-full py-3 lg:py-2.5 rounded-[50px] bg-[#E484EB] text-white font-nunito font-black text-center transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
                             style={{
                                 boxShadow: "0 10px 6px 0 rgba(0,0,0,0.25)",
                                 fontSize: "clamp(0.95rem, 2.8vw, 1.15rem)",
                             }}
                         >
-                            Đăng nhập
+                            {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
                         </button>
+
+                        {errorMessage ? (
+                            <p
+                                className="text-center text-red-600 font-inter"
+                                style={{ fontSize: "clamp(0.8rem, 2.2vw, 0.95rem)" }}
+                            >
+                                {errorMessage}
+                            </p>
+                        ) : null}
                     </form>
 
                     {/* Register link */}
