@@ -35,7 +35,7 @@ export default function MobileFormScreen({
             </div>
 
             <div className="w-full flex-1 min-h-0 bg-white rounded-t-[125px] rounded-b-none px-6 pt-7 pb-7 flex flex-col overflow-hidden mt-0">
-                
+
 
                 <div className="w-full">
                     <LoginFormCard
