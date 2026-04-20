@@ -8,6 +8,7 @@ interface CredentialInputProps {
     iconAlt: string;
     autoComplete?: string;
     autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+    labelClassName?: string;
 }
 
 export default function CredentialInput({
@@ -20,11 +21,12 @@ export default function CredentialInput({
     iconAlt,
     autoComplete,
     autoCapitalize,
+    labelClassName,
 }: CredentialInputProps) {
     return (
         <div className="flex flex-col gap-2">
             <label
-                className="text-[#0A0A0A] font-inter font-light"
+                className={`text-[#0A0A0A] font-inter font-light ${labelClassName ?? ''}`}
                 style={{ fontSize: 'clamp(0.825rem, 2.2vw, 1rem)' }}
             >
                 {label}

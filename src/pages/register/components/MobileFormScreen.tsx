@@ -1,26 +1,32 @@
 import avatarImage from '../../../assets/Logo.png';
-import LoginFormCard from './LoginFormCard';
+import RegisterFormCard from './RegisterFormCard';
 
 interface MobileFormScreenProps {
+    fullName: string;
     identifier: string;
     password: string;
+    confirmPassword: string;
     isSubmitting: boolean;
     errorMessage: string;
+    onFullNameChange: (value: string) => void;
     onIdentifierChange: (value: string) => void;
     onPasswordChange: (value: string) => void;
+    onConfirmPasswordChange: (value: string) => void;
     onSubmit: (event: React.FormEvent) => void;
-    onBack: () => void;
 }
 
 export default function MobileFormScreen({
+    fullName,
     identifier,
     password,
+    confirmPassword,
     isSubmitting,
     errorMessage,
+    onFullNameChange,
     onIdentifierChange,
     onPasswordChange,
+    onConfirmPasswordChange,
     onSubmit,
-    onBack,
 }: MobileFormScreenProps) {
     return (
         <div className="w-full h-full bg-gradient-to-b from-[#2F3FB8] via-[#4C45CC] to-[#7E50E8] p-0 flex flex-col">
@@ -35,17 +41,19 @@ export default function MobileFormScreen({
             </div>
 
             <div className="w-full flex-1 min-h-0 bg-white rounded-t-[125px] rounded-b-none px-6 pt-7 pb-7 flex flex-col overflow-hidden mt-0">
-
-
                 <div className="w-full">
-                    <LoginFormCard
+                    <RegisterFormCard
+                        fullName={fullName}
                         identifier={identifier}
                         password={password}
+                        confirmPassword={confirmPassword}
                         isSubmitting={isSubmitting}
                         errorMessage={errorMessage}
-                        showRegisterLink={false}
+                        showLoginLink={false}
+                        onFullNameChange={onFullNameChange}
                         onIdentifierChange={onIdentifierChange}
                         onPasswordChange={onPasswordChange}
+                        onConfirmPasswordChange={onConfirmPasswordChange}
                         onSubmit={onSubmit}
                     />
                 </div>

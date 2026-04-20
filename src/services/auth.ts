@@ -18,6 +18,11 @@ export interface LoginResponse {
     user: AuthUser;
 }
 
+export interface RegisterHrResponse {
+    message: string;
+    user: AuthUser;
+}
+
 interface ApiErrorShape {
     message?: string;
     error?: string;
@@ -109,6 +114,37 @@ export const loginWithUIT = async (identifier: string, password: string): Promis
     }
 
     return payload as LoginResponse;
+};
+
+export const registerHrUser = async (
+    fullName: string,
+    email: string,
+    password: string,
+): Promise<RegisterHrResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register/hr`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            fullName,
+            email,
+            password,
+        }),
+    });
+
+    let payload: RegisterHrResponse | ApiErrorShape | null = null;
+    try {
+        payload = (await response.json()) as RegisterHrResponse | ApiErrorShape;
+    } catch {
+        payload = null;
+    }
+
+    if (!response.ok) {
+        throw new Error(toErrorMessage('Dang ky tai khoan HR that bai.', payload as ApiErrorShape));
+    }
+
+    return payload as RegisterHrResponse;
 };
 
 export const storeAuthSession = (result: LoginResponse): void => {

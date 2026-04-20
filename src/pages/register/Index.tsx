@@ -1,26 +1,23 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import avatarImage from "../../assets/Logo.png";
-import backgroundForPC from "../../assets/BackgroundforPC.png";
-import {
-    getStoredAccessToken,
-    loginNormalAuth,
-    storeAuthSession,
-    loginWithUIT,
-} from "../../services/auth";
-import LoginFormCard from "./components/LoginFormCard";
-import MobileFormScreen from "./components/MobileFormScreen";
-import MobileIntroScreen from "./components/MobileIntroScreen";
-import MobileViewportScaler from "./components/MobileViewportScaler";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import avatarImage from '../../assets/Logo.png';
+import backgroundForPC from '../../assets/BackgroundforPC.png';
+import { getStoredAccessToken, registerHrUser } from '../../services/auth';
+import MobileViewportScaler from '../login/components/MobileViewportScaler';
+import MobileFormScreen from './components/MobileFormScreen';
+import MobileIntroScreen from './components/MobileIntroScreen';
+import RegisterFormCard from './components/RegisterFormCard';
 
 type MobileStep = 'intro' | 'form';
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const navigate = useNavigate();
-    const [identifier, setIdentifier] = useState("");
-    const [password, setPassword] = useState("");
+    const [fullName, setFullName] = useState('');
+    const [identifier, setIdentifier] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState('');
     const [isDesktop, setIsDesktop] = useState<boolean>(() => {
         if (typeof window === 'undefined') {
             return false;
@@ -32,7 +29,7 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (getStoredAccessToken()) {
-            navigate("/", { replace: true });
+            navigate('/', { replace: true });
         }
     }, [navigate]);
 
@@ -57,33 +54,42 @@ export default function LoginPage() {
         }
     }, [isDesktop]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const normalizedFullName = fullName.trim();
         const normalizedIdentifier = identifier.trim();
         const normalizedPassword = password.trim();
+        const normalizedConfirmPassword = confirmPassword.trim();
 
-        setErrorMessage("");
+        setErrorMessage('');
 
-        if (!normalizedIdentifier || !normalizedPassword) {
-            setErrorMessage("Please enter your email or student ID and password.");
+        if (!normalizedFullName || !normalizedIdentifier || !normalizedPassword || !normalizedConfirmPassword) {
+            setErrorMessage('Please enter full name, email, password, and confirm password.');
+            return;
+        }
+
+        if (normalizedPassword !== normalizedConfirmPassword) {
+            setErrorMessage('Mật khẩu xác nhận không khớp.');
+            return;
+        }
+
+        if (!normalizedIdentifier.includes('@')) {
+            setErrorMessage('Email không hợp lệ.');
             return;
         }
 
         try {
             setIsSubmitting(true);
-
-            // handle UIT authentication first with checking identifier is not an email
-            if (normalizedIdentifier.includes('@')) {
-                var result = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
-            }
-            else {
-                var result = await loginWithUIT(normalizedIdentifier, normalizedPassword);
-            }
-            storeAuthSession(result);
-            navigate("/", { replace: true });
+            await registerHrUser(normalizedFullName, normalizedIdentifier, normalizedPassword);
+            navigate('/login', {
+                replace: true,
+                state: {
+                    registrationSuccess: true,
+                    identifier: normalizedIdentifier,
+                },
+            });
         } catch (error) {
-            const fallbackMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
+            const fallbackMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
             setErrorMessage(
                 error instanceof Error && error.message.trim()
                     ? error.message
@@ -101,14 +107,17 @@ export default function LoginPage() {
                     <MobileIntroScreen onContinue={() => setMobileStep('form')} />
                 ) : (
                     <MobileFormScreen
+                        fullName={fullName}
                         identifier={identifier}
                         password={password}
+                        confirmPassword={confirmPassword}
                         isSubmitting={isSubmitting}
                         errorMessage={errorMessage}
+                        onFullNameChange={setFullName}
                         onIdentifierChange={setIdentifier}
                         onPasswordChange={setPassword}
+                        onConfirmPasswordChange={setConfirmPassword}
                         onSubmit={handleSubmit}
-                        onBack={() => setMobileStep('intro')}
                     />
                 )}
             </MobileViewportScaler>
@@ -131,14 +140,18 @@ export default function LoginPage() {
                         </div>
 
                         <div className="relative z-10 w-full bg-white shadow-[0_10px_24px_rgba(0,0,0,0.18)] flex flex-col items-center px-7 xl:px-10 pt-6 lg:pt-5 pb-7 lg:pb-6 mb-0 rounded-t-[220px] rounded-b-none lg:flex-1">
-                            <LoginFormCard
+                            <RegisterFormCard
+                                fullName={fullName}
                                 identifier={identifier}
                                 password={password}
+                                confirmPassword={confirmPassword}
                                 isSubmitting={isSubmitting}
                                 errorMessage={errorMessage}
-                                showRegisterLink
+                                showLoginLink
+                                onFullNameChange={setFullName}
                                 onIdentifierChange={setIdentifier}
                                 onPasswordChange={setPassword}
+                                onConfirmPasswordChange={setConfirmPassword}
                                 onSubmit={handleSubmit}
                             />
                         </div>
