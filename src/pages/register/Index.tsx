@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import avatarImage from '../../assets/Logo.png';
 import backgroundForPC from '../../assets/BackgroundforPC.png';
-import { getStoredAccessToken, registerHrUser } from '../../services/auth';
+import { checkHrEmailAvailability, hasValidStoredAccessToken, registerHrUser } from '../../services/auth';
 import MobileViewportScaler from '../login/components/MobileViewportScaler';
 import MobileFormScreen from './components/MobileFormScreen';
 import MobileIntroScreen from './components/MobileIntroScreen';
 import RegisterFormCard from './components/RegisterFormCard';
 
 type MobileStep = 'intro' | 'form';
+type HrGender = 'Nam' | 'Nữ' | 'Khác';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -16,6 +17,12 @@ export default function RegisterPage() {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [phone, setPhone] = useState('');
+    const [gender, setGender] = useState<HrGender | ''>('');
+    const [avatarUrl, setAvatarUrl] = useState('');
+    const [linkedinUrl, setLinkedinUrl] = useState('');
+    const [githubUrl, setGithubUrl] = useState('');
+    const [facebookUrl, setFacebookUrl] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isDesktop, setIsDesktop] = useState<boolean>(() => {
@@ -28,7 +35,7 @@ export default function RegisterPage() {
     const [mobileStep, setMobileStep] = useState<MobileStep>('intro');
 
     useEffect(() => {
-        if (getStoredAccessToken()) {
+        if (hasValidStoredAccessToken()) {
             navigate('/', { replace: true });
         }
     }, [navigate]);
@@ -54,12 +61,20 @@ export default function RegisterPage() {
         }
     }, [isDesktop]);
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
+    const handleCheckEmailAvailability = async (email: string) => {
+        await checkHrEmailAvailability(email);
+    };
+
+    const handleSubmit = async () => {
         const normalizedFullName = fullName.trim();
         const normalizedIdentifier = identifier.trim();
         const normalizedPassword = password.trim();
         const normalizedConfirmPassword = confirmPassword.trim();
+        const normalizedPhone = phone.trim();
+        const normalizedAvatarUrl = avatarUrl.trim();
+        const normalizedLinkedinUrl = linkedinUrl.trim();
+        const normalizedGithubUrl = githubUrl.trim();
+        const normalizedFacebookUrl = facebookUrl.trim();
 
         setErrorMessage('');
 
@@ -80,7 +95,17 @@ export default function RegisterPage() {
 
         try {
             setIsSubmitting(true);
-            await registerHrUser(normalizedFullName, normalizedIdentifier, normalizedPassword);
+            await registerHrUser({
+                fullName: normalizedFullName,
+                email: normalizedIdentifier,
+                password: normalizedPassword,
+                phone: normalizedPhone || undefined,
+                gender: gender || undefined,
+                avatarUrl: normalizedAvatarUrl || undefined,
+                linkedinUrl: normalizedLinkedinUrl || undefined,
+                githubUrl: normalizedGithubUrl || undefined,
+                facebookUrl: normalizedFacebookUrl || undefined,
+            });
             navigate('/login', {
                 replace: true,
                 state: {
@@ -111,12 +136,25 @@ export default function RegisterPage() {
                         identifier={identifier}
                         password={password}
                         confirmPassword={confirmPassword}
+                        phone={phone}
+                        gender={gender}
+                        avatarUrl={avatarUrl}
+                        linkedinUrl={linkedinUrl}
+                        githubUrl={githubUrl}
+                        facebookUrl={facebookUrl}
                         isSubmitting={isSubmitting}
                         errorMessage={errorMessage}
                         onFullNameChange={setFullName}
                         onIdentifierChange={setIdentifier}
                         onPasswordChange={setPassword}
                         onConfirmPasswordChange={setConfirmPassword}
+                        onPhoneChange={setPhone}
+                        onGenderChange={setGender}
+                        onAvatarUrlChange={setAvatarUrl}
+                        onLinkedinUrlChange={setLinkedinUrl}
+                        onGithubUrlChange={setGithubUrl}
+                        onFacebookUrlChange={setFacebookUrl}
+                        onCheckEmailAvailability={handleCheckEmailAvailability}
                         onSubmit={handleSubmit}
                     />
                 )}
@@ -129,8 +167,8 @@ export default function RegisterPage() {
             <div className="min-h-dvh lg:flex">
                 <div className="relative w-full lg:w-[390px] xl:w-[440px] 2xl:w-[480px] flex-shrink-0 bg-gradient-to-b from-[#4D55CC] to-[#8B4CFF] px-4 sm:px-6 lg:px-0">
                     <div className="mx-auto w-full max-w-[460px] lg:max-w-none lg:min-h-screen lg:flex lg:flex-col lg:items-center">
-                        <div className="relative z-10 pt-5 sm:pt-6 lg:pt-5 mb-4 lg:mb-3">
-                            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 rounded-full overflow-hidden bg-white shadow-[0_14px_30px_rgba(34,22,99,0.3)]">
+                        <div className="relative z-10 pt-3 sm:pt-4 lg:pt-3 mb-2 lg:mb-2">
+                            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-24 lg:h-24 xl:w-28 xl:h-28 rounded-full overflow-hidden bg-white shadow-[0_14px_30px_rgba(34,22,99,0.3)]">
                                 <img
                                     src={avatarImage}
                                     alt="SEeds logo"
@@ -139,12 +177,18 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        <div className="relative z-10 w-full bg-white shadow-[0_10px_24px_rgba(0,0,0,0.18)] flex flex-col items-center px-7 xl:px-10 pt-6 lg:pt-5 pb-7 lg:pb-6 mb-0 rounded-t-[220px] rounded-b-none lg:flex-1">
+                        <div className="relative z-10 w-full bg-white shadow-[0_10px_24px_rgba(0,0,0,0.18)] flex flex-col items-center px-6 xl:px-8 pt-4 lg:pt-4 pb-4 lg:pb-4 mb-0 rounded-t-[220px] rounded-b-none lg:flex-1">
                             <RegisterFormCard
                                 fullName={fullName}
                                 identifier={identifier}
                                 password={password}
                                 confirmPassword={confirmPassword}
+                                phone={phone}
+                                gender={gender}
+                                avatarUrl={avatarUrl}
+                                linkedinUrl={linkedinUrl}
+                                githubUrl={githubUrl}
+                                facebookUrl={facebookUrl}
                                 isSubmitting={isSubmitting}
                                 errorMessage={errorMessage}
                                 showLoginLink
@@ -152,6 +196,13 @@ export default function RegisterPage() {
                                 onIdentifierChange={setIdentifier}
                                 onPasswordChange={setPassword}
                                 onConfirmPasswordChange={setConfirmPassword}
+                                onPhoneChange={setPhone}
+                                onGenderChange={setGender}
+                                onAvatarUrlChange={setAvatarUrl}
+                                onLinkedinUrlChange={setLinkedinUrl}
+                                onGithubUrlChange={setGithubUrl}
+                                onFacebookUrlChange={setFacebookUrl}
+                                onCheckEmailAvailability={handleCheckEmailAvailability}
                                 onSubmit={handleSubmit}
                             />
                         </div>

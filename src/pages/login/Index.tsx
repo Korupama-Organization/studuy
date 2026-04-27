@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import avatarImage from "../../assets/Logo.png";
 import backgroundForPC from "../../assets/BackgroundforPC.png";
 import {
-    getStoredAccessToken,
+    hasValidStoredAccessToken,
     loginNormalAuth,
     storeAuthSession,
     loginWithUIT,
@@ -31,7 +31,7 @@ export default function LoginPage() {
     const [mobileStep, setMobileStep] = useState<MobileStep>('intro');
 
     useEffect(() => {
-        if (getStoredAccessToken()) {
+        if (hasValidStoredAccessToken()) {
             navigate("/", { replace: true });
         }
     }, [navigate]);
@@ -66,7 +66,7 @@ export default function LoginPage() {
         setErrorMessage("");
 
         if (!normalizedIdentifier || !normalizedPassword) {
-            setErrorMessage("Please enter your email or student ID and password.");
+            setErrorMessage("Please enter your Email and password.");
             return;
         }
 

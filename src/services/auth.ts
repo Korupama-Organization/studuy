@@ -23,6 +23,20 @@ export interface RegisterHrResponse {
     user: AuthUser;
 }
 
+type HrGender = 'Nam' | 'Nữ' | 'Khác';
+
+export interface RegisterHrPayload {
+    fullName: string;
+    email: string;
+    password: string;
+    phone?: string;
+    gender?: HrGender;
+    avatarUrl?: string;
+    linkedinUrl?: string;
+    githubUrl?: string;
+    facebookUrl?: string;
+}
+
 interface ApiErrorShape {
     message?: string;
     error?: string;
@@ -117,34 +131,52 @@ export const loginWithUIT = async (identifier: string, password: string): Promis
 };
 
 export const registerHrUser = async (
-    fullName: string,
-    email: string,
-    password: string,
+    payload: RegisterHrPayload,
 ): Promise<RegisterHrResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/auth/register/hr`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            fullName,
-            email,
-            password,
-        }),
+        body: JSON.stringify(payload),
     });
 
-    let payload: RegisterHrResponse | ApiErrorShape | null = null;
+    let responsePayload: RegisterHrResponse | ApiErrorShape | null = null;
     try {
-        payload = (await response.json()) as RegisterHrResponse | ApiErrorShape;
+        responsePayload = (await response.json()) as RegisterHrResponse | ApiErrorShape;
+    } catch {
+        responsePayload = null;
+    }
+
+    if (!response.ok) {
+        throw new Error(toErrorMessage('Dang ky tai khoan HR that bai.', responsePayload as ApiErrorShape));
+    }
+
+    return responsePayload as RegisterHrResponse;
+};
+
+export const checkHrEmailAvailability = async (email: string): Promise<void> => {
+    const normalizedEmail = email.trim();
+    const response = await fetch(
+        `${API_BASE_URL}/api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        },
+    );
+
+    let payload: ApiErrorShape | null = null;
+    try {
+        payload = (await response.json()) as ApiErrorShape;
     } catch {
         payload = null;
     }
 
     if (!response.ok) {
-        throw new Error(toErrorMessage('Dang ky tai khoan HR that bai.', payload as ApiErrorShape));
+        throw new Error(toErrorMessage('Khong the kiem tra email.', payload as ApiErrorShape));
     }
-
-    return payload as RegisterHrResponse;
 };
 
 export const storeAuthSession = (result: LoginResponse): void => {
@@ -155,6 +187,43 @@ export const storeAuthSession = (result: LoginResponse): void => {
 
 export const getStoredAccessToken = (): string => {
     return localStorage.getItem(STORAGE_KEYS.accessToken) || '';
+};
+
+const parseJwtPayload = (token: string): Record<string, unknown> | null => {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+        return null;
+    }
+
+    try {
+        const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const json = atob(base64);
+        return JSON.parse(json) as Record<string, unknown>;
+    } catch {
+        return null;
+    }
+};
+
+export const hasValidStoredAccessToken = (): boolean => {
+    const token = getStoredAccessToken();
+    if (!token) {
+        return false;
+    }
+
+    const payload = parseJwtPayload(token);
+    if (!payload || typeof payload.exp !== 'number') {
+        clearAuthSession();
+        return false;
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    const isTokenValid = payload.exp > nowInSeconds;
+
+    if (!isTokenValid) {
+        clearAuthSession();
+    }
+
+    return isTokenValid;
 };
 
 export const clearAuthSession = (): void => {

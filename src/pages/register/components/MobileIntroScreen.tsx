@@ -1,5 +1,4 @@
 import backgroundForPhone from '../../../assets/BackgroundforPhone.png';
-import SocialLoginIcons from '../../login/components/SocialLoginIcons';
 
 interface MobileIntroScreenProps {
     onContinue: () => void;
@@ -23,10 +22,6 @@ export default function MobileIntroScreen({ onContinue }: MobileIntroScreenProps
                     >
                         Sign Up
                     </button>
-
-                    <div className="pt-4">
-                        <SocialLoginIcons size={30} />
-                    </div>
                 </div>
             </div>
         </div>

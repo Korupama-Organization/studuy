@@ -1,18 +1,33 @@
 import avatarImage from '../../../assets/Logo.png';
 import RegisterFormCard from './RegisterFormCard';
 
+type HrGender = 'Nam' | 'Nữ' | 'Khác';
+
 interface MobileFormScreenProps {
     fullName: string;
     identifier: string;
     password: string;
     confirmPassword: string;
+    phone: string;
+    gender: HrGender | '';
+    avatarUrl: string;
+    linkedinUrl: string;
+    githubUrl: string;
+    facebookUrl: string;
     isSubmitting: boolean;
     errorMessage: string;
     onFullNameChange: (value: string) => void;
     onIdentifierChange: (value: string) => void;
     onPasswordChange: (value: string) => void;
     onConfirmPasswordChange: (value: string) => void;
-    onSubmit: (event: React.FormEvent) => void;
+    onPhoneChange: (value: string) => void;
+    onGenderChange: (value: HrGender | '') => void;
+    onAvatarUrlChange: (value: string) => void;
+    onLinkedinUrlChange: (value: string) => void;
+    onGithubUrlChange: (value: string) => void;
+    onFacebookUrlChange: (value: string) => void;
+    onCheckEmailAvailability: (email: string) => Promise<void>;
+    onSubmit: () => void;
 }
 
 export default function MobileFormScreen({
@@ -20,12 +35,25 @@ export default function MobileFormScreen({
     identifier,
     password,
     confirmPassword,
+    phone,
+    gender,
+    avatarUrl,
+    linkedinUrl,
+    githubUrl,
+    facebookUrl,
     isSubmitting,
     errorMessage,
     onFullNameChange,
     onIdentifierChange,
     onPasswordChange,
     onConfirmPasswordChange,
+    onPhoneChange,
+    onGenderChange,
+    onAvatarUrlChange,
+    onLinkedinUrlChange,
+    onGithubUrlChange,
+    onFacebookUrlChange,
+    onCheckEmailAvailability,
     onSubmit,
 }: MobileFormScreenProps) {
     return (
@@ -47,6 +75,12 @@ export default function MobileFormScreen({
                         identifier={identifier}
                         password={password}
                         confirmPassword={confirmPassword}
+                        phone={phone}
+                        gender={gender}
+                        avatarUrl={avatarUrl}
+                        linkedinUrl={linkedinUrl}
+                        githubUrl={githubUrl}
+                        facebookUrl={facebookUrl}
                         isSubmitting={isSubmitting}
                         errorMessage={errorMessage}
                         showLoginLink={false}
@@ -54,6 +88,13 @@ export default function MobileFormScreen({
                         onIdentifierChange={onIdentifierChange}
                         onPasswordChange={onPasswordChange}
                         onConfirmPasswordChange={onConfirmPasswordChange}
+                        onPhoneChange={onPhoneChange}
+                        onGenderChange={onGenderChange}
+                        onAvatarUrlChange={onAvatarUrlChange}
+                        onLinkedinUrlChange={onLinkedinUrlChange}
+                        onGithubUrlChange={onGithubUrlChange}
+                        onFacebookUrlChange={onFacebookUrlChange}
+                        onCheckEmailAvailability={onCheckEmailAvailability}
                         onSubmit={onSubmit}
                     />
                 </div>
