@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import CredentialInput from './CredentialInput';
-import SocialLoginIcons from './SocialLoginIcons';
 
 const EMAIL_ICON_CDN = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/envelope.svg';
 const PASSWORD_ICON_CDN = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/key.svg';
@@ -29,9 +28,9 @@ export default function LoginFormCard({
     const isMobileFormLayout = !showRegisterLink;
 
     return (
-        <div className="w-full min-h-full flex flex-col">
+        <div className={`w-full flex flex-col ${isMobileFormLayout ? 'h-full justify-center pb-2' : 'min-h-full'}`}>
             <h1
-                className="text-[#0A0A0A] text-center font-inter font-medium leading-[1.35] tracking-[-0.02em] mt-1 mb-3 sm:mb-5 lg:mb-4"
+                className={`text-[#0A0A0A] text-center font-inter font-medium leading-[1.35] tracking-[-0.02em] ${isMobileFormLayout ? 'mt-0 mb-5' : 'mt-1 mb-3 sm:mb-5 lg:mb-4'}`}
                 style={{ fontSize: 'clamp(1.3rem, 4.2vw, 2rem)' }}
             >
                 Đăng nhập
@@ -41,16 +40,16 @@ export default function LoginFormCard({
 
             <form
                 onSubmit={onSubmit}
-                className={`w-full flex flex-col gap-4 sm:gap-5 lg:gap-4 ${isMobileFormLayout ? 'mt-6' : ''}`}
+                className={`w-full flex flex-col gap-5 sm:gap-5 lg:gap-4 ${isMobileFormLayout ? 'mt-0' : ''}`}
             >
                 <CredentialInput
-                    label="Email or Student ID"
+                    label="Email"
                     type="text"
                     value={identifier}
                     onChange={onIdentifierChange}
-                    placeholder="Enter your email or student ID"
+                    placeholder="Enter your Email"
                     iconUrl={EMAIL_ICON_CDN}
-                    iconAlt="email or student ID icon"
+                    iconAlt="Email icon"
                     autoComplete="username"
                     autoCapitalize="none"
                 />
@@ -115,13 +114,6 @@ export default function LoginFormCard({
                     </Link>
                 </div>
             ) : null}
-
-            <div className={`w-full ${showRegisterLink ? 'mt-4' : 'mt-auto pt-8'}`}>
-                <div className="h-px bg-[#D8DBE9]" />
-                <div className="pt-4">
-                    <SocialLoginIcons size={isMobileFormLayout ? 32 : 26} />
-                </div>
-            </div>
         </div>
     );
 }

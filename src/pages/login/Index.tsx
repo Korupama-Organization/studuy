@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import avatarImage from "../../assets/Avatar.png";
+import avatarImage from "../../assets/Logo.png";
 import backgroundForPC from "../../assets/BackgroundforPC.png";
 import {
-    getStoredAccessToken,
+    hasValidStoredAccessToken,
     loginNormalAuth,
     storeAuthSession,
     loginWithUIT,
@@ -31,7 +31,7 @@ export default function LoginPage() {
     const [mobileStep, setMobileStep] = useState<MobileStep>('intro');
 
     useEffect(() => {
-        if (getStoredAccessToken()) {
+        if (hasValidStoredAccessToken()) {
             navigate("/", { replace: true });
         }
     }, [navigate]);
@@ -66,7 +66,7 @@ export default function LoginPage() {
         setErrorMessage("");
 
         if (!normalizedIdentifier || !normalizedPassword) {
-            setErrorMessage("Please enter your email or student ID and password.");
+            setErrorMessage("Please enter your Email and password.");
             return;
         }
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
             if (normalizedIdentifier.includes('@')) {
                 var result = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
             }
-            else{
+            else {
                 var result = await loginWithUIT(normalizedIdentifier, normalizedPassword);
             }
             storeAuthSession(result);
@@ -121,11 +121,11 @@ export default function LoginPage() {
                 <div className="relative w-full lg:w-[390px] xl:w-[440px] 2xl:w-[480px] flex-shrink-0 bg-gradient-to-b from-[#4D55CC] to-[#8B4CFF] px-4 sm:px-6 lg:px-0">
                     <div className="mx-auto w-full max-w-[460px] lg:max-w-none lg:min-h-screen lg:flex lg:flex-col lg:items-center">
                         <div className="relative z-10 pt-5 sm:pt-6 lg:pt-5 mb-4 lg:mb-3">
-                            <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-36 xl:h-36 rounded-full overflow-hidden shadow-[0_14px_30px_rgba(34,22,99,0.3)]">
+                            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 rounded-full overflow-hidden bg-white shadow-[0_14px_30px_rgba(34,22,99,0.3)]">
                                 <img
                                     src={avatarImage}
                                     alt="SEeds logo"
-                                    className="w-full h-full object-cover scale-125 -translate-y-1"
+                                    className="w-full h-full object-contain p-2.5"
                                 />
                             </div>
                         </div>

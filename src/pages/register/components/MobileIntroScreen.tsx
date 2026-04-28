@@ -20,7 +20,7 @@ export default function MobileIntroScreen({ onContinue }: MobileIntroScreenProps
                         onClick={onContinue}
                         className="w-full h-[44px] rounded-[12px] bg-[#D977E5] text-white font-nunito font-black text-[1.05rem] tracking-[0.01em] shadow-[0_8px_14px_rgba(92,35,120,0.35)]"
                     >
-                        Log In
+                        Sign Up
                     </button>
                 </div>
             </div>

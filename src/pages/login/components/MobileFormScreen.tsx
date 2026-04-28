@@ -1,4 +1,4 @@
-import avatarImage from '../../../assets/Avatar.png';
+import avatarImage from '../../../assets/Logo.png';
 import LoginFormCard from './LoginFormCard';
 
 interface MobileFormScreenProps {
@@ -25,11 +25,11 @@ export default function MobileFormScreen({
     return (
         <div className="w-full h-full bg-gradient-to-b from-[#2F3FB8] via-[#4C45CC] to-[#7E50E8] p-0 flex flex-col">
             <div className="pt-3 pb-4">
-                <div className="mx-auto w-20 h-20 rounded-full overflow-hidden shadow-[0_14px_30px_rgba(34,22,99,0.3)]">
+                <div className="mx-auto w-16 h-16 rounded-full overflow-hidden bg-white shadow-[0_14px_30px_rgba(34,22,99,0.3)]">
                     <img
                         src={avatarImage}
                         alt="SEeds logo"
-                        className="w-full h-full object-cover scale-125 -translate-y-1"
+                        className="w-full h-full object-contain p-2.5"
                     />
                 </div>
             </div>
