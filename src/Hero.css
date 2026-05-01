@@ -1,0 +1,175 @@
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hero-badge {
+    display: inline-flex;
+    padding: 4px 12px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    border-radius: 420420px;
+    border: 1px solid #E4E7EC;
+    background: #FFF;
+    margin-bottom: 24px;
+}
+
+.hero-badge-text {
+    color: #4A5565;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+.hero-title {
+    color: #101828;
+    text-align: center;
+    font-family: Inter;
+    font-size: 60px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 72px;
+    letter-spacing: -1.2px;
+    margin-bottom: 24px;
+}
+
+.hero-title-gradient {
+    background: linear-gradient(135deg, #4D55CC 0%, #8B4CFF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-description {
+    color: #4A5565;
+    text-align: center;
+    font-family: Inter;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 30px;
+    max-width: 768px;
+    margin-bottom: 40px;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 64px;
+}
+
+.btn-start-interview,
+.btn-create-profile {
+    display: flex;
+    padding: 14px 24px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border-radius: 420420px;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-start-interview {
+    background: linear-gradient(135deg, #4D55CC 0%, #8B4CFF 100%);
+    color: #FFF;
+    border: none;
+}
+
+.btn-create-profile {
+    background: #FFF;
+    border: 1px solid #D0D5DD;
+    color: #4A5565;
+}
+
+.hero-visual {
+    position: relative;
+}
+
+.hero-image {
+    width: 100%;
+    max-width: 1232px;
+    height: auto;
+}
+
+.ai-status-card,
+.score-card {
+    position: absolute;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.60);
+    backdrop-filter: blur(12px);
+    padding: 16px;
+}
+
+.ai-status-card {
+    bottom: 40px;
+    left: 40px;
+}
+
+.ai-status-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ai-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4D55CC 0%, #8B4CFF 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ai-status-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-status-label {
+    color: #4A5565;
+    font-size: 14px;
+}
+
+.ai-status-title {
+    color: #101828;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.score-card {
+    top: 40px;
+    right: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.score-card-label {
+    color: #4A5565;
+    font-size: 14px;
+}
+
+.score-card-value {
+    color: #101828;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.score-card-rating {
+    color: #0B60B0;
+    font-size: 14px;
+    font-weight: 500;
+}
