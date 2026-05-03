@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import HeroSection from './components/HeroSection';
+import ProblemSection from './components/ProblemSection';
+import PainSection from './components/PainSection';
+import SolutionSection from './components/SolutionSection';
+import HowItWorksSection from './components/HowItWorksSection';
+import AIAnalysisSection from './components/AIAnalysisSection';
+import ExperienceSection from './components/ExperienceSection';
+import ValueSection from './components/ValueSection';
+import JobConnectionSection from './components/JobConnectionSection';
+import RecruiterSection from './components/RecruiterSection';
+import CTASection from './components/CTASection';
+import FAQSection from './components/FAQSection';
 import FooterSection from './components/FooterSection';
+import introMusic from './assets/logo.png.mp3';
+
 
 
 
@@ -22,6 +35,35 @@ const LandingPage: React.FC = () => {
             localStorage.setItem('theme', 'light');
         }
     }, [isDarkMode]);
+
+    useEffect(() => {
+        const audio = new Audio(introMusic);
+        audio.volume = 0.5;
+        audio.loop = true;
+        
+        const attemptPlay = () => {
+            audio.play().catch(() => {
+                console.log("Autoplay blocked. Music will start on first interaction.");
+                const playOnInteraction = () => {
+                    audio.play();
+                    window.removeEventListener('click', playOnInteraction);
+                    window.removeEventListener('keydown', playOnInteraction);
+                    window.removeEventListener('touchstart', playOnInteraction);
+                };
+                window.addEventListener('click', playOnInteraction);
+                window.addEventListener('keydown', playOnInteraction);
+                window.addEventListener('touchstart', playOnInteraction);
+            });
+        };
+
+        attemptPlay();
+
+        return () => {
+            audio.pause();
+            audio.src = '';
+        };
+    }, []);
+
 
     const features = [
         {
@@ -183,311 +225,35 @@ const LandingPage: React.FC = () => {
             {/* Hero Section */}
             <HeroSection />
 
-            {/* Features Section */}
-            <section className="py-20 bg-[#F4F5FA]">
-                <div className="max-w-[1280px] mx-auto w-full px-4 md:px-8">
-                    <div className="flex flex-col items-center">
-                        <div className="flex flex-col items-center text-center mb-16">
-                            <div className="bg-[#E5EFFF] px-4 py-1.5 rounded-full mb-6">
-                                <span className="text-[#3B82F6] text-sm font-semibold">Tính năng</span>
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-[#1F2937] mb-4">
-                                Mọi thứ bạn cần để <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366F1] to-[#A855F7]">Phỏng vấn</span>
-                            </h2>
-                            <p className="text-[#6B7280] max-w-xl text-base md:text-lg">
-                                Công cụ toàn diện được hỗ trợ bởi AI<br className="hidden md:block" /> để chuẩn bị cho mọi thử thách phỏng vấn
-                            </p>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-                            {features.map((feature) => (
-                                <div key={feature.id} className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-gradient-to-r ${feature.gradient}`}>
-                                        {feature.icon}
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">
-                                        {feature.title}
-                                    </h3>
-                                    <p className="text-gray-500 text-sm leading-relaxed">
-                                        {feature.description}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/* Problem Section */}
+            <ProblemSection />
+
+            {/* Pain Section */}
+            <PainSection />
+
+            {/* Solution Section */}
+            <SolutionSection />
 
             {/* How It Works Section */}
-            <section className="py-[80px] bg-white relative">
-                <div className="max-w-[1280px] mx-auto px-4 w-full flex flex-col items-center">
-                    
-                    {/* Phần Tiêu đề */}
-                    <div className="flex flex-col items-center text-center">
-                        <div className="bg-[#8B4CFF]/10 px-4 py-1.5 rounded-full mb-4">
-                            <span className="text-[#8B4CFF] text-sm font-semibold">Cách hoạt động</span>
-                        </div>
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                            Bắt đầu chỉ với <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6366F1] to-[#A855F7]">4 bước đơn giản</span>
-                        </h2>
-                        <p className="text-[#4A5565] text-base md:text-lg">
-                            Từ tạo hồ sơ đến nhận việc làm mơ ước
-                        </p>
-                    </div>
+            <HowItWorksSection />
 
-                    {/* Phần Các Bước (Grid) */}
-                    <div className="mt-[64px] w-full max-w-[824px] relative">
-                        
-                        {/* Đường Line ngang (Connector) - Giấu đi ở màn hình nhỏ */}
-                        <div className="hidden md:block absolute top-[30px] left-[12%] right-[12%] h-[1px] bg-gradient-to-r from-transparent via-[#D1D5DB] to-transparent z-0"></div>
+            {/* AI Analysis Section */}
+            <AIAnalysisSection />
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative z-10">
-                            {steps.map((step) => (
-                                <div key={step.id} className="flex flex-col items-center text-center">
-                                    {/* Vòng tròn đánh số */}
-                                    <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center text-white text-xl font-bold mb-6 bg-gradient-to-br from-[#A855F7] to-[#6366F1] shadow-[0_0_20px_rgba(139,76,255,0.4)] relative">
-                                        {step.id}
-                                        {/* Hiệu ứng Glow/viền trắng tùy chọn để đè lên đường line */}
-                                        <div className="absolute inset-0 rounded-full border-[6px] border-white -z-10"></div>
-                                    </div>
-                                    
-                                    {/* Container chứa Icon */}
-                                    <div className="w-14 h-14 rounded-full bg-[#F8F9FA] flex items-center justify-center mb-4">
-                                        {step.icon}
-                                    </div>
+            {/* Experience Section */}
+            <ExperienceSection />
 
-                                    {/* Text nội dung */}
-                                    <h3 className="text-base font-bold text-gray-900 mb-2">
-                                        {step.title}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 leading-relaxed max-w-[180px]">
-                                        {step.description}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+            {/* Value Section */}
+            <ValueSection />
 
-                </div>
-            </section>
+            {/* Job Connection Section */}
+            <JobConnectionSection />
 
-            {/* Product Demo Section */}
-            <section className="min-h-screen py-16 md:py-[60px] px-4 md:px-[20px] bg-gradient-to-br from-[#4318D1] via-[#5B2FC9] to-[#7B4BC1] font-['Inter',sans-serif] flex flex-col items-center justify-start relative overflow-hidden">
-                {/* Product Preview Badge (Positioned absolute top right on large screens) */}
-                <div className="md:absolute md:top-20 md:right-24 mb-8 md:mb-0">
-                    <div className="bg-white/15 backdrop-blur-[10px] text-white text-[12px] md:text-[14px] font-medium px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-white/20">
-                        Xem trước sản phẩm
-                    </div>
-                </div>
+            {/* Recruiter Section */}
+            <RecruiterSection />
 
-                {/* Header Section */}
-                <div className="text-center mb-10 md:mb-[40px] max-w-[1200px] w-full">
-                    <h2 className="text-white text-3xl md:text-[56px] font-bold leading-tight md:leading-[1.2] mb-4">
-                        Trải nghiệm tương lai của việc chuẩn bị phỏng vấn
-                    </h2>
-                    <p className="text-white/85 text-[14px] md:text-[18px] font-normal leading-relaxed md:leading-[1.6]">
-                        Xem nền tảng được hỗ trợ bởi AI của chúng tôi biến đổi cách luyện tập phỏng vấn
-                    </p>
-                </div>
-
-                {/* Content Container */}
-                <div className="flex flex-col lg:flex-row gap-6 md:gap-[32px] w-full max-w-[1400px] items-start">
-                    
-                    {/* Left Card: Live Interview Session */}
-                    <div className="flex-1 w-full bg-white/10 backdrop-blur-[20px] rounded-[24px] border border-white/15 p-5 md:p-[32px]">
-                        {/* Header */}
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF6B00] flex items-center justify-center">
-                                <i className="ti ti-player-play-filled text-white text-2xl"></i>
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-white text-lg font-semibold leading-tight mb-0.5">Phiên phỏng vấn trực tiếp</div>
-                                <div className="text-white/70 text-sm font-normal">Tương tác AI theo thời gian thực</div>
-                            </div>
-                        </div>
-
-                        {/* Interview Chat Bubble */}
-                        <div className="bg-black/20 backdrop-blur-[10px] rounded-2xl p-6 mb-6 border border-white/10">
-                            <div className="flex items-start gap-3 mb-4">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#A855F7] to-[#8B5CF6] flex items-center justify-center flex-shrink-0 text-white text-sm font-semibold">
-                                    AI
-                                </div>
-                                <div className="flex-1 text-white text-sm font-normal leading-[1.6]">
-                                    "Hãy kể cho tôi nghe về một dự án thử thách mà bạn đã làm và cách bạn vượt qua khó khăn?"
-                                </div>
-                            </div>
-                            {/* Progress bar */}
-                            <div className="w-full bg-white/15 rounded-full h-1.5 overflow-hidden">
-                                <div className="bg-gradient-to-r from-[#FF6B9D] to-[#C084FC] h-full rounded-full w-[60%]"></div>
-                            </div>
-                            <div className="text-white/60 text-[12px] font-normal mt-3">Đang lắng nghe câu trả lời của bạn...</div>
-                        </div>
-
-                        {/* Metrics Grid */}
-                        <div className="grid grid-cols-3 gap-3 md:gap-[16px]">
-                            <div className="bg-black/20 backdrop-blur-[10px] rounded-xl p-4 md:p-[20px] border border-white/10 flex flex-col items-center justify-center">
-                                <div className="text-white text-2xl md:text-[32px] font-bold leading-[1.2] mb-1">45s</div>
-                                <div className="text-white/70 text-[11px] md:text-[13px] font-normal">Thời gian nói</div>
-                            </div>
-                            <div className="bg-black/20 backdrop-blur-[10px] rounded-xl p-4 md:p-[20px] border border-white/10 flex flex-col items-center justify-center">
-                                <div className="text-white text-2xl md:text-[32px] font-bold leading-[1.2] mb-1">8.2</div>
-                                <div className="text-white/70 text-[11px] md:text-[13px] font-normal">Điểm rõ ràng</div>
-                            </div>
-                            <div className="bg-black/20 backdrop-blur-[10px] rounded-xl p-4 md:p-[20px] border border-white/10 flex flex-col items-center justify-center">
-                                <div className="text-white text-2xl md:text-[32px] font-bold leading-[1.2] mb-1">95%</div>
-                                <div className="text-white/70 text-[11px] md:text-[13px] font-normal">Tự tin</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Card: Performance Report */}
-                    <div className="flex-1 w-full bg-white/10 backdrop-blur-[20px] rounded-[24px] border border-white/15 p-5 md:p-[32px]">
-                        {/* Header */}
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FFB800] to-[#FFA000] flex items-center justify-center">
-                                <i className="ti ti-award text-white text-2xl"></i>
-                            </div>
-                            <div className="flex-1">
-                                <div className="text-white text-lg font-semibold leading-tight mb-0.5">Báo cáo hiệu suất</div>
-                                <div className="text-white/70 text-sm font-normal">Đánh giá chi tiết</div>
-                            </div>
-                        </div>
-
-                        {/* Main Score Block */}
-                        <div className="bg-gradient-to-br from-[rgba(139,92,246,0.3)] to-[rgba(168,85,247,0.2)] backdrop-blur-[10px] rounded-[20px] p-6 md:p-[32px] mb-6 border border-white/15 flex flex-col items-center justify-center">
-                            <div className="text-white text-5xl md:text-[72px] font-bold leading-none mb-2">8.5</div>
-                            <div className="text-white/85 text-sm md:text-[16px] font-medium mb-5">Điểm tổng thể</div>
-                            <div className="bg-gradient-to-r from-[#FF6B9D] to-[#C084FC] text-white text-xs md:text-[14px] font-semibold px-5 md:px-6 py-2 md:py-2.5 rounded-[20px] cursor-pointer hover:opacity-80 transition-opacity">
-                                Xuất sắc
-                            </div>
-                        </div>
-
-                        {/* Skills Breakdown */}
-                        <div className="space-y-4">
-                            {/* Skill 1 */}
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <div className="text-white text-sm font-medium">Kỹ năng giao tiếp</div>
-                                    <div className="text-white text-sm font-semibold">9.0/10</div>
-                                </div>
-                                <div className="w-full bg-white/15 rounded-full h-2 overflow-hidden">
-                                    <div className="bg-gradient-to-r from-[#FF6B35] to-[#FF8E53] h-full rounded-full w-[90%]"></div>
-                                </div>
-                            </div>
-                            {/* Skill 2 */}
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <div className="text-white text-sm font-medium">Kiến thức chuyên môn</div>
-                                    <div className="text-white text-sm font-semibold">8.5/10</div>
-                                </div>
-                                <div className="w-full bg-white/15 rounded-full h-2 overflow-hidden">
-                                    <div className="bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] h-full rounded-full w-[85%]"></div>
-                                </div>
-                            </div>
-                            {/* Skill 3 */}
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <div className="text-white text-sm font-medium">Giải quyết vấn đề</div>
-                                    <div className="text-white text-sm font-semibold">8.0/10</div>
-                                </div>
-                                <div className="w-full bg-white/15 rounded-full h-2 overflow-hidden">
-                                    <div className="bg-gradient-to-r from-[#84CC16] to-[#A3E635] h-full rounded-full w-[80%]"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Suggestion Block */}
-                        <div className="mt-6 bg-black/20 backdrop-blur-[10px] rounded-2xl p-5 border border-white/10">
-                            <div className="flex items-center gap-2.5 mb-2">
-                                <i className="ti ti-trending-up text-[#10B981] text-xl"></i>
-                                <div className="text-white text-[15px] font-semibold">Gợi ý cải thiện</div>
-                            </div>
-                            <div className="text-white/75 text-sm font-normal leading-relaxed">
-                                Cố gắng đưa ra các ví dụ cụ thể hơn với kết quả có thể đo lường được
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-            {/* For Recruiters Section */}
-            <section className="py-24 bg-white overflow-hidden">
-                <div className="max-w-[1280px] mx-auto px-4 md:px-8">
-                    <div className="flex flex-col lg:flex-row items-center gap-16">
-                        
-                        {/* Left side: Image with Badge */}
-                        <div className="lg:w-1/2 relative">
-                            <div className="relative z-10 rounded-[32px] overflow-hidden shadow-2xl">
-                                <img 
-                                    src="https://miro.medium.com/v2/resize:fit:4800/format:webp/0*_QJNNyZqfXI7RStX" 
-                                    alt="Recruitment AI" 
-                                    className="w-full h-auto object-cover"
-                                />
-                            </div>
-                            {/* Floating Badge */}
-                            <div className="absolute -top-6 -right-6 md:top-10 md:-right-12 bg-white p-6 rounded-2xl shadow-xl z-20 flex flex-col items-center animate-bounce-slow">
-                                <span className="text-3xl font-bold text-[#4D55CC]">75%</span>
-                                <span className="text-gray-500 text-xs font-medium mt-1">Tiết kiệm thời gian</span>
-                            </div>
-                            {/* Decorative background element */}
-                            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-violet-100 rounded-full mix-blend-multiply filter blur-2xl opacity-70 animate-blob"></div>
-                        </div>
-
-                        {/* Right side: Content */}
-                        <div className="lg:w-1/2">
-                            <div className="bg-[#F5F3FF] px-4 py-1.5 rounded-full inline-block mb-6">
-                                <span className="text-[#7C3AED] text-sm font-semibold">Dành cho Nhà tuyển dụng</span>
-                            </div>
-                            <h2 className="text-3xl md:text-5xl font-bold text-[#1E1C38] mb-6 leading-tight">
-                                Tuyển dụng thông minh hơn với <span className="text-[#7C5CFC]">Phỏng vấn AI</span>
-                            </h2>
-                            <p className="text-gray-500 text-lg mb-10 leading-relaxed">
-                                Đơn giản hóa quy trình tuyển dụng với sàng lọc và đánh giá ứng viên được hỗ trợ bởi AI.
-                            </p>
-
-                            {/* Features List */}
-                            <div className="space-y-8 mb-10">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-[#F5F3FF] flex items-center justify-center flex-shrink-0 text-violet-600 shadow-sm">
-                                        <i className="ti ti-clock-hour-4 text-2xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-[#1E1C38] mb-1">Đánh giá ứng viên nhanh hơn</h3>
-                                        <p className="text-gray-500 text-sm">Sàng lọc AI giúp tiết kiệm hàng giờ đánh giá thủ công</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-[#E0F2FE] flex items-center justify-center flex-shrink-0 text-[#0EA5E9] shadow-sm">
-                                        <i className="ti ti-target-arrow text-2xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-[#1E1C38] mb-1">Sàng lọc AI tự động</h3>
-                                        <p className="text-gray-500 text-sm">Tự động lọc và xếp hạng ứng viên theo mức độ phù hợp</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-[#DCFCE7] flex items-center justify-center flex-shrink-0 text-[#22C55E] shadow-sm">
-                                        <i className="ti ti-users text-2xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-[#1E1C38] mb-1">Đánh giá có cấu trúc</h3>
-                                        <p className="text-gray-500 text-sm">Đánh giá nhất quán, khách quan cho tất cả các ứng viên</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button className="group relative px-8 py-4 bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white font-bold rounded-2xl shadow-xl shadow-violet-600/30 hover:-translate-y-1 transition-all duration-300">
-                                <span className="flex items-center gap-2">
-                                    Tạo tin tuyển dụng
-                                    <i className="ti ti-arrow-right transition-transform group-hover:translate-x-1"></i>
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
+          
+        
             {/* Testimonials Section */}
             <section className="py-24 bg-gradient-to-b from-[#E484EB]/10 to-white/50 overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -583,46 +349,11 @@ const LandingPage: React.FC = () => {
 
 
 
-            {/* Final CTA Section */}
-            <section className="py-24 px-4 md:px-8 bg-white">
-                <div className="max-w-[1280px] mx-auto flex items-center justify-center">
-                    <div className="w-full max-w-[850px] rounded-[24px] px-6 py-8 md:px-20 md:py-[60px] text-center relative overflow-hidden flex flex-col items-center" 
-                         style={{ background: 'linear-gradient(135deg, #4a4e9e 0%, #6b4fb8 50%, #9b4fb8 100%)' }}>
-                        
-                        {/* Decorative background element */}
-                        <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
-                            <div className="absolute -top-24 -right-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                        </div>
+             {/* CTA Section */}
+            <CTASection />
 
-                        <div className="relative z-10 flex flex-col items-center">
-                            {/* Top Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-[4px] border border-white/20 text-white text-sm font-normal mb-8">
-                                <i className="ti ti-sparkles text-white"></i>
-                                <span>Bắt đầu hành trình của bạn ngay hôm nay</span>
-                            </div>
-
-                            <h2 className="text-3xl md:text-[48px] font-bold text-white mb-6 leading-tight md:leading-[56px]">
-                                Sẵn sàng nâng cao kỹ năng phỏng vấn?
-                            </h2>
-                            
-                            <p className="text-white text-sm md:text-base max-w-[600px] mx-auto mb-10 leading-6 opacity-90">
-                                Tham gia cùng hàng ngàn sinh viên đã thành công nhận được công việc mơ ước với việc chuẩn bị phỏng vấn được hỗ trợ bởi AI
-                            </p>
-
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-                                <button className="w-full sm:w-auto px-6 py-3 bg-white text-[#6b4fb8] font-semibold rounded-full hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                                    <span className="text-base">Bắt đầu phỏng vấn thử</span>
-                                    <i className="ti ti-arrow-right text-xl"></i>
-                                </button>
-                                <button className="w-full sm:w-auto px-6 py-3 border-2 border-white text-white font-semibold rounded-full hover:bg-white/10 transition-all flex items-center justify-center">
-                                    <span className="text-base">Tạo hồ sơ miễn phí</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+             {/* FAQ Section */}
+            <FAQSection />
 
             {/* Footer Section */}
             <FooterSection />
