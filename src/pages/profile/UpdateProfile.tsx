@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useProfileForm } from './ProfileFormContext';
+import ProfileSidebar from './ProfileSidebar';
 
 const STEPS = [
     { label: "Bước 1", sub: "Thông tin cơ bản" },
@@ -8,28 +10,17 @@ const STEPS = [
     { label: "Bước 4", sub: "Mục tiêu sự nghiệp" },
 ];
 
-const MISSING_FIELDS = ["Họ tên", "Email", "Ngày sinh", "Số điện thoại", "Ngày sinh", "Giới tính"];
-
-const TIPS = [
-    "Lorem Upsim",
-    "Lorem Ipsum",
-    "Nun na na na anh Do Mi Xi",
-    "Nhớ lưu bản nháp khi bạn cập nhật bất kỳ điều gì vào hồ sơ nhé!",
-];
-
-const PROGRESS = 45;
-const CIRCUMFERENCE = 2 * Math.PI * 56; // radius 56
-
 export default function UpdateProfile() {
     const [activeStep] = useState(0);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const navigate = useNavigate();
+    const { form, updateField, completion, completionLoading } = useProfileForm();
+
+    const progress = completion?.completionPercentage ?? 0;
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-
-    const strokeDasharray = `${(PROGRESS / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`;
 
     return (
         <div className="profile-page">
@@ -116,9 +107,12 @@ export default function UpdateProfile() {
                         <div className="form-area">
                             {/* Step Navigator */}
                             <div className="step-card">
-                                <p className="step-counter">Bước 1 trên 4</p>
+                                <p className="step-counter" style={{display: 'flex', justifyContent: 'space-between'}}>
+                                    <span>Bước 1 trên 4</span>
+                                    <span style={{color: '#6D52E5'}}>{completionLoading ? '...' : `${progress}%`}</span>
+                                </p>
                                 <div className="step-progress-bar">
-                                    <div className="step-progress-fill" style={{ width: "25%" }} />
+                                    <div className="step-progress-fill" style={{ width: `${progress}%`, transition: 'width 0.6s ease' }} />
                                 </div>
                                 <div className="step-tabs">
                                     {STEPS.map((step, idx) => (
@@ -149,6 +143,8 @@ export default function UpdateProfile() {
                                             type="text"
                                             className="field-input"
                                             placeholder="Nguyen Van A"
+                                            value={form.fullName}
+                                            onChange={(e) => updateField('fullName', e.target.value)}
                                         />
                                     </div>
                                     <div className="form-field">
@@ -159,6 +155,7 @@ export default function UpdateProfile() {
                                             type="text"
                                             className="field-input field-input--disabled"
                                             placeholder="SE123456"
+                                            value={form.studentId}
                                             readOnly
                                         />
                                     </div>
@@ -170,6 +167,8 @@ export default function UpdateProfile() {
                                             type="email"
                                             className="field-input"
                                             placeholder="student@university.edu.vn"
+                                            value={form.email}
+                                            onChange={(e) => updateField('email', e.target.value)}
                                         />
                                         <p className="field-hint">Email để gửi các thông báo quan trọng của SEeds</p>
                                     </div>
@@ -181,6 +180,8 @@ export default function UpdateProfile() {
                                             type="tel"
                                             className="field-input"
                                             placeholder="+84 723 456 789"
+                                            value={form.phone}
+                                            onChange={(e) => updateField('phone', e.target.value)}
                                         />
                                     </div>
                                     <div className="form-field">
@@ -190,13 +191,15 @@ export default function UpdateProfile() {
                                         <input
                                             type="date"
                                             className="field-input"
+                                            value={form.birthDate}
+                                            onChange={(e) => updateField('birthDate', e.target.value)}
                                         />
                                     </div>
                                     <div className="form-field">
                                         <label className="field-label">
                                             Giới tính <span className="required-star">*</span>
                                         </label>
-                                        <select className="field-input field-select">
+                                        <select className="field-input field-select" value={form.gender} onChange={(e) => updateField('gender', e.target.value)}>
                                             <option value="">-- Chọn giới tính --</option>
                                             <option value="male">Nam</option>
                                             <option value="female">Nữ</option>
@@ -222,7 +225,7 @@ export default function UpdateProfile() {
                                                 </svg>
                                                 GitHub URL
                                             </label>
-                                            <input type="url" className="field-input" placeholder="https://github.com/username" />
+                                            <input type="url" className="field-input" placeholder="https://github.com/username" value={form.githubUrl} onChange={(e) => updateField('githubUrl', e.target.value)} />
                                         </div>
                                         <div className="form-field">
                                             <label className="field-label field-label--icon">
@@ -238,7 +241,7 @@ export default function UpdateProfile() {
                                                 </svg>
                                                 LinkedIn URL
                                             </label>
-                                            <input type="url" className="field-input" placeholder="https://linkedin.com/in/username" />
+                                            <input type="url" className="field-input" placeholder="https://linkedin.com/in/username" value={form.linkedinUrl} onChange={(e) => updateField('linkedinUrl', e.target.value)} />
                                         </div>
                                         <div className="form-field">
                                             <label className="field-label field-label--icon">
@@ -252,7 +255,7 @@ export default function UpdateProfile() {
                                                 </svg>
                                                 Facebook URL
                                             </label>
-                                            <input type="url" className="field-input" placeholder="https://facebook.com/username" />
+                                            <input type="url" className="field-input" placeholder="https://facebook.com/username" value={form.facebookUrl} onChange={(e) => updateField('facebookUrl', e.target.value)} />
                                         </div>
                                         <div className="form-field">
                                             <label className="field-label field-label--icon">
@@ -268,7 +271,7 @@ export default function UpdateProfile() {
                                                 </svg>
                                                 Portfolio URL
                                             </label>
-                                            <input type="url" className="field-input" placeholder="https://yourportfolio.com" />
+                                            <input type="url" className="field-input" placeholder="https://yourportfolio.com" value={form.portfolioUrl} onChange={(e) => updateField('portfolioUrl', e.target.value)} />
                                             <p className="field-hint">Trang portfolio của bạn</p>
                                         </div>
                                     </div>
@@ -296,70 +299,7 @@ export default function UpdateProfile() {
                         </div>
 
                         {/* Right: Sidebar */}
-                        <aside className="profile-sidebar">
-                            {/* Progress Card */}
-                            <div className="progress-card">
-                                <h3 className="progress-card-title">Tiến độ hoàn thành hồ sơ</h3>
-
-                                <div className="progress-circle-wrapper">
-                                    <svg width="128" height="128" viewBox="0 0 128 128" fill="none">
-                                        <path d="M120 64C120 33.0721 94.9279 8 64 8C33.0721 8 8 33.0721 8 64C8 94.9279 33.0721 120 64 120C94.9279 120 120 94.9279 120 64Z" stroke="#E5E7EB" strokeWidth="8"/>
-                                        <path
-                                            d="M120 64C120 33.0721 94.9279 8 64 8C33.0721 8 8 33.0721 8 64C8 94.9279 33.0721 120 64 120C94.9279 120 120 94.9279 120 64Z"
-                                            stroke="url(#progress-gradient)"
-                                            strokeWidth="8"
-                                            strokeLinecap="round"
-                                            strokeDasharray={strokeDasharray}
-                                        />
-                                        <defs>
-                                            <linearGradient id="progress-gradient" x1="8" y1="120" x2="120" y2="8" gradientUnits="userSpaceOnUse">
-                                                <stop stopColor="#4D55CC"/>
-                                                <stop offset="1" stopColor="#8B4CFF"/>
-                                            </linearGradient>
-                                        </defs>
-                                    </svg>
-                                    <span className="progress-percentage">{PROGRESS}%</span>
-                                </div>
-
-                                <p className="progress-message">
-                                    Hồ sơ của bạn chưa hoàn thiện lắm, hãy cố gắng nhé!
-                                </p>
-
-                                <div className="missing-info-section">
-                                    <p className="missing-info-title">Thiếu thông tin về:</p>
-                                    <div className="missing-info-list">
-                                        {MISSING_FIELDS.map((field, idx) => (
-                                            <div key={idx} className="missing-info-item">
-                                                <span className="missing-info-icon">⚠️</span>
-                                                <span className="missing-info-text">{field}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Tips Card */}
-                            <div className="tips-card">
-                                <div className="tips-header">
-                                    <div className="tips-icon">
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <path d="M9.99427 18.3228C14.594 18.3228 18.3228 14.594 18.3228 9.99427C18.3228 5.39457 14.594 1.66577 9.99427 1.66577C5.39457 1.66577 1.66577 5.39457 1.66577 9.99427C1.66577 14.594 5.39457 18.3228 9.99427 18.3228Z" stroke="white" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M9.99414 13.3255V9.99414" stroke="white" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M9.99414 6.66284H10.0025" stroke="white" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <h3 className="tips-title">Mẹo nhỏ</h3>
-                                </div>
-                                <ul className="tips-list">
-                                    {TIPS.map((tip, idx) => (
-                                        <li key={idx} className="tips-item">
-                                            <span className="tips-bullet">•</span>
-                                            <span className="tips-text">{tip}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </aside>
+                        <ProfileSidebar activeStep={0} />
                     </div>
                 </div>
             </main>

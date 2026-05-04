@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useProfileForm } from './ProfileFormContext';
+import ProfileSidebar from './ProfileSidebar';
 
 const STEPS = [
     { label: "Bước 1", sub: "Thông tin cơ bản" },
@@ -8,28 +10,17 @@ const STEPS = [
     { label: "Bước 4", sub: "Mục tiêu sự nghiệp" },
 ];
 
-const MISSING_FIELDS = ["Họ tên", "Email", "Ngày sinh", "Số điện thoại", "Ngày sinh", "Giới tính"];
-
-const TIPS = [
-    "Lorem Upsim",
-    "Lorem Ipsum",
-    "Nun na na na anh Do Mi Xi",
-    "Nhớ lưu bản nháp khi bạn cập nhật bất kỳ điều gì vào hồ sơ nhé!",
-];
-
-const PROGRESS = 45;
-const CIRCUMFERENCE = 2 * Math.PI * 56; // radius 56
-
 export default function UpdateProfileStep3() {
     const [activeStep] = useState(2);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const navigate = useNavigate();
+    const { form, updateField, completion, completionLoading, saveStep3, saving } = useProfileForm();
+
+    const progress = completion?.completionPercentage ?? 0;
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-
-    const strokeDasharray = `${(PROGRESS / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`;
 
     return (
         <div className="profile-page">
@@ -117,11 +108,11 @@ export default function UpdateProfileStep3() {
                             {/* Step Navigator */}
                             <div className="step-card">
                                 <p className="step-counter" style={{display: 'flex', justifyContent: 'space-between'}}>
-                                    <span>Tiến độ hoàn thành</span>
-                                    <span style={{color: '#6D52E5'}}>75%</span>
+                                    <span>Bước 3 trên 4</span>
+                                    <span style={{color: '#6D52E5'}}>{completionLoading ? '...' : `${progress}%`}</span>
                                 </p>
                                 <div className="step-progress-bar">
-                                    <div className="step-progress-fill" style={{ width: "75%" }} />
+                                    <div className="step-progress-fill" style={{ width: `${progress}%`, transition: 'width 0.6s ease' }} />
                                 </div>
                                 <div className="step-tabs">
                                     {STEPS.map((step, idx) => (
@@ -268,8 +259,11 @@ export default function UpdateProfileStep3() {
                                         Trở lại
                                     </button>
                                     <div className="form-actions-right">
-                                        <button className="btn-save">Lưu bản nháp</button>
-                                        <button className="btn-next" onClick={() => navigate('/profile/update/step4')}>
+                                        <button className="btn-save" onClick={saveStep3} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
+                                        <button className="btn-next" disabled={saving} onClick={async () => {
+                                            const success = await saveStep3();
+                                            if (success) navigate('/profile/update/step4');
+                                        }}>
                                             Tiếp
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                                 <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -281,70 +275,7 @@ export default function UpdateProfileStep3() {
                         </div>
 
                         {/* Right: Sidebar */}
-                        <aside className="profile-sidebar">
-                            {/* Progress Card */}
-                            <div className="progress-card">
-                                <h3 className="progress-card-title">Tiến độ hoàn thành hồ sơ</h3>
-
-                                <div className="progress-circle-wrapper">
-                                    <svg width="128" height="128" viewBox="0 0 128 128" fill="none">
-                                        <path d="M120 64C120 33.0721 94.9279 8 64 8C33.0721 8 8 33.0721 8 64C8 94.9279 33.0721 120 64 120C94.9279 120 120 94.9279 120 64Z" stroke="#E5E7EB" strokeWidth="8"/>
-                                        <path
-                                            d="M120 64C120 33.0721 94.9279 8 64 8C33.0721 8 8 33.0721 8 64C8 94.9279 33.0721 120 64 120C94.9279 120 120 94.9279 120 64Z"
-                                            stroke="url(#progress-gradient)"
-                                            strokeWidth="8"
-                                            strokeLinecap="round"
-                                            strokeDasharray={strokeDasharray}
-                                        />
-                                        <defs>
-                                            <linearGradient id="progress-gradient" x1="8" y1="120" x2="120" y2="8" gradientUnits="userSpaceOnUse">
-                                                <stop stopColor="#4D55CC"/>
-                                                <stop offset="1" stopColor="#8B4CFF"/>
-                                            </linearGradient>
-                                        </defs>
-                                    </svg>
-                                    <span className="progress-percentage">{PROGRESS}%</span>
-                                </div>
-
-                                <p className="progress-message">
-                                    Hồ sơ của bạn chưa hoàn thiện lắm, hãy cố gắng nhé!
-                                </p>
-
-                                <div className="missing-info-section">
-                                    <p className="missing-info-title">Thiếu thông tin về:</p>
-                                    <div className="missing-info-list">
-                                        {MISSING_FIELDS.map((field, idx) => (
-                                            <div key={idx} className="missing-info-item">
-                                                <span className="missing-info-icon">⚠️</span>
-                                                <span className="missing-info-text">{field}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Tips Card */}
-                            <div className="tips-card">
-                                <div className="tips-header">
-                                    <div className="tips-icon">
-                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <path d="M9.99427 18.3228C14.594 18.3228 18.3228 14.594 18.3228 9.99427C18.3228 5.39457 14.594 1.66577 9.99427 1.66577C5.39457 1.66577 1.66577 5.39457 1.66577 9.99427C1.66577 14.594 5.39457 18.3228 9.99427 18.3228Z" stroke="white" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M9.99414 13.3255V9.99414" stroke="white" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M9.99414 6.66284H10.0025" stroke="white" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <h3 className="tips-title">Mẹo nhỏ</h3>
-                                </div>
-                                <ul className="tips-list">
-                                    {TIPS.map((tip, idx) => (
-                                        <li key={idx} className="tips-item">
-                                            <span className="tips-bullet">•</span>
-                                            <span className="tips-text">{tip}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </aside>
+                        <ProfileSidebar activeStep={2} />
                     </div>
                 </div>
             </main>
