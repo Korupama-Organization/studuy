@@ -1,0 +1,145 @@
+.experience-section {
+  padding: 120px 0;
+  background-color: #101828;
+  color: white;
+  text-align: center;
+}
+
+.experience-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.experience-tag {
+  color: #E484EB;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.experience-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+  color: white;
+}
+
+.experience-desc {
+  font-size: 1.1rem;
+  color: #99A1AF;
+  max-width: 600px;
+  margin: 0 auto 60px;
+  line-height: 1.6;
+}
+
+/* Video Placeholder */
+.demo-video-wrapper {
+  position: relative;
+  background: linear-gradient(135deg, #1E2939 0%, #101828 100%);
+  border-radius: 24px;
+  padding: 4px; /* Space for glowing lines */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.demo-video-content {
+  background: rgba(30, 41, 57, 0.5);
+  border-radius: 20px;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.demo-video-content:hover {
+  background: rgba(30, 41, 57, 0.7);
+}
+
+/* Glowing Lines */
+.glow-line-tl {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  width: 120px;
+  height: 4px;
+  background: linear-gradient(90deg, #4D55CC, transparent);
+  border-radius: 2px;
+}
+
+.glow-line-br {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+  width: 120px;
+  height: 4px;
+  background: linear-gradient(270deg, #8B4CFF, transparent);
+  border-radius: 2px;
+}
+
+/* Play Button */
+.play-button {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #4D55CC 0%, #8B4CFF 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+  transition: transform 0.3s ease;
+}
+
+.demo-video-content:hover .play-button {
+  transform: scale(1.1);
+}
+
+.play-icon {
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 20px solid white;
+  margin-left: 6px;
+}
+
+.demo-text-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.demo-text-subtitle {
+  font-size: 0.9rem;
+  color: #99A1AF;
+}
+
+.youtube-iframe {
+  border-radius: 16px;
+  border: none;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .experience-title {
+    font-size: 2.5rem;
+  }
+  
+  .experience-section {
+    padding: 80px 0;
+  }
+  
+  .play-button {
+    width: 60px;
+    height: 60px;
+  }
+}
