@@ -4,7 +4,7 @@ import { navItems } from "../data";
 export default function Sidebar() {
   return (
     <aside className="hidden w-[220px] flex-shrink-0 rounded-[24px] border border-slate-100 bg-white px-5 py-6 shadow-[0_10px_30px_rgba(109,120,196,0.1)] lg:block">
-      <div className="mb-10 flex items-center gap-3">
+      <div className="mb-4 flex items-center gap-3">
         <img
           alt="SEeds logo"
           className="h-11 w-11 rounded-2xl object-cover"
