@@ -12,14 +12,33 @@ interface FilterState {
 }
 
 const createdByOptions = [
-  { id: "oscar1", name: "Oscar Holloway", avatar: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80" },
-  { id: "oscar2", name: "Oscar Holloway", avatar: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80" },
-  { id: "oscar3", name: "Oscar Holloway", avatar: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80" },
+  {
+    id: "oscar1",
+    name: "Oscar Holloway",
+    avatar:
+      "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
+  },
+  {
+    id: "oscar2",
+    name: "Oscar Holloway",
+    avatar:
+      "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
+  },
+  {
+    id: "oscar3",
+    name: "Oscar Holloway",
+    avatar:
+      "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
+  },
 ];
 
 const statusOptions = ["Opening", "Closed"];
 
-export default function FilterModal({ isOpen, onClose, onApply }: FilterModalProps) {
+export default function FilterModal({
+  isOpen,
+  onClose,
+  onApply,
+}: FilterModalProps) {
   const [filters, setFilters] = useState<FilterState>({
     createdBy: ["oscar1"],
     status: ["Opening"],
@@ -72,12 +91,17 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
 
         <div className="space-y-4">
           <div>
-            <h3 className="mb-3 text-sm font-semibold text-slate-500">Created By</h3>
+            <h3 className="mb-3 text-sm font-semibold text-slate-500">
+              Created By
+            </h3>
             <div className="space-y-3">
               {createdByOptions
                 .slice(0, showMoreCreatedBy ? createdByOptions.length : 3)
                 .map((person) => (
-                  <div key={person.id} onClick={() => handleCreatedByChange(person.id)} className="flex cursor-pointer items-center gap-3">
+                  <div
+                    key={person.id}
+                    onClick={() => handleCreatedByChange(person.id)}
+                    className="flex cursor-pointer items-center gap-3">
                     <div
                       className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition ${
                         filters.createdBy.includes(person.id)
@@ -93,7 +117,9 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
                       className="h-6 w-6 rounded-full object-cover"
                       src={person.avatar}
                     />
-                    <span className="text-sm text-slate-700">{person.name}</span>
+                    <span className="text-sm text-slate-700">
+                      {person.name}
+                    </span>
                   </div>
                 ))}
             </div>
@@ -101,16 +127,24 @@ export default function FilterModal({ isOpen, onClose, onApply }: FilterModalPro
               <button
                 onClick={() => setShowMoreCreatedBy(!showMoreCreatedBy)}
                 className="mt-2 text-sm font-semibold text-[#5B5BF6] hover:underline">
-                View more <span className="material-symbols-outlined inline text-[14px]">{showMoreCreatedBy ? "expand_less" : "expand_more"}</span>
+                View more{" "}
+                <span className="material-symbols-outlined inline text-[14px]">
+                  {showMoreCreatedBy ? "expand_less" : "expand_more"}
+                </span>
               </button>
             )}
           </div>
 
           <div className="pt-2">
-            <h3 className="mb-3 text-sm font-semibold text-slate-500">Status</h3>
+            <h3 className="mb-3 text-sm font-semibold text-slate-500">
+              Status
+            </h3>
             <div className="space-y-3">
               {statusOptions.map((status) => (
-                <div key={status} onClick={() => handleStatusChange(status)} className="flex cursor-pointer items-center gap-3">
+                <div
+                  key={status}
+                  onClick={() => handleStatusChange(status)}
+                  className="flex cursor-pointer items-center gap-3">
                   <div
                     className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition ${
                       filters.status.includes(status)

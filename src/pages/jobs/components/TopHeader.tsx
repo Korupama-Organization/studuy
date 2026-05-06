@@ -3,9 +3,17 @@ import FilterModal from "./FilterModal";
 
 export default function TopHeader() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("Newest");
 
   const handleApplyFilter = (filters: any) => {
     console.log("Applied filters:", filters);
+  };
+
+  const handleSortChange = (option: string) => {
+    setSortBy(option);
+    setIsSortOpen(false);
+    console.log("Sorted by:", option);
   };
 
   return (
@@ -54,14 +62,45 @@ export default function TopHeader() {
             type="button">
             <span className="material-symbols-outlined text-[18px]">tune</span>
           </button>
-          <button
-            className="flex h-11 items-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition"
-            type="button">
-            Newest
-            <span className="material-symbols-outlined text-[18px]">
-              expand_more
-            </span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsSortOpen(!isSortOpen)}
+              className="flex h-11 items-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition"
+              type="button">
+              {sortBy}
+              <span className="material-symbols-outlined text-[18px]">
+                expand_more
+              </span>
+            </button>
+            {isSortOpen && (
+              <div className="absolute right-0 top-12 z-40 w-48 rounded-2xl border border-slate-100 bg-white shadow-lg">
+                <button
+                  onClick={() => handleSortChange("Newest")}
+                  className={`flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold transition ${
+                    sortBy === "Newest"
+                      ? "bg-[#EEF0FF] text-[#5B5BF6]"
+                      : "text-slate-700 hover:bg-slate-50"
+                  }`}>
+                  <span className="material-symbols-outlined text-[16px]">
+                    {sortBy === "Newest" ? "check" : ""}
+                  </span>
+                  Newest
+                </button>
+                <button
+                  onClick={() => handleSortChange("Oldest")}
+                  className={`flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold transition ${
+                    sortBy === "Oldest"
+                      ? "bg-[#EEF0FF] text-[#5B5BF6]"
+                      : "text-slate-700 hover:bg-slate-50"
+                  }`}>
+                  <span className="material-symbols-outlined text-[16px]">
+                    {sortBy === "Oldest" ? "check" : ""}
+                  </span>
+                  Oldest
+                </button>
+              </div>
+            )}
+          </div>
           <button
             className="h-11 rounded-2xl bg-[#F758B1] px-5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(247,88,177,0.35)] hover:bg-[#E73D9F] transition"
             type="button">
