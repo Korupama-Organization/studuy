@@ -1,13 +1,23 @@
+import { useState } from "react";
 import { jobRows } from "../data";
+import UpdateJobModal from "./UpdateJobModal";
 
 export default function JobsTable() {
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const handleJobClick = (job: any) => {
+    setSelectedJob(job);
+    setIsUpdateModalOpen(true);
+  };
   return (
     <div className="flex flex-col gap-4">
       <div className="hidden flex-col gap-4 lg:flex">
         {jobRows.map((job) => (
           <div
             key={job.id}
-            className="grid grid-cols-6 items-start gap-4 rounded-2xl border border-slate-100 bg-white px-6 py-4 text-sm shadow-sm transition hover:shadow-md"
+            onClick={() => handleJobClick(job)}
+            className="grid grid-cols-6 items-start gap-4 rounded-2xl border border-slate-100 bg-white px-6 py-4 text-sm shadow-sm transition hover:shadow-md cursor-pointer hover:border-slate-200"
             style={{ gridTemplateColumns: "100px 1.7fr 1fr 1fr 1fr 120px" }}>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
@@ -56,7 +66,8 @@ export default function JobsTable() {
         {jobRows.map((job) => (
           <div
             key={job.id}
-            className="border border-slate-100 rounded-xl p-4 space-y-3 bg-white shadow-sm">
+            onClick={() => handleJobClick(job)}
+            className="border border-slate-100 rounded-xl p-4 space-y-3 bg-white shadow-sm cursor-pointer transition hover:shadow-md hover:border-slate-200">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs text-slate-400 font-semibold uppercase">
@@ -99,6 +110,12 @@ export default function JobsTable() {
           </div>
         ))}
       </div>
+
+      <UpdateJobModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        job={selectedJob}
+      />
     </div>
   );
 }
