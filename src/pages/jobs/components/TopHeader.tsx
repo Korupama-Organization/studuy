@@ -1,6 +1,16 @@
+import { useState } from "react";
+import FilterModal from "./FilterModal";
+
 export default function TopHeader() {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const handleApplyFilter = (filters: any) => {
+    console.log("Applied filters:", filters);
+  };
+
   return (
-    <header className="flex flex-col gap-3">
+    <>
+      <header className="flex flex-col gap-3">
       <div className="flex items-center justify-end gap-3">
         <button
           className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-500 shadow-sm hover:bg-slate-50 transition"
@@ -39,6 +49,7 @@ export default function TopHeader() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setIsFilterOpen(true)}
             className="flex h-11 items-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition"
             type="button">
             <span className="material-symbols-outlined text-[18px]">tune</span>
@@ -59,5 +70,12 @@ export default function TopHeader() {
         </div>
       </div>
     </header>
+
+      <FilterModal
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={handleApplyFilter}
+      />
+    </>
   );
 }
