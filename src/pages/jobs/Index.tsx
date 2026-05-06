@@ -1,9 +1,12 @@
+import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import TopHeader from "./components/TopHeader";
 import JobsTable from "./components/JobsTable";
 import Pagination from "./components/Pagination";
 
 export default function JobsPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+
   return (
     <div className="min-h-dvh bg-[#F4F6FB] text-slate-900 font-['Inter']">
       <div className="absolute inset-0 pointer-events-none">
@@ -17,7 +20,7 @@ export default function JobsPage() {
         <main className="flex flex-1 flex-col gap-6">
           <TopHeader />
           <JobsTable />
-          <Pagination />
+          <Pagination currentPage={currentPage} onPageChange={setCurrentPage} />
         </main>
       </div>
     </div>

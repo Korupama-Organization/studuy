@@ -1,9 +1,11 @@
 import { useState } from "react";
 import FilterModal from "./FilterModal";
+import CreateJobModal from "./CreateJobModal";
 
 export default function TopHeader() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [sortBy, setSortBy] = useState("Newest");
 
   const handleApplyFilter = (filters: any) => {
@@ -102,6 +104,7 @@ export default function TopHeader() {
             )}
           </div>
           <button
+            onClick={() => setIsCreateJobOpen(true)}
             className="h-11 rounded-2xl bg-[#F758B1] px-5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(247,88,177,0.35)] hover:bg-[#E73D9F] transition"
             type="button">
             + New
@@ -114,6 +117,11 @@ export default function TopHeader() {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onApply={handleApplyFilter}
+      />
+
+      <CreateJobModal
+        isOpen={isCreateJobOpen}
+        onClose={() => setIsCreateJobOpen(false)}
       />
     </>
   );
