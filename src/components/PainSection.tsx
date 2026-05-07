@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import '../Pain.css';
 
 const PainSection: React.FC = () => {
@@ -11,17 +12,27 @@ const PainSection: React.FC = () => {
       </div>
 
       <div className="pain-container">
-        <h2 className="pain-title">
+        <motion.h2 
+          className="pain-title"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
           Chúng ta bước vào và rời khỏi<br />
           cuộc phỏng vấn
           <span className="pain-highlight">
             mà không biết mình thiếu sót ở đâu.
           </span>
-        </h2>
+        </motion.h2>
         
-        <p className="pain-subtitle">
+        <motion.p 
+          className="pain-subtitle"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        >
           Không có feedback, không biết cải thiện, và cứ lặp lại sai lầm.
-        </p>
+        </motion.p>
       </div>
     </section>
   );

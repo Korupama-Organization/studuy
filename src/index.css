@@ -33,3 +33,58 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* --- Presentation Slide Mode Overrides (Desktop) --- */
+@media (min-width: 1024px) {
+  /* Force sections to take 100% of their slide container and center content */
+  .slide-scrollable section,
+  .slide-scrollable .py-24 {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-height: 100% !important;
+    height: auto !important;
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+  }
+
+  /* Target specific sections with known massive paddings to shrink them */
+  .slide-scrollable .recruiter-section,
+  .slide-scrollable .job-connection-section,
+  .slide-scrollable .how-section,
+  .slide-scrollable .faq-section {
+    padding: 1rem 0 !important;
+  }
+
+  /* Scale down huge images to prevent pushing content out of bounds */
+  .slide-scrollable img:not(.logo-icon) {
+    max-height: 45vh;
+    width: auto;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+
+  /* Scale down massive mockup cards */
+  .slide-scrollable .mockup-card,
+  .slide-scrollable .mockup-window {
+    transform: scale(0.85);
+    transform-origin: center center;
+    margin-top: -1rem;
+    margin-bottom: -1rem;
+  }
+
+  /* Scale down gap in grids */
+  .slide-scrollable .grid,
+  .slide-scrollable .job-cards-wrapper,
+  .slide-scrollable .value-grid,
+  .slide-scrollable .how-grid,
+  .slide-scrollable .ai-analysis-grid {
+    gap: 1rem !important;
+    margin-bottom: 0 !important;
+  }
+}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import './RecruiterSection.css';
 
 const RecruiterSection: React.FC = () => {
@@ -23,7 +24,12 @@ const RecruiterSection: React.FC = () => {
   return (
     <section className="recruiter-section">
       <div className="recruiter-container">
-        <div className="recruiter-content">
+        <motion.div 
+          className="recruiter-content"
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           <span className="recruiter-label">DÀNH CHO NHÀ TUYỂN DỤNG</span>
           <h2 className="recruiter-title">
             Tìm kiếm ứng viên IT <br />
@@ -37,11 +43,23 @@ const RecruiterSection: React.FC = () => {
             Đăng tin tuyển dụng 
             <i className="ti ti-arrow-narrow-right"></i>
           </button>
-        </div>
+        </motion.div>
 
-        <div className="recruiter-features">
+        <motion.div 
+          className="recruiter-features"
+          initial="hidden"
+          whileInView="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.4 } }
+          }}
+        >
           {features.map((feature, index) => (
-            <div key={index} className="recruiter-feature-card">
+            <motion.div 
+              key={index} 
+              className="recruiter-feature-card"
+              variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
+            >
               <div className="feature-icon-wrapper">
                 <i className={feature.icon}></i>
               </div>
@@ -49,9 +67,9 @@ const RecruiterSection: React.FC = () => {
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import '../AIAnalysis.css';
 
 const AIAnalysisSection: React.FC = () => {
@@ -46,7 +47,12 @@ const AIAnalysisSection: React.FC = () => {
   return (
     <section className="ai-analysis-section">
       <div className="ai-analysis-container">
-        <div className="ai-analysis-content">
+        <motion.div 
+          className="ai-analysis-content"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           <span className="ai-tag">Công nghệ AI</span>
           <h2 className="ai-analysis-title">
             <span>Đánh giá</span>
@@ -56,19 +62,31 @@ const AIAnalysisSection: React.FC = () => {
           <p className="ai-analysis-desc">
             Hệ thống AI phân tích toàn diện câu trả lời của bạn, từ nội dung kỹ thuật đến cách trình bày và giao tiếp
           </p>
-        </div>
+        </motion.div>
 
-        <div className="ai-analysis-grid">
+        <motion.div 
+          className="ai-analysis-grid"
+          initial="hidden"
+          whileInView="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.4 } }
+          }}
+        >
           {features.map((feature, index) => (
-            <div key={index} className="ai-card">
+            <motion.div 
+              key={index} 
+              className="ai-card"
+              variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
+            >
               <div className="ai-card-icon">
                 {feature.icon}
               </div>
               <h3 className="ai-card-title">{feature.title}</h3>
               <p className="ai-card-desc">{feature.desc}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import './FAQSection.css';
 
 interface FAQ {
@@ -35,12 +36,22 @@ const FAQSection: React.FC = () => {
   return (
     <section className="faq-section">
       <div className="faq-container">
-        <div className="faq-header">
+        <motion.div 
+          className="faq-header"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           <span className="faq-label">CÂU HỎI THƯỜNG GẶP</span>
           <h2 className="faq-title">Bạn có thắc mắc về...?</h2>
-        </div>
+        </motion.div>
 
-        <div className="faq-mockup">
+        <motion.div 
+          className="faq-mockup"
+          initial={{ opacity: 0, scale: 0.95, y: 30 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+        >
           <div className="mockup-window">
             <div className="mockup-header">
               <div className="header-controls">
@@ -100,7 +111,7 @@ const FAQSection: React.FC = () => {
                Click vào câu hỏi để xem câu trả lời
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
