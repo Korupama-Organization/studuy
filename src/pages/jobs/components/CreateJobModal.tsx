@@ -1,23 +1,26 @@
 import { useState } from "react";
 import SuccessDialog from "./SuccessDialog";
+import type { SaveJobPayload } from "../Index";
 
 interface CreateJobModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCreate: (payload: SaveJobPayload) => Promise<void>;
 }
 
-export default function CreateJobModal({
-  isOpen,
-  onClose,
-}: CreateJobModalProps) {
+const emptyForm: SaveJobPayload = {
+  jobTitle: "",
+  jobDescription: "",
+  shortDescription: "",
+  location: "",
+  requiredEducation: "",
+};
+
+export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobModalProps) {
   const [showSuccess, setShowSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    jobTitle: "",
-    jobDescription: "",
-    shortDescription: "",
-    location: "",
-    requiredEducation: "",
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState<SaveJobPayload>(emptyForm);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -29,21 +32,33 @@ export default function CreateJobModal({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Job created:", formData);
-    setShowSuccess(true);
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await onCreate(formData);
+      setShowSuccess(true);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Tao job that bai.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCloseSuccess = () => {
     setShowSuccess(false);
-    setFormData({
-      jobTitle: "",
-      jobDescription: "",
-      shortDescription: "",
-      location: "",
-      requiredEducation: "",
-    });
+    setFormData(emptyForm);
+    onClose();
+  };
+
+  const handleClose = () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setError("");
     onClose();
   };
 
@@ -51,26 +66,21 @@ export default function CreateJobModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30" onClick={onClose}></div>
+      <div className="fixed inset-0 z-40 bg-black/30" onClick={handleClose}></div>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
             <h2 className="text-xl font-bold text-slate-900">Create Job</h2>
             <button
-              onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
-              <span className="material-symbols-outlined text-[20px]">
-                close
-              </span>
+              onClick={handleClose}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition"
+              disabled={isSubmitting}>
+              <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6 p-6">
-            <p className="text-sm text-slate-500">
-              Aliquam nostrum excepteur et voluptate est consectetur lorem, in a
-              cuss aspersies et cum dignissimos colegues voluptate expetis.
-              Maxime tempore scena U - Possant autem pundem placstat
-            </p>
+            {error ? <p className="text-sm text-red-500">{error}</p> : null}
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
@@ -95,7 +105,6 @@ export default function CreateJobModal({
                 name="jobDescription"
                 value={formData.jobDescription}
                 onChange={handleInputChange}
-                placeholder="Chúng tôi đang tìm kiếm một Frontend Developer năng động và sáng tạo để đề giúp tập ơi ngạ esca chứng tôi. Ban sẽ chịu trách nhiệm phát triển giao diện web hiện đại, tối ưu hóa trải nghiệm người dùng và phối hợp cùng backend để xây dựng các tính năng đầu tiên. Yêu cầu kinh nghiệm với React, Redux, HTML, CSS, JavaScript và các framework ứng dụng có khác React ngôn từ. Hãy gửi hồ sơ của bạn nếu bạn tự tin có thể chạy tất cả câu tôi với những sài phần web xuất sắc!"
                 rows={6}
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none resize-none"
                 required
@@ -106,25 +115,14 @@ export default function CreateJobModal({
               <label className="block text-sm font-semibold text-slate-900 mb-2">
                 Short Description <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <textarea
-                  name="shortDescription"
-                  value={formData.shortDescription}
-                  onChange={handleInputChange}
-                  placeholder="Phát triển giao diện web hiện đại, tối ưu hóa trải nghiệm người dùng với backend để xây dựng sản phẩm công nghệ hàng đầu."
-                  rows={3}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none resize-none"
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute bottom-2.5 right-2.5 flex items-center gap-2 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-600 transition">
-                  <span className="material-symbols-outlined text-[16px]">
-                    auto_awesome
-                  </span>
-                  AI Generate
-                </button>
-              </div>
+              <textarea
+                name="shortDescription"
+                value={formData.shortDescription}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none resize-none"
+                required
+              />
             </div>
 
             <div>
@@ -149,9 +147,6 @@ export default function CreateJobModal({
                 name="requiredEducation"
                 value={formData.requiredEducation}
                 onChange={handleInputChange}
-                placeholder="• Sinh viên năm cuối hoặc đã tốt nghiệp ngành CNTT / Kỹ thuật phần mềm
-• GPA >= 2.8
-• Tiếng Anh dạo tiểu kỳ luật kỹ thuật"
                 rows={4}
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none resize-none"
               />
@@ -160,14 +155,16 @@ export default function CreateJobModal({
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
-                onClick={onClose}
-                className="flex-1 rounded-2xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+                onClick={handleClose}
+                className="flex-1 rounded-2xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+                disabled={isSubmitting}>
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 rounded-2xl bg-[#5B5BF6] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(91,91,246,0.3)] transition hover:bg-[#4A4AE6]">
-                Submit
+                className="flex-1 rounded-2xl bg-[#5B5BF6] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(91,91,246,0.3)] transition hover:bg-[#4A4AE6] disabled:opacity-50"
+                disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
             </div>
           </form>
