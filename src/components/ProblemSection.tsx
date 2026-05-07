@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import '../Problem.css';
 
 const ProblemSection: React.FC = () => {
@@ -13,7 +14,12 @@ const ProblemSection: React.FC = () => {
       <div className="problem-container">
         
         {/* Left: Illustration */}
-        <div className="problem-visual">
+        <motion.div 
+          className="problem-visual"
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
           <div className="problem-card-wrap">
             <div className="problem-card">
               <div className="problem-card-inner">
@@ -59,12 +65,22 @@ const ProblemSection: React.FC = () => {
             </div>
 
             {/* Floating Bubbles */}
-            <div className="problem-bubble bubble-1">
+            <motion.div 
+              className="problem-bubble bubble-1"
+              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8, type: "spring" }}
+            >
               Làm sao bây giờ? 😰
-            </div>
-            <div className="problem-bubble bubble-2">
+            </motion.div>
+            <motion.div 
+              className="problem-bubble bubble-2"
+              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 1.0, type: "spring" }}
+            >
               Trả lời gì đây???
-            </div>
+            </motion.div>
 
             {/* Character Image */}
             <img 
@@ -73,16 +89,26 @@ const ProblemSection: React.FC = () => {
               className="problem-confused-img"
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Right: Text Content */}
         <div className="problem-content">
-          <h2 className="problem-heading">
+          <motion.h2 
+            className="problem-heading"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             Hầu hết sinh viên không chuẩn bị gì cho phỏng vấn thực tế.
-          </h2>
-          <p className="problem-description">
+          </motion.h2>
+          <motion.p 
+            className="problem-description"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
             Họ không biết sẽ gặp gì, trả lời như thế nào, hay bị đánh giá ra sao. Điều này dẫn đến sự thiếu tự tin và bỏ lỡ nhiều cơ hội việc làm tốt.
-          </p>
+          </motion.p>
         </div>
 
       </div>

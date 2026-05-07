@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import '../Experience.css';
 
 const ExperienceSection: React.FC = () => {
@@ -7,13 +8,37 @@ const ExperienceSection: React.FC = () => {
   return (
     <section className="experience-section">
       <div className="experience-container">
-        <span className="experience-tag">Trải nghiệm</span>
-        <h2 className="experience-title">Giao diện thực tế</h2>
-        <p className="experience-desc">
+        <motion.span 
+          className="experience-tag"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          Trải nghiệm
+        </motion.span>
+        <motion.h2 
+          className="experience-title"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          Giao diện thực tế
+        </motion.h2>
+        <motion.p 
+          className="experience-desc"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+        >
           Trải nghiệm phỏng vấn như thật với giao diện trực quan và dễ sử dụng
-        </p>
+        </motion.p>
 
-        <div className="demo-video-wrapper">
+        <motion.div 
+          className="demo-video-wrapper"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+        >
           {!isPlaying && <div className="glow-line-tl"></div>}
           {!isPlaying && <div className="glow-line-br"></div>}
           
@@ -39,7 +64,7 @@ const ExperienceSection: React.FC = () => {
               </>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

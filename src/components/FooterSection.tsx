@@ -1,10 +1,16 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import './FooterSection.css';
 
 const FooterSection: React.FC = () => {
   return (
     <footer className="footer-section">
-      <div className="footer-container">
+      <motion.div 
+        className="footer-container"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="footer-top">
           {/* Logo and About */}
           <div className="footer-brand">
@@ -58,7 +64,7 @@ const FooterSection: React.FC = () => {
             <a href="#">Điều khoản</a>
           </div>
         </div>
-      </div>
+      </motion.div>
     </footer>
   );
 };

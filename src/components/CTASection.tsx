@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import './CTASection.css';
 
 const CTASection: React.FC = () => {
@@ -11,22 +12,42 @@ const CTASection: React.FC = () => {
       </div>
 
       <div className="cta-container">
-        <div className="cta-badge">
+        <motion.div 
+          className="cta-badge"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
             <i className="ti ti-sparkles"></i>
             Hoàn toàn miễn phí
-        </div>
+        </motion.div>
         
-        <h2 className="cta-title">
+        <motion.h2 
+          className="cta-title"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
           Sẵn sàng chinh phục <br />
           phỏng vấn?
-        </h2>
+        </motion.h2>
         
-        <p className="cta-description">
+        <motion.p 
+          className="cta-description"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+        >
           Tham gia cùng hàng nghìn sinh viên IT đang luyện tập <br className="hidden md:block" />
           và chuẩn bị cho sự nghiệp của mình
-        </p>
+        </motion.p>
 
-        <div className="cta-buttons">
+        <motion.div 
+          className="cta-buttons"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
           <button className="cta-btn-primary">
             Bắt đầu luyện tập ngay
             <i className="ti ti-arrow-narrow-right"></i>
@@ -34,11 +55,16 @@ const CTASection: React.FC = () => {
           <button className="cta-btn-secondary">
             Xem demo
           </button>
-        </div>
+        </motion.div>
 
-        <p className="cta-footer-text">
+        <motion.p 
+          className="cta-footer-text"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.0 }}
+        >
           Không cần tạo tài khoản - Hoàn toàn miễn phí cho sinh viên và doanh nghiệp tuyển dụng
-        </p>
+        </motion.p>
       </div>
     </section>
   );
