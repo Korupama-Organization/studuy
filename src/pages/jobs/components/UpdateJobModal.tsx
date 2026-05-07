@@ -4,8 +4,17 @@ import type { SaveJobPayload } from "../Index";
 
 interface JobRow {
   id: string;
+  slug: string;
   title: string;
-  salary: string;
+  summary: string;
+  locations: string[];
+  workModel: string;
+  level: string;
+  jobType: string;
+  headcount: number;
+  roleType: string;
+  requiredEducation: string;
+  minMonthsExperience: number;
   createdAt: string;
   createdBy: string;
   status: string;
@@ -21,12 +30,10 @@ interface UpdateJobModalProps {
 
 const makeInitialForm = (job?: JobRow): SaveJobPayload => ({
   jobTitle: job?.title || "",
-  jobDescription: "",
-  shortDescription: "",
-  salary: job?.salary || "",
-  client: "",
-  location: "",
-  requiredEducation: "",
+  jobDescription: job?.summary || "",
+  shortDescription: job?.summary || "",
+  location: job?.locations?.join(", ") || "",
+  requiredEducation: job?.requiredEducation || "",
 });
 
 export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelete }: UpdateJobModalProps) {

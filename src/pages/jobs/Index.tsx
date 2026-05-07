@@ -8,7 +8,15 @@ interface JobRow {
   id: string;
   slug: string;
   title: string;
-  salary: string;
+  summary: string;
+  locations: string[];
+  workModel: string;
+  level: string;
+  jobType: string;
+  headcount: number;
+  roleType: string;
+  requiredEducation: string;
+  minMonthsExperience: number;
   createdAt: string;
   createdBy: string;
   status: string;
@@ -59,14 +67,31 @@ const parseDate = (value: unknown): string => {
 
 const normalizeJob = (raw: Record<string, unknown>): JobRow => {
   const basicInfo = raw.basicInfo as Record<string, unknown> | undefined;
+  const requirements = raw.requirements as Record<string, unknown> | undefined;
   const company = raw.company as Record<string, unknown> | undefined;
 
-  const creator = raw.createdBy as Record<string, unknown> | string | undefined;
   const createdBy =
     (typeof company?.name === "string" && company.name) ||
     (typeof raw.companyName === "string" && raw.companyName) ||
-    (typeof creator === "object" && creator && typeof creator.companyName === "string" && creator.companyName) ||
     "-";
+
+  const locations = Array.isArray(basicInfo?.locations)
+    ? (basicInfo.locations as string[])
+    : [];
+
+  const parseDateField = (dateVal: unknown): string => {
+    if (!dateVal) return "-";
+    if (typeof dateVal === "string") {
+      return parseDate(dateVal);
+    }
+    if (typeof dateVal === "object" && dateVal !== null) {
+      const dateObj = dateVal as Record<string, unknown>;
+      if (typeof dateObj.$date === "string") {
+        return parseDate(dateObj.$date);
+      }
+    }
+    return "-";
+  };
 
   return {
     id:
@@ -79,14 +104,36 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
       "",
     title:
       (typeof basicInfo?.title === "string" && basicInfo.title) ||
-      (typeof raw.jobTitle === "string" && raw.jobTitle) ||
-      (typeof raw.title === "string" && raw.title) ||
       "-",
-    salary:
-      (typeof raw.salary === "string" && raw.salary) ||
-      (typeof raw.salaryRange === "string" && raw.salaryRange) ||
-      "-",
-    createdAt: parseDate(raw.createdAt),
+    summary:
+      (typeof basicInfo?.summary === "string" && basicInfo.summary) ||
+      "",
+    locations,
+    workModel:
+      (typeof basicInfo?.workModel === "string" && basicInfo.workModel) ||
+      "",
+    level:
+      (typeof basicInfo?.level === "string" && basicInfo.level) ||
+      "",
+    jobType:
+      (typeof basicInfo?.jobType === "string" && basicInfo.jobType) ||
+      "",
+    headcount:
+      typeof basicInfo?.headcount === "number"
+        ? basicInfo.headcount
+        : 0,
+    roleType:
+      (typeof basicInfo?.roleType === "string" && basicInfo.roleType) ||
+      "",
+    requiredEducation:
+      (typeof requirements?.requiredEducation === "string" &&
+        requirements.requiredEducation) ||
+      "",
+    minMonthsExperience:
+      typeof requirements?.minMonthsExperience === "number"
+        ? requirements.minMonthsExperience
+        : 0,
+    createdAt: parseDateField(raw.createdAt),
     createdBy,
     status: (typeof raw.status === "string" && raw.status) || "Opening",
   };
@@ -142,13 +189,17 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
 
-  const loadJobs = useCallback(async () => {
+  const loadJobs = useCallback(async (sort: "newest" | "oldest" = "newest") => {
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/jobs`, {
+      const url = new URL(`${API_BASE_URL}/api/jobs`);
+      url.searchParams.set("sort", sort);
+
+      const response = await fetch(url.toString(), {
         method: "GET",
         headers: getAuthHeaders(),
       });
@@ -169,8 +220,8 @@ export default function JobsPage() {
   }, []);
 
   useEffect(() => {
-    void loadJobs();
-  }, [loadJobs]);
+    void loadJobs(sortBy);
+  }, [loadJobs, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(jobs.length / PAGE_SIZE));
 
@@ -185,39 +236,58 @@ export default function JobsPage() {
     return jobs.slice(start, start + PAGE_SIZE);
   }, [currentPage, jobs]);
 
+  const handleSortChange = useCallback((newSort: "newest" | "oldest") => {
+    setSortBy(newSort);
+  }, []);
+
+  const toNestedPayload = (flat: SaveJobPayload) => ({
+    basicInfo: {
+      title: flat.jobTitle,
+      shortDescription: flat.shortDescription,
+      jobDescription: flat.jobDescription,
+      location: flat.location || "",
+      requiredEducation: flat.requiredEducation || "",
+    },
+    salary: "",
+  });
+
   const handleCreateJob = useCallback(
     async (payload: SaveJobPayload) => {
+      const nestedPayload = toNestedPayload(payload);
+
       const response = await fetch(`${API_BASE_URL}/api/jobs`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify(payload),
+        body: JSON.stringify(nestedPayload),
       });
 
       if (!response.ok) {
         throw new Error(await getResponseErrorMessage(response, "Tao job that bai."));
       }
 
-      await loadJobs();
+      await loadJobs(sortBy);
       setCurrentPage(1);
     },
-    [loadJobs],
+    [loadJobs, sortBy],
   );
 
   const handleUpdateJob = useCallback(
     async (id: string, payload: SaveJobPayload) => {
+      const nestedPayload = toNestedPayload(payload);
+
       const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(payload),
+        body: JSON.stringify(nestedPayload),
       });
 
       if (!response.ok) {
         throw new Error(await getResponseErrorMessage(response, "Cap nhat job that bai."));
       }
 
-      await loadJobs();
+      await loadJobs(sortBy);
     },
-    [loadJobs],
+    [loadJobs, sortBy],
   );
 
   const handleDeleteJob = useCallback(
@@ -247,7 +317,7 @@ export default function JobsPage() {
         <Sidebar />
 
         <main className="flex flex-1 flex-col gap-6">
-          <TopHeader onCreateJob={handleCreateJob} />
+          <TopHeader onCreateJob={handleCreateJob} onSortChange={handleSortChange} />
           {error ? <p className="text-sm text-red-500">{error}</p> : null}
           <JobsTable
             jobs={pagedJobs}
