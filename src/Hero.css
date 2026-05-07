@@ -24,7 +24,6 @@
   border-radius: 50%;
   background: #fff;
   filter: blur(64px);
-  animation: orb-pulse 8s infinite ease-in-out;
 }
 
 .hs-orb--tl {
@@ -136,31 +135,6 @@
   box-shadow: 0 20px 40px rgba(0,0,0,0.2); /* Adds depth */
 }
 
-/* ── Scroll indicator ───────────────────────────────────── */
-.hs-scroll {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  width: 24px;
-  height: 40px;
-  border-radius: 9999px;
-  border: 1.253px solid rgba(255, 255, 255, 0.5);
-  padding: 8px;
-  z-index: 1;
-}
-
-.hs-scroll-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  animation: scroll-nudge 2s infinite ease-in-out;
-}
-
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .hs-inner {
@@ -206,15 +180,4 @@
   .hs-btn {
     width: 100%;
   }
-}
-
-/* ── Animations ─────────────────────────────────────────── */
-@keyframes scroll-nudge {
-  0%, 100% { transform: translateY(0); opacity: 0.5; }
-  50% { transform: translateY(10px); opacity: 1; }
-}
-
-@keyframes orb-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.1; }
-  50% { transform: scale(1.1); opacity: 0.15; }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import Reveal from './Reveal';
 import '../Solution.css';
 
 const SolutionSection: React.FC = () => {
@@ -9,76 +9,70 @@ const SolutionSection: React.FC = () => {
         
         {/* Left Side: Text and Content */}
         <div className="solution-content">
-          <motion.h2 
+          <Reveal
+            as="h2"
             className="solution-heading"
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            delay={80}
+            variant="left"
           >
             Gặp gỡ trợ lý <br />
             <span>AI</span> phỏng vấn
-          </motion.h2>
-          <motion.p 
+          </Reveal>
+          <Reveal
+            as="p"
             className="solution-description"
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            delay={160}
+            variant="left"
           >
             Luyện tập câu hỏi phỏng vấn thực tế, trả lời bằng giọng nói và nhận feedback ngay lập tức.
-          </motion.p>
+          </Reveal>
           
-          <motion.ul 
+          <Reveal
+            as="ul"
             className="solution-features"
-            initial="hidden"
-            whileInView="visible"
-            variants={{
-              hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.6 } }
-            }}
+            delay={240}
+            variant="left"
           >
-            <motion.li className="solution-feature-item" variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <li className="solution-feature-item">
               <span className="solution-feature-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
               </span>
               Đặt câu hỏi linh hoạt theo từng vị trí
-            </motion.li>
-            <motion.li className="solution-feature-item" variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            </li>
+            <li className="solution-feature-item">
               <span className="solution-feature-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
               </span>
               Lắng nghe câu trả lời của bạn realtime
-            </motion.li>
-            <motion.li className="solution-feature-item" variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            </li>
+            <li className="solution-feature-item">
               <span className="solution-feature-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
               </span>
               Đánh giá kết quả ngay lập tức
-            </motion.li>
-          </motion.ul>
+            </li>
+          </Reveal>
 
-          <motion.div 
+          <Reveal
             className="solution-actions"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.0 }}
+            delay={320}
           >
             <button className="btn-primary-sol">Cách hoạt động</button>
             <button className="btn-secondary-sol">Vậy còn việc làm...</button>
-          </motion.div>
+          </Reveal>
         </div>
 
         {/* Right Side: Interactive Mockup */}
-        <motion.div 
+        <Reveal
           className="solution-visual"
-          initial={{ opacity: 0, scale: 0.9, x: 50 }}
-          whileInView={{ opacity: 1, scale: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          delay={160}
+          variant="right"
         >
           <div className="mockup-card">
             <div className="mockup-badge">✨ Hỗ trợ AI</div>
@@ -101,30 +95,25 @@ const SolutionSection: React.FC = () => {
 
             <div className="mockup-chat">
               <div className="mockup-label">Câu hỏi</div>
-              <motion.div 
+              <Reveal
                 className="mockup-bubble bubble-ai"
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.8 }}
+                delay={320}
               >
                 "Hãy kể về một dự án bạn đã làm"
-              </motion.div>
+              </Reveal>
 
               <div className="mockup-label">Câu trả lời của bạn</div>
-              <motion.div 
+              <Reveal
                 className="mockup-bubble bubble-user"
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 1.2 }}
+                delay={400}
               >
                 "Em đã xây dựng một ứng dụng web sử dụng Node.js và React giúp các team cộng tác làm việc. Thử thách chính là..."
-              </motion.div>
+              </Reveal>
 
-              <motion.div 
+              <Reveal
                 className="mockup-voice-bar"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 1.6 }}
+                delay={480}
+                variant="scale"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
@@ -135,15 +124,15 @@ const SolutionSection: React.FC = () => {
                 <span>Đang lắng nghe...</span>
                 <div className="voice-wave" style={{ marginLeft: 'auto' }}>
                   <div className="wave-bar active"></div>
-                  <div className="wave-bar active" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="wave-bar active" style={{ animationDelay: '0.4s' }}></div>
-                  <div className="wave-bar active" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="wave-bar active" style={{ animationDelay: '0.3s' }}></div>
+                  <div className="wave-bar active wave-bar--mid"></div>
+                  <div className="wave-bar active wave-bar--tall"></div>
+                  <div className="wave-bar active wave-bar--short"></div>
+                  <div className="wave-bar active wave-bar--mid"></div>
                 </div>
-              </motion.div>
+              </Reveal>
             </div>
           </div>
-        </motion.div>
+        </Reveal>
 
       </div>
     </section>

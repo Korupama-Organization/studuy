@@ -1,53 +1,80 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import Reveal from './Reveal';
 import '../Experience.css';
 
-const ExperienceSection: React.FC = () => {
+const DemoSection: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+
+    if (!section || isPlaying) {
+      return;
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      const fallbackTimer = window.setTimeout(() => setIsPlaying(true), 0);
+      return () => window.clearTimeout(fallbackTimer);
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsPlaying(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: '0px 0px -20% 0px',
+        threshold: 0.35,
+      }
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, [isPlaying]);
 
   return (
-    <section className="experience-section">
+    <section className="experience-section" ref={sectionRef}>
       <div className="experience-container">
-        <motion.span 
+        <Reveal
+          as="span"
           className="experience-tag"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          delay={80}
         >
           Trải nghiệm
-        </motion.span>
-        <motion.h2 
+        </Reveal>
+        <Reveal
+          as="h2"
           className="experience-title"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          delay={140}
         >
           Giao diện thực tế
-        </motion.h2>
-        <motion.p 
+        </Reveal>
+        <Reveal
+          as="p"
           className="experience-desc"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
+          delay={200}
         >
           Trải nghiệm phỏng vấn như thật với giao diện trực quan và dễ sử dụng
-        </motion.p>
+        </Reveal>
 
-        <motion.div 
+        <Reveal
           className="demo-video-wrapper"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
+          delay={260}
+          variant="scale"
         >
           {!isPlaying && <div className="glow-line-tl"></div>}
           {!isPlaying && <div className="glow-line-br"></div>}
-          
+
           <div className="demo-video-content" onClick={() => setIsPlaying(true)}>
             {isPlaying ? (
               <iframe
                 width="100%"
                 height="100%"
-                src="https://www.youtube.com/embed/PD61lIYrG-M?autoplay=1"
+                src="https://www.youtube.com/embed/PD61lIYrG-M?autoplay=1&mute=1&playsinline=1&rel=0"
                 title="Demo phỏng vấn với AI"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -64,10 +91,10 @@ const ExperienceSection: React.FC = () => {
               </>
             )}
           </div>
-        </motion.div>
+        </Reveal>
       </div>
     </section>
   );
 };
 
-export default ExperienceSection;
+export default DemoSection;

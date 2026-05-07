@@ -231,13 +231,19 @@
 
 .wave-bar.active {
   background: #fff;
-  height: 24px;
-  animation: pulse-wave 1s infinite ease-in-out;
+  height: 20px;
 }
 
-@keyframes pulse-wave {
-  0%, 100% { height: 12px; }
-  50% { height: 28px; }
+.wave-bar--short {
+  height: 10px;
+}
+
+.wave-bar--mid {
+  height: 16px;
+}
+
+.wave-bar--tall {
+  height: 24px;
 }
 
 /* ── Responsive ─────────────────────────────────────────── */

@@ -134,12 +134,6 @@
 .sparkle-icon {
   color: #6366F1;
   font-size: 1.3rem;
-  animation: sparkle 2s infinite ease-in-out;
-}
-
-@keyframes sparkle {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.7; }
 }
 
 /* Responsive */
