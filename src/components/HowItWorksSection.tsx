@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import Reveal from './Reveal';
 import '../HowItWorks.css';
 
 const HowItWorksSection: React.FC = () => {
@@ -15,30 +15,22 @@ const HowItWorksSection: React.FC = () => {
   return (
     <section className="how-section">
       <div className="how-container">
-        <motion.div 
+        <Reveal
           className="how-header"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          delay={80}
         >
           <h2 className="how-title">Cách hoạt động</h2>
           <p className="how-subtitle">Bắt đầu với 6 bước đơn giản</p>
-        </motion.div>
+        </Reveal>
 
-        <motion.div 
+        <div 
           className="how-grid"
-          initial="hidden"
-          whileInView="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.4 } }
-          }}
         >
-          {steps.map((step) => (
-            <motion.div 
+          {steps.map((step, index) => (
+            <Reveal
               key={step.number} 
               className="step-card"
-              variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } }}
+              delay={140 + index * 60}
             >
               <div className="step-number">{step.number}</div>
               <div className="step-icon-wrapper">
@@ -76,19 +68,17 @@ const HowItWorksSection: React.FC = () => {
                   </svg>
                 </div>
               )}
-            </motion.div>
+            </Reveal>
           ))}
-        </motion.div>
+        </div>
 
-        <motion.div 
+        <Reveal
           className="how-footer"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.0 }}
+          delay={520}
         >
           <span className="lightning-icon">⚡</span>
           <span>Thời gian trung bình: 18-36 phút</span>
-        </motion.div>
+        </Reveal>
       </div>
     </section>
   );

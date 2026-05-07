@@ -1,9 +1,12 @@
 /* ── Problem Section ────────────────────────────────────── */
 .problem-section {
-  padding: 120px 24px;
+  min-height: calc(100vh - 80px);
+  padding: 96px 24px;
   background: #fff;
   overflow: hidden;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .problem-bg-orbs {
@@ -154,23 +157,13 @@
   top: 220px;
   left: -20px;
   transform: rotate(-5deg);
-  animation: float 4s infinite ease-in-out;
 }
 
 .bubble-2 {
   top: 80px;
   right: -10px;
   transform: rotate(5deg);
-  animation: float 4s infinite ease-in-out 1s;
 }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
-  50% { transform: translateY(-10px) rotate(var(--rot, 0deg)); }
-}
-
-.bubble-1 { --rot: -5deg; }
-.bubble-2 { --rot: 5deg; }
 
 /* ── Right side: Content ────────────────────────────────── */
 .problem-content {

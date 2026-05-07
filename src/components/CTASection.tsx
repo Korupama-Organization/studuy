@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import Reveal from './Reveal';
 import './CTASection.css';
 
 const CTASection: React.FC = () => {
@@ -12,41 +12,35 @@ const CTASection: React.FC = () => {
       </div>
 
       <div className="cta-container">
-        <motion.div 
+        <Reveal
           className="cta-badge"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          delay={80}
         >
             <i className="ti ti-sparkles"></i>
             Hoàn toàn miễn phí
-        </motion.div>
+        </Reveal>
         
-        <motion.h2 
+        <Reveal
+          as="h2"
           className="cta-title"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          delay={140}
         >
           Sẵn sàng chinh phục <br />
           phỏng vấn?
-        </motion.h2>
+        </Reveal>
         
-        <motion.p 
+        <Reveal
+          as="p"
           className="cta-description"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
+          delay={200}
         >
           Tham gia cùng hàng nghìn sinh viên IT đang luyện tập <br className="hidden md:block" />
           và chuẩn bị cho sự nghiệp của mình
-        </motion.p>
+        </Reveal>
 
-        <motion.div 
+        <Reveal
           className="cta-buttons"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
+          delay={260}
         >
           <button className="cta-btn-primary">
             Bắt đầu luyện tập ngay
@@ -55,16 +49,15 @@ const CTASection: React.FC = () => {
           <button className="cta-btn-secondary">
             Xem demo
           </button>
-        </motion.div>
+        </Reveal>
 
-        <motion.p 
+        <Reveal
+          as="p"
           className="cta-footer-text"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 1.0 }}
+          delay={320}
         >
           Không cần tạo tài khoản - Hoàn toàn miễn phí cho sinh viên và doanh nghiệp tuyển dụng
-        </motion.p>
+        </Reveal>
       </div>
     </section>
   );

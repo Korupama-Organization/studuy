@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import Reveal from './Reveal';
 import '../Hero.css';
 
 const HeroSection: React.FC = () => {
@@ -14,41 +14,36 @@ const HeroSection: React.FC = () => {
       <div className="hs-inner">
         {/* Left: text content */}
         <div className="hs-text">
-          <motion.h1 
+          <Reveal
+            as="h1"
             className="hs-heading"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            delay={80}
           >
             Tìm việc đã khó.{'\n'}Phỏng vấn{'\n'}càng khó hơn.
-          </motion.h1>
+          </Reveal>
 
-          <motion.p 
+          <Reveal
+            as="p"
             className="hs-subtext"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            delay={160}
           >
             Bạn có muốn luyện tập phỏng vấn{'\n'}và có việc làm ngay trên ghế nhà trường không?
-          </motion.p>
+          </Reveal>
 
-          <motion.div 
+          <Reveal
             className="hs-cta"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            delay={240}
           >
             <button className="hs-btn hs-btn--primary">Bắt đầu ngay</button>
             <button className="hs-btn hs-btn--ghost">Tìm hiểu thêm</button>
-          </motion.div>
+          </Reveal>
         </div>
 
         {/* Right: hero image */}
-        <motion.div 
+        <Reveal
           className="hs-img-wrap"
-          initial={{ opacity: 0, scale: 0.9, x: 20 }}
-          whileInView={{ opacity: 1, scale: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          delay={180}
+          variant="right"
         >
           <img
             className="hs-img"
@@ -57,12 +52,7 @@ const HeroSection: React.FC = () => {
             loading="eager"
             fetchPriority="high"
           />
-        </motion.div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="hs-scroll">
-        <div className="hs-scroll-dot" />
+        </Reveal>
       </div>
     </section>
   );

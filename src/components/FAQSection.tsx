@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import Reveal from './Reveal';
+import logoImage from '../assets/Logo.png';
 import './FAQSection.css';
 
 interface FAQ {
   question: string;
   answer: string;
 }
+
+type ChatMessage = {
+  id: number;
+  sender: 'reply' | 'user';
+  text: string;
+};
 
 const FAQSection: React.FC = () => {
   const faqs: FAQ[] = [
@@ -32,25 +39,55 @@ const FAQSection: React.FC = () => {
   ];
 
   const [activeTab, setActiveTab] = useState<number | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 0,
+      sender: 'reply',
+      text: 'Xin chào!',
+    },
+  ]);
+  const messageIdRef = useRef(1);
+  const threadRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    threadRef.current?.scrollTo({
+      top: threadRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [messages]);
+
+  const handleQuestionClick = (faq: FAQ, index: number) => {
+    setActiveTab(index);
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      {
+        id: messageIdRef.current++,
+        sender: 'user',
+        text: faq.question,
+      },
+      {
+        id: messageIdRef.current++,
+        sender: 'reply',
+        text: faq.answer,
+      },
+    ]);
+  };
 
   return (
     <section className="faq-section">
       <div className="faq-container">
-        <motion.div 
+        <Reveal
           className="faq-header"
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          delay={80}
         >
           <span className="faq-label">CÂU HỎI THƯỜNG GẶP</span>
           <h2 className="faq-title">Bạn có thắc mắc về...?</h2>
-        </motion.div>
+        </Reveal>
 
-        <motion.div 
+        <Reveal
           className="faq-mockup"
-          initial={{ opacity: 0, scale: 0.95, y: 30 }}
-          whileInView={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          delay={160}
+          variant="scale"
         >
           <div className="mockup-window">
             <div className="mockup-header">
@@ -59,7 +96,7 @@ const FAQSection: React.FC = () => {
                 <span className="control minimize"></span>
                 <span className="control maximize"></span>
               </div>
-              <div className="header-title">AI Interview Assistant</div>
+              <div className="header-title">Câu hỏi thường gặp</div>
               <div className="header-actions">
                 <i className="ti ti-arrows-maximize"></i>
                 <i className="ti ti-minus"></i>
@@ -68,13 +105,22 @@ const FAQSection: React.FC = () => {
             </div>
 
             <div className="mockup-body">
-              <div className="chat-bubble ai-message">
-                <div className="ai-avatar">
-                   <img src="https://api.dicebear.com/7.x/bottts/svg?seed=seed-ai" alt="AI Avatar" />
-                </div>
-                <div className="message-content">
-                  Xin chào! Tôi là <strong>AI Assistant</strong>. Bạn có câu hỏi gì về nền tảng SEed không?
-                </div>
+              <div className="chat-thread" ref={threadRef} aria-live="polite">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`chat-bubble ${message.sender === 'user' ? 'user-message' : 'reply-message'}`}
+                  >
+                    {message.sender === 'reply' && (
+                      <div className="reply-avatar">
+                        <img src={logoImage} alt="" aria-hidden="true" />
+                      </div>
+                    )}
+                    <div className="message-content">
+                      {message.text}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               <div className="question-selectors">
@@ -84,34 +130,21 @@ const FAQSection: React.FC = () => {
                     <button 
                       key={index} 
                       className={`question-tag ${activeTab === index ? 'active' : ''}`}
-                      onClick={() => setActiveTab(index)}
+                      onClick={() => handleQuestionClick(faq, index)}
                     >
                       {faq.question}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {activeTab !== null && (
-                <div className="answer-area animate-fade-in">
-                   <div className="chat-bubble ai-message">
-                    <div className="ai-avatar">
-                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=seed-ai" alt="AI Avatar" />
-                    </div>
-                    <div className="message-content">
-                      {faqs[activeTab].answer}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="mockup-footer">
                <i className="ti ti-message-dots"></i>
-               Click vào câu hỏi để xem câu trả lời
+               Chọn một câu hỏi để bắt đầu trò chuyện
             </div>
           </div>
-        </motion.div>
+        </Reveal>
       </div>
     </section>
   );
