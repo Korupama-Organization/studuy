@@ -6,6 +6,7 @@ import Pagination from "./components/Pagination";
 
 interface JobRow {
   id: string;
+  slug: string;
   title: string;
   salary: string;
   createdAt: string;
@@ -72,6 +73,10 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
       (typeof raw._id === "string" && raw._id) ||
       (typeof raw.id === "string" && raw.id) ||
       "N/A",
+    slug:
+      (typeof raw.slug === "string" && raw.slug) ||
+      (typeof raw.jobSlug === "string" && raw.jobSlug) ||
+      "",
     title:
       (typeof basicInfo?.title === "string" && basicInfo.title) ||
       (typeof raw.jobTitle === "string" && raw.jobTitle) ||

@@ -40,13 +40,13 @@ export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }:
       <div className="hidden flex-col gap-4 lg:flex">
         {jobs.map((job) => (
           <div
-            key={job.id}
+            key={job.slug || job.id}
             onClick={() => handleJobClick(job)}
             className="grid grid-cols-6 items-start gap-4 rounded-2xl border border-slate-100 bg-white px-6 py-4 text-sm shadow-sm transition hover:shadow-md cursor-pointer hover:border-slate-200"
             style={{ gridTemplateColumns: "100px 1.7fr 1fr 1fr 1fr 120px" }}>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Job ID</p>
-              <p className="mt-1 font-semibold text-slate-900">{job.id}</p>
+              <p className="mt-1 font-semibold text-slate-900">{job.slug || job.id}</p>
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Job Title</p>
@@ -77,13 +77,13 @@ export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }:
       <div className="lg:hidden flex flex-col gap-4">
         {jobs.map((job) => (
           <div
-            key={job.id}
+            key={job.slug || job.id}
             onClick={() => handleJobClick(job)}
             className="border border-slate-100 rounded-xl p-4 space-y-3 bg-white shadow-sm cursor-pointer transition hover:shadow-md hover:border-slate-200">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-xs text-slate-400 font-semibold uppercase">Job ID</p>
-                <p className="font-semibold text-slate-900">{job.id}</p>
+                <p className="font-semibold text-slate-900">{job.slug || job.id}</p>
               </div>
               <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-600">
                 {job.status}
