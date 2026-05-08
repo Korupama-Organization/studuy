@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import avatarImage from '../../assets/Logo.png';
 import backgroundForPC from '../../assets/BackgroundforPC.png';
-import { checkHrEmailAvailability, hasValidStoredAccessToken, registerHrUser } from '../../services/auth';
+import { 
+    checkHrEmailAvailability, 
+    hasValidStoredAccessToken, 
+    registerHrUser, 
+    loginNormalAuth, 
+    storeAuthSession, 
+    createCompany 
+} from '../../services/auth';
 import MobileViewportScaler from '../login/components/MobileViewportScaler';
 import MobileFormScreen from './components/MobileFormScreen';
 import MobileIntroScreen from './components/MobileIntroScreen';
@@ -23,6 +30,21 @@ export default function RegisterPage() {
     const [linkedinUrl, setLinkedinUrl] = useState('');
     const [githubUrl, setGithubUrl] = useState('');
     const [facebookUrl, setFacebookUrl] = useState('');
+    
+    // Company fields
+    const [companyName, setCompanyName] = useState('');
+    const [companyShortName, setCompanyShortName] = useState('');
+    const [companyLogoUrl, setCompanyLogoUrl] = useState('');
+    const [companyWebsite, setCompanyWebsite] = useState('');
+    const [companyAddress, setCompanyAddress] = useState('');
+    const [companyDescription, setCompanyDescription] = useState('');
+    const [companyType, setCompanyType] = useState<'On-site' | 'Remote' | 'Hybrid'>('Hybrid');
+    const [companyTechStack, setCompanyTechStack] = useState<string>('Node.js, TypeScript, MongoDB');
+    const [companyBenefits, setCompanyBenefits] = useState<string>('Flexible time, Laptop support');
+    const [companyTargetRoles, setCompanyTargetRoles] = useState<string>('Backend Developer, QA Engineer');
+    const [usingAIInterview, setUsingAIInterview] = useState(false);
+    const [usingManualInterview, setUsingManualInterview] = useState(true);
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isDesktop, setIsDesktop] = useState<boolean>(() => {
@@ -75,11 +97,20 @@ export default function RegisterPage() {
         const normalizedLinkedinUrl = linkedinUrl.trim();
         const normalizedGithubUrl = githubUrl.trim();
         const normalizedFacebookUrl = facebookUrl.trim();
+        
+        const normalizedCompanyName = companyName.trim();
+        const normalizedCompanyWebsite = companyWebsite.trim();
+        const normalizedCompanyAddress = companyAddress.trim();
 
         setErrorMessage('');
 
         if (!normalizedFullName || !normalizedIdentifier || !normalizedPassword || !normalizedConfirmPassword) {
-            setErrorMessage('Please enter full name, email, password, and confirm password.');
+            setErrorMessage('Vui lòng nhập đầy đủ họ tên, email và mật khẩu.');
+            return;
+        }
+
+        if (!normalizedCompanyName || !normalizedCompanyWebsite || !normalizedCompanyAddress) {
+            setErrorMessage('Vui lòng nhập đầy đủ thông tin công ty.');
             return;
         }
 
@@ -95,6 +126,8 @@ export default function RegisterPage() {
 
         try {
             setIsSubmitting(true);
+            
+            // 1. Register HR user
             await registerHrUser({
                 fullName: normalizedFullName,
                 email: normalizedIdentifier,
@@ -106,15 +139,57 @@ export default function RegisterPage() {
                 githubUrl: normalizedGithubUrl || undefined,
                 facebookUrl: normalizedFacebookUrl || undefined,
             });
-            navigate('/login', {
-                replace: true,
-                state: {
-                    registrationSuccess: true,
-                    identifier: normalizedIdentifier,
+
+            // 2. Auto-login to get token
+            const loginResult = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
+            storeAuthSession(loginResult);
+
+            // 3. Create company using the provided detailed template
+            await createCompany(loginResult.accessToken, {
+                name: normalizedCompanyName,
+                shortName: companyShortName.trim() || normalizedCompanyName.slice(0, 10),
+                logoUrl: companyLogoUrl.trim() || "https://seeds.example.com/logo.png",
+                website: normalizedCompanyWebsite,
+                email: normalizedIdentifier,
+                phone: normalizedPhone || "0909123456",
+                address: normalizedCompanyAddress,
+                description: companyDescription.trim() || "Company profile for first-time recruiter team",
+                location: [
+                  {
+                    address: normalizedCompanyAddress,
+                    city: "Ho Chi Minh",
+                    country: "Vietnam"
+                  }
+                ],
+                workingEnvironment: {
+                  type: companyType,
+                  techStack: companyTechStack.split(',').map(s => s.trim()).filter(Boolean),
+                  benefits: companyBenefits.split(',').map(s => s.trim()).filter(Boolean)
                 },
+                socialMediaLinks: [
+                  {
+                    platform: "LinkedIn",
+                    url: normalizedLinkedinUrl || "https://www.linkedin.com/company/seeds-technology"
+                  },
+                  {
+                    platform: "Facebook",
+                    url: normalizedFacebookUrl || "https://facebook.com/seeds.technology"
+                  }
+                ],
+                recruitingPreferences: {
+                  targetRoles: companyTargetRoles.split(',').map(s => s.trim()).filter(Boolean),
+                  targetLevels: [{ level: "Intern" }, { level: "Fresher" }],
+                  usingAIInterview: usingAIInterview,
+                  usingManualInterview: usingManualInterview
+                },
+                partnerStatus: "inactive"
             });
+
+            // 4. Redirect to dashboard
+            navigate('/dashboard', { replace: true });
+
         } catch (error) {
-            const fallbackMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
+            const fallbackMessage = 'Đăng ký hoặc tạo công ty thất bại. Vui lòng thử lại.';
             setErrorMessage(
                 error instanceof Error && error.message.trim()
                     ? error.message
@@ -154,6 +229,30 @@ export default function RegisterPage() {
                         onLinkedinUrlChange={setLinkedinUrl}
                         onGithubUrlChange={setGithubUrl}
                         onFacebookUrlChange={setFacebookUrl}
+                        companyName={companyName}
+                        companyShortName={companyShortName}
+                        companyLogoUrl={companyLogoUrl}
+                        companyWebsite={companyWebsite}
+                        companyAddress={companyAddress}
+                        companyDescription={companyDescription}
+                        companyType={companyType}
+                        companyTechStack={companyTechStack}
+                        companyBenefits={companyBenefits}
+                        companyTargetRoles={companyTargetRoles}
+                        usingAIInterview={usingAIInterview}
+                        usingManualInterview={usingManualInterview}
+                        onCompanyNameChange={setCompanyName}
+                        onCompanyShortNameChange={setCompanyShortName}
+                        onCompanyLogoUrlChange={setCompanyLogoUrl}
+                        onCompanyWebsiteChange={setCompanyWebsite}
+                        onCompanyAddressChange={setCompanyAddress}
+                        onCompanyDescriptionChange={setCompanyDescription}
+                        onCompanyTypeChange={setCompanyType}
+                        onCompanyTechStackChange={setCompanyTechStack}
+                        onCompanyBenefitsChange={setCompanyBenefits}
+                        onCompanyTargetRolesChange={setCompanyTargetRoles}
+                        onUsingAIInterviewChange={setUsingAIInterview}
+                        onUsingManualInterviewChange={setUsingManualInterview}
                         onCheckEmailAvailability={handleCheckEmailAvailability}
                         onSubmit={handleSubmit}
                     />
@@ -202,6 +301,30 @@ export default function RegisterPage() {
                                 onLinkedinUrlChange={setLinkedinUrl}
                                 onGithubUrlChange={setGithubUrl}
                                 onFacebookUrlChange={setFacebookUrl}
+                                companyName={companyName}
+                                companyShortName={companyShortName}
+                                companyLogoUrl={companyLogoUrl}
+                                companyWebsite={companyWebsite}
+                                companyAddress={companyAddress}
+                                companyDescription={companyDescription}
+                                companyType={companyType}
+                                companyTechStack={companyTechStack}
+                                companyBenefits={companyBenefits}
+                                companyTargetRoles={companyTargetRoles}
+                                usingAIInterview={usingAIInterview}
+                                usingManualInterview={usingManualInterview}
+                                onCompanyNameChange={setCompanyName}
+                                onCompanyShortNameChange={setCompanyShortName}
+                                onCompanyLogoUrlChange={setCompanyLogoUrl}
+                                onCompanyWebsiteChange={setCompanyWebsite}
+                                onCompanyAddressChange={setCompanyAddress}
+                                onCompanyDescriptionChange={setCompanyDescription}
+                                onCompanyTypeChange={setCompanyType}
+                                onCompanyTechStackChange={setCompanyTechStack}
+                                onCompanyBenefitsChange={setCompanyBenefits}
+                                onCompanyTargetRolesChange={setCompanyTargetRoles}
+                                onUsingAIInterviewChange={setUsingAIInterview}
+                                onUsingManualInterviewChange={setUsingManualInterview}
                                 onCheckEmailAvailability={handleCheckEmailAvailability}
                                 onSubmit={handleSubmit}
                             />

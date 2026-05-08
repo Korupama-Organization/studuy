@@ -35,6 +35,9 @@ export interface RegisterHrPayload {
     linkedinUrl?: string;
     githubUrl?: string;
     facebookUrl?: string;
+    companyName?: string;
+    companyWebsite?: string;
+    companyAddress?: string;
 }
 
 interface ApiErrorShape {
@@ -215,6 +218,29 @@ export const checkHrEmailAvailability = async (email: string): Promise<void> => 
     if (!response.ok) {
         throw new Error(toErrorMessage('Khong the kiem tra email.', payload as ApiErrorShape));
     }
+};
+
+export const createCompany = async (
+    token: string,
+    payload: Record<string, any>
+): Promise<any> => {
+    const response = await fetch(buildApiUrl('/api/companies'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+    });
+
+    const rawBody = await extractResponseText(response);
+
+    if (!response.ok) {
+        const message = extractApiErrorMessage(rawBody);
+        throw new Error(message || 'Tạo công ty thất bại.');
+    }
+
+    return JSON.parse(rawBody);
 };
 
 export const storeAuthSession = (result: LoginResponse): void => {

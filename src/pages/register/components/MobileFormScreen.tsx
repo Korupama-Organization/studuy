@@ -26,6 +26,30 @@ interface MobileFormScreenProps {
     onLinkedinUrlChange: (value: string) => void;
     onGithubUrlChange: (value: string) => void;
     onFacebookUrlChange: (value: string) => void;
+    companyName: string;
+    companyShortName: string;
+    companyLogoUrl: string;
+    companyWebsite: string;
+    companyAddress: string;
+    companyDescription: string;
+    companyType: 'On-site' | 'Remote' | 'Hybrid';
+    companyTechStack: string;
+    companyBenefits: string;
+    companyTargetRoles: string;
+    usingAIInterview: boolean;
+    usingManualInterview: boolean;
+    onCompanyNameChange: (value: string) => void;
+    onCompanyShortNameChange: (value: string) => void;
+    onCompanyLogoUrlChange: (value: string) => void;
+    onCompanyWebsiteChange: (value: string) => void;
+    onCompanyAddressChange: (value: string) => void;
+    onCompanyDescriptionChange: (value: string) => void;
+    onCompanyTypeChange: (value: 'On-site' | 'Remote' | 'Hybrid') => void;
+    onCompanyTechStackChange: (value: string) => void;
+    onCompanyBenefitsChange: (value: string) => void;
+    onCompanyTargetRolesChange: (value: string) => void;
+    onUsingAIInterviewChange: (value: boolean) => void;
+    onUsingManualInterviewChange: (value: boolean) => void;
     onCheckEmailAvailability: (email: string) => Promise<void>;
     onSubmit: () => void;
 }
@@ -53,6 +77,30 @@ export default function MobileFormScreen({
     onLinkedinUrlChange,
     onGithubUrlChange,
     onFacebookUrlChange,
+    companyName,
+    companyShortName,
+    companyLogoUrl,
+    companyWebsite,
+    companyAddress,
+    companyDescription,
+    companyType,
+    companyTechStack,
+    companyBenefits,
+    companyTargetRoles,
+    usingAIInterview,
+    usingManualInterview,
+    onCompanyNameChange,
+    onCompanyShortNameChange,
+    onCompanyLogoUrlChange,
+    onCompanyWebsiteChange,
+    onCompanyAddressChange,
+    onCompanyDescriptionChange,
+    onCompanyTypeChange,
+    onCompanyTechStackChange,
+    onCompanyBenefitsChange,
+    onCompanyTargetRolesChange,
+    onUsingAIInterviewChange,
+    onUsingManualInterviewChange,
     onCheckEmailAvailability,
     onSubmit,
 }: MobileFormScreenProps) {
@@ -94,6 +142,30 @@ export default function MobileFormScreen({
                         onLinkedinUrlChange={onLinkedinUrlChange}
                         onGithubUrlChange={onGithubUrlChange}
                         onFacebookUrlChange={onFacebookUrlChange}
+                        companyName={companyName}
+                        companyShortName={companyShortName}
+                        companyLogoUrl={companyLogoUrl}
+                        companyWebsite={companyWebsite}
+                        companyAddress={companyAddress}
+                        companyDescription={companyDescription}
+                        companyType={companyType}
+                        companyTechStack={companyTechStack}
+                        companyBenefits={companyBenefits}
+                        companyTargetRoles={companyTargetRoles}
+                        usingAIInterview={usingAIInterview}
+                        usingManualInterview={usingManualInterview}
+                        onCompanyNameChange={onCompanyNameChange}
+                        onCompanyShortNameChange={onCompanyShortNameChange}
+                        onCompanyLogoUrlChange={onCompanyLogoUrlChange}
+                        onCompanyWebsiteChange={onCompanyWebsiteChange}
+                        onCompanyAddressChange={onCompanyAddressChange}
+                        onCompanyDescriptionChange={onCompanyDescriptionChange}
+                        onCompanyTypeChange={onCompanyTypeChange}
+                        onCompanyTechStackChange={onCompanyTechStackChange}
+                        onCompanyBenefitsChange={onCompanyBenefitsChange}
+                        onCompanyTargetRolesChange={onCompanyTargetRolesChange}
+                        onUsingAIInterviewChange={onUsingAIInterviewChange}
+                        onUsingManualInterviewChange={onUsingManualInterviewChange}
                         onCheckEmailAvailability={onCheckEmailAvailability}
                         onSubmit={onSubmit}
                     />

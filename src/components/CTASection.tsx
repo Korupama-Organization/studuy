@@ -16,10 +16,10 @@ const CTASection: React.FC = () => {
           className="cta-badge"
           delay={80}
         >
-            <i className="ti ti-sparkles"></i>
-            Hoàn toàn miễn phí
+          <i className="ti ti-sparkles"></i>
+          Hoàn toàn miễn phí
         </Reveal>
-        
+
         <Reveal
           as="h2"
           className="cta-title"
@@ -28,7 +28,7 @@ const CTASection: React.FC = () => {
           Sẵn sàng chinh phục <br />
           phỏng vấn?
         </Reveal>
-        
+
         <Reveal
           as="p"
           className="cta-description"
