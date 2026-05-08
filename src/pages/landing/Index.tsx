@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import HeroSection from './components/HeroSection';
-import ProblemSection from './components/ProblemSection';
-import PainSection from './components/PainSection';
-import SolutionSection from './components/SolutionSection';
-import HowItWorksSection from './components/HowItWorksSection';
-import FeaturesSection from './components/FeaturesSection';
-import DemoSection from './components/DemoSection';
-import CTASection from './components/CTASection';
-import FAQSection from './components/FAQSection';
-import FooterSection from './components/FooterSection';
-import logoImage from './assets/Logo.png';
-import './FormalMotion.css';
+import HeroSection from '../../components/HeroSection';
+import ProblemSection from '../../components/ProblemSection';
+import PainSection from '../../components/PainSection';
+import SolutionSection from '../../components/SolutionSection';
+import HowItWorksSection from '../../components/HowItWorksSection';
+import FeaturesSection from '../../components/FeaturesSection';
+import DemoSection from '../../components/DemoSection';
+import CTASection from '../../components/CTASection';
+import FAQSection from '../../components/FAQSection';
+import FooterSection from '../../components/FooterSection';
+import logoImage from '../../assets/Logo.png';
+import '../../styles/landing/FormalMotion.css';
 
 const LandingPage: React.FC = () => {
   const [isDarkMode] = useState<boolean>(() => {

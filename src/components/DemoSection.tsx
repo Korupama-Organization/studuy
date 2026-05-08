@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Reveal from './Reveal';
-import '../Experience.css';
+import '../styles/landing/Experience.css';
 
 const DemoSection: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);

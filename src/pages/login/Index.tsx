@@ -73,13 +73,10 @@ export default function LoginPage() {
         try {
             setIsSubmitting(true);
 
-            // handle UIT authentication first with checking identifier is not an email
-            if (normalizedIdentifier.includes('@')) {
-                var result = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
-            }
-            else {
-                var result = await loginWithUIT(normalizedIdentifier, normalizedPassword);
-            }
+            const result = normalizedIdentifier.includes('@')
+                ? await loginNormalAuth(normalizedIdentifier, normalizedPassword)
+                : await loginWithUIT(normalizedIdentifier, normalizedPassword);
+
             storeAuthSession(result);
             navigate("/", { replace: true });
         } catch (error) {
@@ -108,7 +105,6 @@ export default function LoginPage() {
                         onIdentifierChange={setIdentifier}
                         onPasswordChange={setPassword}
                         onSubmit={handleSubmit}
-                        onBack={() => setMobileStep('intro')}
                     />
                 )}
             </MobileViewportScaler>

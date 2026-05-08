@@ -1,6 +1,6 @@
 import React from 'react';
 import Reveal from './Reveal';
-import '../Problem.css';
+import '../styles/landing/Problem.css';
 
 const ProblemSection: React.FC = () => {
   return (

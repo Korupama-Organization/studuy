@@ -1,7 +1,7 @@
 import React from 'react';
 import Reveal from './Reveal';
-import '../AIAnalysis.css';
-import '../Value.css';
+import '../styles/landing/AIAnalysis.css';
+import '../styles/landing/Value.css';
 import './JobConnection.css';
 import './RecruiterSection.css';
 import pandaSpeech from '../assets/panda_speech.png';
