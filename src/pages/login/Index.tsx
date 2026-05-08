@@ -7,6 +7,7 @@ import {
     loginNormalAuth,
     storeAuthSession,
     loginWithUIT,
+    getStoredUserRole,
 } from "../../services/auth";
 import LoginFormCard from "./components/LoginFormCard";
 import MobileFormScreen from "./components/MobileFormScreen";
@@ -32,7 +33,13 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (hasValidStoredAccessToken()) {
-            navigate("/", { replace: true });
+            const role = getStoredUserRole();
+            console.log('[Login] Already authenticated, role:', role);
+            if (role === 'recruiter') {
+                navigate('/dashboard', { replace: true });
+            } else {
+                navigate('/', { replace: true });
+            }
         }
     }, [navigate]);
 
@@ -73,15 +80,32 @@ export default function LoginPage() {
         try {
             setIsSubmitting(true);
 
-            // handle UIT authentication first with checking identifier is not an email
-            if (normalizedIdentifier.includes('@')) {
-                var result = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
+            // Recruiter đăng nhập bằng email (chứa @) → normal_auth
+            // Candidate đăng nhập bằng MSSV (không chứa @) → uit_auth
+            const isEmailLogin = normalizedIdentifier.includes('@');
+            let result;
+            if (isEmailLogin) {
+                result = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
+            } else {
+                result = await loginWithUIT(normalizedIdentifier, normalizedPassword);
             }
-            else {
-                var result = await loginWithUIT(normalizedIdentifier, normalizedPassword);
-            }
+
             storeAuthSession(result);
-            navigate("/", { replace: true });
+
+            // Debug: xem API trả về role gì
+            console.log('[Login] Login response user:', JSON.stringify(result.user));
+            console.log('[Login] user.role:', result.user?.role);
+            console.log('[Login] isEmailLogin:', isEmailLogin);
+
+            // Điều hướng: recruiter → /dashboard, còn lại → /
+            const userRole = result.user?.role;
+            if (userRole === 'recruiter' || (isEmailLogin && userRole !== 'candidate')) {
+                console.log('[Login] Redirecting to /dashboard');
+                navigate('/dashboard', { replace: true });
+            } else {
+                console.log('[Login] Redirecting to /');
+                navigate('/', { replace: true });
+            }
         } catch (error) {
             const fallbackMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
             setErrorMessage(

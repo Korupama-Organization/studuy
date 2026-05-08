@@ -264,6 +264,17 @@ export const hasValidStoredAccessToken = (): boolean => {
     return isTokenValid;
 };
 
+export const getStoredUserRole = (): string | null => {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.currentUser);
+        if (!raw) return null;
+        const user = JSON.parse(raw) as AuthUser;
+        return user.role ?? null;
+    } catch {
+        return null;
+    }
+};
+
 export const clearAuthSession = (): void => {
     localStorage.removeItem(STORAGE_KEYS.accessToken);
     localStorage.removeItem(STORAGE_KEYS.refreshToken);

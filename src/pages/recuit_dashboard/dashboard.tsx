@@ -1,77 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './dashboard.css';
 import { motion } from 'framer-motion';
 import { 
   dashboardService, 
-  DashboardStats, 
-  ApplicationStat, 
-  RecentApplication, 
-  UpcomingInterview 
+  DashboardData,
+  DashboardApiError
 } from '../../services/dashboardService';
 import { 
   hasValidStoredAccessToken, 
   clearAuthSession, 
   AuthUser 
 } from '../../services/auth';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/vi';
+
+dayjs.extend(relativeTime);
+dayjs.locale('vi');
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [chartData, setChartData] = useState<ApplicationStat[]>([]);
-  const [applications, setApplications] = useState<RecentApplication[]>([]);
-  const [interviews, setInterviews] = useState<UpcomingInterview[]>([]);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
-  // // Auth guard: kiểm tra token, nếu không có thì redirect về login
-  // useEffect(() => {
-  //   if (!hasValidStoredAccessToken()) {
-  //     navigate('/login', { replace: true });
-  //     return;
-  //   }
-
-  //   // Đọc thông tin user đã lưu từ localStorage
-  //   try {
-  //     const storedUser = localStorage.getItem('currentUser');
-  //     if (storedUser) {
-  //       setCurrentUser(JSON.parse(storedUser) as AuthUser);
-  //     }
-  //   } catch {
-  //     // ignore parse errors
-  //   }
-  // }, [navigate]);
-
-  // Fetch dashboard data từ API
+  // Auth guard: kiểm tra token, nếu không có thì redirect về login
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [statsData, chartRes, appData, interviewData] = await Promise.all([
-          dashboardService.getStats(),
-          dashboardService.getChartData(),
-          dashboardService.getRecentApplications(),
-          dashboardService.getUpcomingInterviews()
-        ]);
-        
-        setStats(statsData);
-        setChartData(chartRes);
-        setApplications(appData);
-        setInterviews(interviewData);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!hasValidStoredAccessToken()) {
+      navigate('/login', { replace: true });
+      return;
+    }
 
+    // Đọc thông tin user đã lưu từ localStorage
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        setCurrentUser(JSON.parse(storedUser) as AuthUser);
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }, [navigate]);
+
+  // Fetch dashboard data từ backend API
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const dashboardData = await dashboardService.getDashboard('week');
+      setData(dashboardData);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      // Nếu lỗi xác thực (401/403), redirect về login
+      if (err instanceof DashboardApiError && err.isAuthError) {
+        clearAuthSession();
+        navigate('/login', { replace: true });
+        return;
+      }
+      setError(err instanceof Error ? err.message : 'Không thể tải dữ liệu dashboard.');
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleLogout = () => {
     clearAuthSession();
     navigate('/login', { replace: true });
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-gray-50">
@@ -84,6 +87,56 @@ const Dashboard: React.FC = () => {
     );
   }
 
+  // Error state — hiển thị lỗi và nút thử lại
+  if (error || !data) {
+    const isNoCompanyError = error?.includes('chưa thuộc công ty');
+
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-gray-50 p-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md w-full bg-white p-10 rounded-[40px] border border-gray-100 shadow-2xl shadow-indigo-100 text-center"
+        >
+          <div className="w-20 h-20 rounded-3xl bg-orange-50 flex items-center justify-center text-orange-500 mb-8 mx-auto">
+            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          
+          <h3 className="text-2xl font-black text-gray-900 mb-4">
+            {isNoCompanyError ? 'Thiết lập tài khoản' : 'Không thể tải dữ liệu'}
+          </h3>
+          
+          <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8">
+            {error || 'Đã xảy ra lỗi không xác định khi truy cập hệ thống.'}
+            {isNoCompanyError && <span className="block mt-2">Vui lòng liên hệ quản trị viên để được gán vào một công ty trước khi sử dụng Dashboard.</span>}
+          </p>
+          
+          <div className="flex flex-col gap-3">
+            <motion.button
+              onClick={fetchData}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full py-4 bg-indigo-500 text-white rounded-2xl font-bold text-sm shadow-lg shadow-indigo-200 hover:bg-indigo-600 transition-all"
+            >
+              Thử tải lại trang
+            </motion.button>
+            
+            <button
+              onClick={handleLogout}
+              className="w-full py-4 bg-gray-50 text-gray-500 rounded-2xl font-bold text-sm hover:bg-gray-100 transition-all"
+            >
+              Đăng xuất
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const { stats, chartData, recentApplications, upcomingInterviews, statusOverview, notifications, company, recruiter } = data;
+
   return (
     <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
       {/* Left Sidebar */}
@@ -91,11 +144,15 @@ const Dashboard: React.FC = () => {
         <div className="px-6 py-8">
           {/* Logo Area */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold text-xl shadow-md">
-              S
-            </div>
+            {company.logoUrl ? (
+                <img src={company.logoUrl} alt="logo" className="w-10 h-10 rounded-xl shadow-md object-cover" />
+            ) : (
+                <div className="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                {company.shortName ? company.shortName.charAt(0).toUpperCase() : 'S'}
+                </div>
+            )}
             <div>
-              <h1 className="text-xl font-black tracking-tight text-gray-900 leading-none">SEeds</h1>
+              <h1 className="text-xl font-black tracking-tight text-gray-900 leading-none">{company.shortName || company.name || 'SEeds'}</h1>
               <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mt-1">Enterprise</p>
             </div>
           </div>
@@ -186,7 +243,7 @@ const Dashboard: React.FC = () => {
           <div>
             <h2 className="text-xl font-bold text-gray-900 leading-tight">Tổng quan doanh nghiệp</h2>
             <p className="text-xs font-medium text-gray-500 mt-1">
-              Chào mừng trở lại, {currentUser?.fullName || 'quản trị viên'}
+              Chào mừng trở lại, {recruiter.fullName || currentUser?.fullName || 'quản trị viên'}
             </p>
           </div>
           <div className="flex items-center gap-6">
@@ -196,19 +253,23 @@ const Dashboard: React.FC = () => {
               className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+              {notifications.length > 0 && <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
             </motion.button>
             <div className="flex items-center gap-3 border-l border-gray-200 pl-6">
               <div className="text-right">
                 <p className="text-sm font-bold text-gray-900 leading-none">
-                  {currentUser?.fullName || 'User'}
+                  {recruiter.fullName || currentUser?.fullName || 'User'}
                 </p>
                 <p className="text-[11px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md mt-1 inline-block">
-                  {currentUser?.role || 'HR'}
+                  {recruiter.jobTitle || currentUser?.role || 'HR'}
                 </p>
               </div>
-              <div className="w-11 h-11 rounded-full shadow-sm bg-indigo-500 text-white flex items-center justify-center font-bold text-lg">
-                {currentUser?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+              <div className="w-11 h-11 rounded-full shadow-sm bg-indigo-500 text-white flex items-center justify-center font-bold text-lg overflow-hidden">
+                {recruiter.avatarUrl ? (
+                    <img src={recruiter.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                    (recruiter.fullName || currentUser?.fullName || 'U').charAt(0).toUpperCase()
+                )}
               </div>
             </div>
           </div>
@@ -226,11 +287,11 @@ const Dashboard: React.FC = () => {
                 <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 </div>
-                <span className="bg-emerald-50 text-emerald-500 text-xs font-bold px-2 py-1 rounded-lg">{stats?.candidates.trend}</span>
+                <span className={`text-xs font-bold px-2 py-1 rounded-lg ${stats.candidates.trend.startsWith('+') ? 'bg-emerald-50 text-emerald-500' : 'bg-gray-100 text-gray-500'}`}>{stats.candidates.trend}</span>
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 tracking-wider uppercase mb-1">Ứng viên tiềm năng</p>
-                <h3 className="text-3xl font-black text-gray-900">{stats?.candidates.value.toLocaleString()}</h3>
+                <h3 className="text-3xl font-black text-gray-900">{stats.candidates.value.toLocaleString()}</h3>
               </div>
             </motion.div>
 
@@ -244,7 +305,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 tracking-wider uppercase mb-1">Vị trí</p>
-                <h3 className="text-3xl font-black text-gray-900">{stats?.positions.value}</h3>
+                <h3 className="text-3xl font-black text-gray-900">{stats.positions.value}</h3>
               </div>
             </motion.div>
 
@@ -258,7 +319,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 tracking-wider uppercase mb-1">CV Đã nhận</p>
-                <h3 className="text-3xl font-black text-gray-900">{stats?.cvsReceived.value}</h3>
+                <h3 className="text-3xl font-black text-gray-900">{stats.cvsReceived.value}</h3>
               </div>
             </motion.div>
 
@@ -272,7 +333,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs font-bold text-gray-500 tracking-wider uppercase mb-1">Đã tuyển</p>
-                <h3 className="text-3xl font-black text-gray-900">{stats?.hired.value}</h3>
+                <h3 className="text-3xl font-black text-gray-900">{stats.hired.value}</h3>
               </div>
             </motion.div>
           </div>
@@ -291,7 +352,7 @@ const Dashboard: React.FC = () => {
               {/* Dummy Bar Chart */}
               <div className="flex items-end justify-between h-48 px-4 gap-4">
                 {chartData.map((item, index) => (
-                  <div key={index} className="flex flex-col items-center flex-1">
+                  <div key={index} className="flex flex-col items-center flex-1 h-full justify-end">
                     <div className="flex items-end gap-1 w-full justify-center h-full">
                       <motion.div 
                         initial={{ height: 0 }}
@@ -304,7 +365,7 @@ const Dashboard: React.FC = () => {
                         className="w-2 bg-indigo-500 rounded-t-full"
                       />
                     </div>
-                    <span className={`text-[10px] uppercase mt-3 font-bold ${index === 2 ? 'text-indigo-500' : 'text-gray-400'}`}>
+                    <span className={`text-[10px] uppercase mt-3 font-bold text-gray-400`}>
                       {item.day}
                     </span>
                   </div>
@@ -318,25 +379,20 @@ const Dashboard: React.FC = () => {
                 <h3 className="text-lg font-black text-gray-900 mb-8">Trạng thái hồ sơ</h3>
                 {/* Dummy Donut */}
                 <div className="relative w-40 h-40 rounded-full border-[12px] border-indigo-500 border-r-indigo-200 flex flex-col items-center justify-center">
-                  <span className="text-3xl font-black text-gray-900">1,204</span>
+                  <span className="text-3xl font-black text-gray-900">{statusOverview.total.toLocaleString()}</span>
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Tổng</span>
                 </div>
               </div>
-              <div className="flex flex-col gap-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="w-8 h-2 rounded-full bg-indigo-500"></span>
-                    <span className="text-xs font-bold text-gray-500 uppercase">Đã nộp</span>
-                  </div>
-                  <p className="text-sm font-black text-gray-900 ml-10">782 (65%)</p>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="w-8 h-2 rounded-full bg-indigo-300"></span>
-                    <span className="text-xs font-bold text-gray-500 uppercase">Phỏng vấn</span>
-                  </div>
-                  <p className="text-sm font-black text-gray-900 ml-10">310 (25%)</p>
-                </div>
+              <div className="flex flex-col gap-4">
+                {statusOverview.items.slice(0, 3).map((item, index) => (
+                    <div key={item.key}>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className={`w-8 h-2 rounded-full ${index === 0 ? 'bg-indigo-500' : index === 1 ? 'bg-indigo-300' : 'bg-emerald-400'}`}></span>
+                        <span className="text-xs font-bold text-gray-500 uppercase">{item.label}</span>
+                    </div>
+                    <p className="text-sm font-black text-gray-900 ml-10">{item.count} ({item.percentage}%)</p>
+                    </div>
+                ))}
               </div>
             </div>
           </div>
@@ -358,27 +414,25 @@ const Dashboard: React.FC = () => {
                   <tr className="bg-gray-50/50">
                     <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Ứng viên</th>
                     <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Vị trí</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Người phụ trách</th>
                     <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Ngày nộp</th>
                     <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Trạng thái</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {applications.map((app) => (
+                  {recentApplications.map((app) => (
                     <tr key={app.id} className="hover:bg-gray-50/30 transition-colors">
-                      <td className="px-6 py-4 font-bold text-gray-900 text-sm">{app.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500 font-medium">{app.position}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <img src={app.recruiterAvatar} className="w-6 h-6 rounded-full" alt="" />
-                          <span className="text-xs font-bold text-gray-700">{app.recruiter}</span>
-                        </div>
+                      <td className="px-6 py-4 font-bold text-gray-900 text-sm flex items-center gap-3">
+                        <img src={app.recruiterAvatar} className="w-8 h-8 rounded-full bg-gray-100" alt="" />
+                        {app.name}
                       </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 font-medium">{app.position}</td>
                       <td className="px-6 py-4 text-xs font-bold text-gray-400">{app.date}</td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
                           app.status === 'Review' ? 'bg-indigo-50 text-indigo-500' :
                           app.status === 'Interview' ? 'bg-emerald-50 text-emerald-500' :
+                          app.status === 'Hired' ? 'bg-blue-50 text-blue-500' :
+                          app.status === 'Offered' ? 'bg-purple-50 text-purple-500' :
                           'bg-orange-50 text-orange-500'
                         }`}>
                           {app.status}
@@ -390,7 +444,7 @@ const Dashboard: React.FC = () => {
               </table>
             </div>
             
-            {applications.length === 0 && (
+            {recentApplications.length === 0 && (
               <div className="p-10 text-center text-gray-400 font-medium text-sm">
                 Chưa có dữ liệu ứng viên mới.
               </div>
@@ -406,16 +460,27 @@ const Dashboard: React.FC = () => {
           
           <div className="mb-10">
             <h3 className="text-[10px] font-black text-gray-500 tracking-widest uppercase mb-6">Thông báo</h3>
-            <div className="flex gap-4">
-              <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 flex-shrink-0">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-              </div>
-              <div>
-                <p className="text-sm text-gray-900 leading-snug">
-                  <span className="font-black">Thành Lê</span> <span className="font-medium text-gray-600">nộp CV cho</span> <span className="font-black text-indigo-500">Frontend</span>
-                </p>
-                <p className="text-[10px] font-bold text-gray-400 mt-2">12 phút trước</p>
-              </div>
+            <div className="space-y-6">
+                {notifications.map((notification) => (
+                <div key={notification.id} className="flex gap-4">
+                    <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 flex-shrink-0 overflow-hidden">
+                        {notification.candidate?.avatarUrl ? (
+                            <img src={notification.candidate.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        )}
+                    </div>
+                    <div>
+                    <p className="text-sm text-gray-900 leading-snug">
+                        <span className="font-black">{notification.candidate?.fullName || 'Ứng viên'}</span> <span className="font-medium text-gray-600">nộp CV cho</span> <span className="font-black text-indigo-500">{notification.job?.roleType || notification.job?.title || 'Vị trí'}</span>
+                    </p>
+                    <p className="text-[10px] font-bold text-gray-400 mt-2">{notification.createdAt ? dayjs(notification.createdAt).fromNow() : 'Mới đây'}</p>
+                    </div>
+                </div>
+                ))}
+                {notifications.length === 0 && (
+                    <p className="text-xs text-gray-400 font-medium">Không có thông báo mới.</p>
+                )}
             </div>
           </div>
 
@@ -423,14 +488,14 @@ const Dashboard: React.FC = () => {
             <h3 className="text-[10px] font-black text-gray-500 tracking-widest uppercase mb-6">Phỏng vấn sắp tới</h3>
             
             <div className="space-y-4">
-              {interviews.map((interview) => (
+              {upcomingInterviews.map((interview) => (
                 <motion.div 
                   key={interview.id}
                   whileHover={{ y: -4, scale: 1.02 }}
                   className="bg-gray-50 border border-gray-100 rounded-3xl p-5 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <span className="bg-indigo-500 text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg">
+                    <span className="bg-indigo-500 text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg max-w-[120px] truncate">
                       {interview.tag}
                     </span>
                     <span className="text-[10px] font-bold text-gray-500">{interview.time}</span>
@@ -439,11 +504,14 @@ const Dashboard: React.FC = () => {
                     Phỏng vấn {interview.candidateName}
                   </h4>
                   <div className="flex items-center gap-2">
-                    <img src={interview.interviewerAvatar} alt="Interviewer" className="w-6 h-6 rounded-full object-cover" />
-                    <span className="text-[11px] font-bold text-gray-500">{interview.interviewer}</span>
+                    <img src={interview.interviewerAvatar} alt="Candidate" className="w-6 h-6 rounded-full object-cover" />
+                    <span className="text-[11px] font-bold text-gray-500">{interview.candidateName}</span>
                   </div>
                 </motion.div>
               ))}
+              {upcomingInterviews.length === 0 && (
+                <p className="text-xs text-gray-400 font-medium">Không có lịch phỏng vấn sắp tới.</p>
+              )}
             </div>
           </div>
         </div>
