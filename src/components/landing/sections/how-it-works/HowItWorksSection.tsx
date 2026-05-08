@@ -1,6 +1,6 @@
 import React from 'react';
-import Reveal from './Reveal';
-import '../styles/landing/HowItWorks.css';
+import Reveal from '../../shared/Reveal';
+import './HowItWorksSection.css';
 
 const HowItWorksSection: React.FC = () => {
   const steps = [

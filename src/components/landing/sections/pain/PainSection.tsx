@@ -1,6 +1,6 @@
 import React from 'react';
-import Reveal from './Reveal';
-import '../styles/landing/Pain.css';
+import Reveal from '../../shared/Reveal';
+import './PainSection.css';
 
 const PainSection: React.FC = () => {
   return (

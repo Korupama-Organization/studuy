@@ -1,6 +1,6 @@
 import React from 'react';
-import Reveal from './Reveal';
-import logoImage from '../assets/Logo.png';
+import Reveal from '../../shared/Reveal';
+import logoImage from '../../../../assets/Logo.png';
 import './FooterSection.css';
 
 const FooterSection: React.FC = () => {

@@ -1,4 +1,5 @@
 import React, { CSSProperties, ElementType, HTMLAttributes } from 'react';
+import './Reveal.css';
 
 type RevealVariant = 'up' | 'left' | 'right' | 'scale';
 

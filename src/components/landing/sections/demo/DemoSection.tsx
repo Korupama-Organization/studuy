@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Reveal from './Reveal';
-import '../styles/landing/Experience.css';
+import Reveal from '../../shared/Reveal';
+import './DemoSection.css';
 
 const DemoSection: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,8 +14,8 @@ const DemoSection: React.FC = () => {
     }
 
     if (!('IntersectionObserver' in window)) {
-      const fallbackTimer = window.setTimeout(() => setIsPlaying(true), 0);
-      return () => window.clearTimeout(fallbackTimer);
+      const fallbackTimer = setTimeout(() => setIsPlaying(true), 0);
+      return () => clearTimeout(fallbackTimer);
     }
 
     const observer = new IntersectionObserver(

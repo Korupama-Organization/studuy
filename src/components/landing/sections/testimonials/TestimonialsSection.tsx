@@ -1,5 +1,5 @@
 import React from 'react';
-import Reveal from './Reveal';
+import Reveal from '../../shared/Reveal';
 
 const TestimonialsSection: React.FC = () => (
   <section className="py-24 bg-gradient-to-b from-[#E484EB]/10 to-white/50 overflow-hidden w-full min-h-full flex flex-col justify-center">

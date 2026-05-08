@@ -1,5 +1,5 @@
 import React from 'react';
-import Reveal from './Reveal';
+import Reveal from '../../shared/Reveal';
 import './CTASection.css';
 
 const CTASection: React.FC = () => {

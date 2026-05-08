@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Reveal from './Reveal';
-import logoImage from '../assets/Logo.png';
+import Reveal from '../../shared/Reveal';
+import logoImage from '../../../../assets/Logo.png';
 import './FAQSection.css';
 
 interface FAQ {

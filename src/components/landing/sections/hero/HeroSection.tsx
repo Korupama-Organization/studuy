@@ -1,6 +1,6 @@
 import React from 'react';
-import Reveal from './Reveal';
-import '../styles/landing/Hero.css';
+import Reveal from '../../shared/Reveal';
+import './HeroSection.css';
 
 const HeroSection: React.FC = () => {
   return (
