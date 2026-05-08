@@ -1,0 +1,126 @@
+import { useState } from "react";
+import UpdateJobModal from "./UpdateJobModal";
+import type { SaveJobPayload } from "../Index";
+
+interface JobRow {
+  id: string;
+  slug: string;
+  title: string;
+  salary: string;
+  createdAt: string;
+  createdBy: string;
+  status: string;
+}
+
+interface JobsTableProps {
+  jobs: JobRow[];
+  isLoading: boolean;
+  onUpdateJob: (id: string, payload: SaveJobPayload) => Promise<void>;
+  onDeleteJob: (id: string) => Promise<void>;
+}
+
+export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }: JobsTableProps) {
+  const [selectedJob, setSelectedJob] = useState<JobRow | null>(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const handleJobClick = (job: JobRow) => {
+    setSelectedJob(job);
+    setIsUpdateModalOpen(true);
+  };
+
+  if (isLoading) {
+    return <p className="text-sm text-slate-500">Dang tai jobs...</p>;
+  }
+
+  if (!jobs.length) {
+    return <p className="text-sm text-slate-500">Khong co job nao.</p>;
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="hidden flex-col gap-4 lg:flex">
+        {jobs.map((job) => (
+          <div
+            key={job.slug || job.id}
+            onClick={() => handleJobClick(job)}
+            className="grid grid-cols-6 items-start gap-4 rounded-2xl border border-slate-100 bg-white px-6 py-4 text-sm shadow-sm transition hover:shadow-md cursor-pointer hover:border-slate-200"
+            style={{ gridTemplateColumns: "100px 1.7fr 1fr 1fr 1fr 120px" }}>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Job ID</p>
+              <p className="mt-1 font-semibold text-slate-900">{job.slug || job.id}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Job Title</p>
+              <p className="mt-1 text-slate-700">{job.title}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Salary</p>
+              <p className="mt-1 text-slate-700">{job.salary}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Created At</p>
+              <p className="mt-1 text-slate-700">{job.createdAt}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Created By</p>
+              <p className="mt-1 text-slate-700">{job.createdBy}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Status</p>
+              <span className="mt-1 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-600">
+                {job.status}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="lg:hidden flex flex-col gap-4">
+        {jobs.map((job) => (
+          <div
+            key={job.slug || job.id}
+            onClick={() => handleJobClick(job)}
+            className="border border-slate-100 rounded-xl p-4 space-y-3 bg-white shadow-sm cursor-pointer transition hover:shadow-md hover:border-slate-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs text-slate-400 font-semibold uppercase">Job ID</p>
+                <p className="font-semibold text-slate-900">{job.slug || job.id}</p>
+              </div>
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-600">
+                {job.status}
+              </span>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 font-semibold uppercase">Job title</p>
+              <p className="text-slate-700">{job.title}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-xs text-slate-400 font-semibold uppercase">Salary</p>
+                <p className="text-slate-700">{job.salary}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400 font-semibold uppercase">Created At</p>
+                <p className="text-slate-700">{job.createdAt}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="text-xs text-slate-400 font-semibold uppercase">Created By</p>
+                <p className="text-slate-700">{job.createdBy}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <UpdateJobModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        job={selectedJob || undefined}
+        onUpdate={onUpdateJob}
+        onDelete={onDeleteJob}
+      />
+    </div>
+  );
+}

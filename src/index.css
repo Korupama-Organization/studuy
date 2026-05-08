@@ -11,13 +11,14 @@
 }
 
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  font-family: "Inter", sans-serif;
 }
 
 /* Custom styles from the provided code */
@@ -87,4 +88,4 @@ html {
     gap: 1rem !important;
     margin-bottom: 0 !important;
   }
-}
+}
