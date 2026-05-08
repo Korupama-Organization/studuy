@@ -9,7 +9,6 @@ interface MobileFormScreenProps {
     onIdentifierChange: (value: string) => void;
     onPasswordChange: (value: string) => void;
     onSubmit: (event: React.FormEvent) => void;
-    onBack: () => void;
 }
 
 export default function MobileFormScreen({
@@ -20,7 +19,6 @@ export default function MobileFormScreen({
     onIdentifierChange,
     onPasswordChange,
     onSubmit,
-    onBack,
 }: MobileFormScreenProps) {
     return (
         <div className="w-full h-full bg-gradient-to-b from-[#2F3FB8] via-[#4C45CC] to-[#7E50E8] p-0 flex flex-col">

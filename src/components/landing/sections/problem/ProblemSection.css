@@ -1,0 +1,212 @@
+/* ── Problem Section ────────────────────────────────────── */
+.problem-section {
+  min-height: calc(100vh - 80px);
+  padding: 96px 24px;
+  background: #fff;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.problem-bg-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  z-index: 0;
+}
+
+.problem-orb-1 {
+  position: absolute;
+  width: 384px;
+  height: 384px;
+  border-radius: 50%;
+  background: #4D55CC;
+  filter: blur(80px);
+  left: 10%;
+  top: 20%;
+}
+
+.problem-orb-2 {
+  position: absolute;
+  width: 384px;
+  height: 384px;
+  border-radius: 50%;
+  background: #E484EB;
+  filter: blur(80px);
+  right: 10%;
+  bottom: 20%;
+}
+
+.problem-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Left side: Illustration ────────────────────────────── */
+.problem-visual {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.problem-card-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 580px;
+  z-index: 2;
+}
+
+.problem-card {
+  background: #1e2939;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.problem-card-inner {
+  background: #fff;
+  border-radius: 12px;
+  min-height: 300px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* AI Prompt */
+.problem-ai-msg {
+  background: #f3f4f6;
+  border: 1.25px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.problem-ai-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4d55cc 0%, #8b4cff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.problem-ai-text {
+  color: #101828;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+/* Character & Emojis */
+.problem-character-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.problem-emoji-main {
+  font-size: 80px;
+  line-height: 1;
+}
+
+.problem-confused-img {
+  width: 300px;
+  height: auto;
+  position: absolute;
+  bottom: -40px;
+  right: -20px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Floating bubbles */
+.problem-bubble {
+  position: absolute;
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: #fef9c2;
+  border: 1.5px solid #ffdf20;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  color: #364153;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 4;
+}
+
+.bubble-1 {
+  top: 220px;
+  left: -20px;
+  transform: rotate(-5deg);
+}
+
+.bubble-2 {
+  top: 80px;
+  right: -10px;
+  transform: rotate(5deg);
+}
+
+/* ── Right side: Content ────────────────────────────────── */
+.problem-content {
+  flex: 1;
+}
+
+.problem-heading {
+  font-size: clamp(40px, 4vw, 64px);
+  font-weight: 700;
+  color: #101828;
+  line-height: 1.2;
+  margin-bottom: 32px;
+}
+
+.problem-description {
+  font-size: clamp(18px, 2vw, 24px);
+  color: #4a5565;
+  line-height: 1.6;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .problem-container {
+    flex-direction: column;
+    gap: 64px;
+    text-align: center;
+  }
+  
+  .problem-heading {
+    font-size: 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  .problem-section {
+    padding: 80px 20px;
+  }
+  
+  .problem-heading {
+    font-size: 36px;
+  }
+  
+  .problem-confused-img {
+    width: 200px;
+  }
+}

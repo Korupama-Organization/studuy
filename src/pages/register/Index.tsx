@@ -65,7 +65,7 @@ export default function RegisterPage() {
         await checkHrEmailAvailability(email);
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (): Promise<string | null> => {
         const normalizedFullName = fullName.trim();
         const normalizedIdentifier = identifier.trim();
         const normalizedPassword = password.trim();
@@ -79,18 +79,21 @@ export default function RegisterPage() {
         setErrorMessage('');
 
         if (!normalizedFullName || !normalizedIdentifier || !normalizedPassword || !normalizedConfirmPassword) {
-            setErrorMessage('Please enter full name, email, password, and confirm password.');
-            return;
+            const message = 'Please enter full name, email, password, and confirm password.';
+            setErrorMessage(message);
+            return message;
         }
 
         if (normalizedPassword !== normalizedConfirmPassword) {
-            setErrorMessage('Mật khẩu xác nhận không khớp.');
-            return;
+            const message = 'Mật khẩu xác nhận không khớp.';
+            setErrorMessage(message);
+            return message;
         }
 
         if (!normalizedIdentifier.includes('@')) {
-            setErrorMessage('Email không hợp lệ.');
-            return;
+            const message = 'Email không hợp lệ.';
+            setErrorMessage(message);
+            return message;
         }
 
         try {
@@ -113,13 +116,14 @@ export default function RegisterPage() {
                     identifier: normalizedIdentifier,
                 },
             });
+            return null;
         } catch (error) {
             const fallbackMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
-            setErrorMessage(
-                error instanceof Error && error.message.trim()
-                    ? error.message
-                    : fallbackMessage,
-            );
+            const message = error instanceof Error && error.message.trim()
+                ? error.message
+                : fallbackMessage;
+            setErrorMessage(message);
+            return message;
         } finally {
             setIsSubmitting(false);
         }

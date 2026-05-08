@@ -4,6 +4,7 @@ import type { SaveJobPayload } from "../Index";
 
 interface JobRow {
   id: string;
+  slug: string;
   title: string;
   salary: string;
   createdAt: string;

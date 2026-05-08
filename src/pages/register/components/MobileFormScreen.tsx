@@ -27,7 +27,7 @@ interface MobileFormScreenProps {
     onGithubUrlChange: (value: string) => void;
     onFacebookUrlChange: (value: string) => void;
     onCheckEmailAvailability: (email: string) => Promise<void>;
-    onSubmit: () => void;
+    onSubmit: () => Promise<string | null>;
 }
 
 export default function MobileFormScreen({

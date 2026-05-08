@@ -1,0 +1,49 @@
+[data-reveal] {
+  --reveal-x: 0px;
+  --reveal-y: 18px;
+  --reveal-scale: 1;
+  --reveal-rotate: 0deg;
+  opacity: 0;
+  translate: var(--reveal-x) var(--reveal-y);
+  scale: var(--reveal-scale);
+  rotate: var(--reveal-rotate);
+  transition:
+    opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    rotate 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, translate, scale, rotate;
+}
+
+[data-reveal="left"] {
+  --reveal-x: -24px;
+  --reveal-y: 0px;
+}
+
+[data-reveal="right"] {
+  --reveal-x: 24px;
+  --reveal-y: 0px;
+}
+
+[data-reveal="scale"] {
+  --reveal-y: 12px;
+  --reveal-scale: 0.985;
+}
+
+[data-reveal].is-visible {
+  --reveal-x: 0px;
+  --reveal-y: 0px;
+  --reveal-scale: 1;
+  opacity: 1;
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
