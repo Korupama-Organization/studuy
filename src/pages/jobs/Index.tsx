@@ -9,6 +9,8 @@ interface JobRow {
   slug: string;
   title: string;
   summary: string;
+  shortDescription?: string;
+  jobDescription?: string;
   locations: string[];
   workModel: string;
   level: string;
@@ -17,6 +19,8 @@ interface JobRow {
   roleType: string;
   requiredEducation: string;
   minMonthsExperience: number;
+  salary?: string;
+  client?: string;
   createdAt: string;
   createdBy: string;
   status: string;
@@ -30,6 +34,12 @@ export interface SaveJobPayload {
   requiredEducation?: string;
   salary?: string;
   client?: string;
+  workModel?: string;
+  level?: string;
+  jobType?: string;
+  headcount?: number;
+  roleType?: string;
+  minMonthsExperience?: number;
 }
 
 const API_BASE_URL =
@@ -75,9 +85,72 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     (typeof raw.companyName === "string" && raw.companyName) ||
     "-";
 
-  const locations = Array.isArray(basicInfo?.locations)
-    ? (basicInfo.locations as string[])
-    : [];
+  const toStringArray = (value: unknown): string[] => {
+    if (Array.isArray(value)) {
+      return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+    }
+
+    if (typeof value === "string" && value.trim()) {
+      return [value.trim()];
+    }
+
+    return [];
+  };
+
+  const parseNumberValue = (value: unknown): number | null => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      const numericMatch = trimmed.match(/[-+]?[0-9]*\.?[0-9]+/);
+      if (numericMatch) {
+        const parsed = Number(numericMatch[0]);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+    }
+
+    if (typeof value === "object" && value !== null) {
+      const obj = value as Record<string, unknown>;
+      if (typeof obj.$numberInt === "string") {
+        const parsed = Number(obj.$numberInt);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+      if (typeof obj.$numberLong === "string") {
+        const parsed = Number(obj.$numberLong);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+      if (typeof obj.$numberDecimal === "string") {
+        const parsed = Number(obj.$numberDecimal);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const locationsFromBasicInfo = toStringArray(basicInfo?.locations);
+  const locationsFromBasicInfoSingle = toStringArray(basicInfo?.location);
+  const locationsFromRoot = toStringArray(raw.locations);
+  const locationsFromRootSingle = toStringArray(raw.location);
+
+  const locations =
+    locationsFromBasicInfo.length > 0
+      ? locationsFromBasicInfo
+      : locationsFromBasicInfoSingle.length > 0
+        ? locationsFromBasicInfoSingle
+        : locationsFromRoot.length > 0
+          ? locationsFromRoot
+          : locationsFromRootSingle;
 
   const parseDateField = (dateVal: unknown): string => {
     if (!dateVal) return "-";
@@ -108,15 +181,30 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     summary:
       (typeof basicInfo?.summary === "string" && basicInfo.summary) ||
       "",
+    shortDescription:
+      (typeof basicInfo?.shortDescription === "string" && basicInfo.shortDescription) ||
+      undefined,
+    jobDescription:
+      (typeof basicInfo?.jobDescription === "string" && basicInfo.jobDescription) ||
+      undefined,
     locations,
     workModel:
       (typeof basicInfo?.workModel === "string" && basicInfo.workModel) ||
+      (typeof basicInfo?.workmodel === "string" && basicInfo.workmodel) ||
+      (typeof raw.workModel === "string" && raw.workModel) ||
+      (typeof raw.workmodel === "string" && raw.workmodel) ||
       "",
     level:
       (typeof basicInfo?.level === "string" && basicInfo.level) ||
+      (typeof basicInfo?.jobLevel === "string" && basicInfo.jobLevel) ||
+      (typeof raw.level === "string" && raw.level) ||
+      (typeof raw.jobLevel === "string" && raw.jobLevel) ||
       "",
     jobType:
       (typeof basicInfo?.jobType === "string" && basicInfo.jobType) ||
+      (typeof basicInfo?.jobtype === "string" && basicInfo.jobtype) ||
+      (typeof raw.jobType === "string" && raw.jobType) ||
+      (typeof raw.jobtype === "string" && raw.jobtype) ||
       "",
     headcount:
       typeof basicInfo?.headcount === "number"
@@ -125,14 +213,57 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     roleType:
       (typeof basicInfo?.roleType === "string" && basicInfo.roleType) ||
       "",
+    salary:
+      (typeof raw.salary === "string" && raw.salary) ||
+      "",
+    client:
+      (typeof raw.client === "string" && raw.client) ||
+      "",
     requiredEducation:
       (typeof requirements?.requiredEducation === "string" &&
         requirements.requiredEducation) ||
       "",
-    minMonthsExperience:
-      typeof requirements?.minMonthsExperience === "number"
-        ? requirements.minMonthsExperience
-        : 0,
+    minMonthsExperience: (() => {
+      const monthCandidates: unknown[] = [
+        requirements?.minMonthsExperience,
+        requirements?.minimumMonthsExperience,
+        requirements?.monthsExperience,
+        raw.minMonthsExperience,
+        raw.minimumMonthsExperience,
+      ];
+
+      for (const candidate of monthCandidates) {
+        if (typeof candidate === "number" && Number.isFinite(candidate)) {
+          return candidate;
+        }
+        if (typeof candidate === "string" && candidate.trim()) {
+          const parsed = Number(candidate);
+          if (!Number.isNaN(parsed)) {
+            return parsed;
+          }
+        }
+      }
+
+      const yearCandidates: unknown[] = [
+        requirements?.minYearsExperience,
+        requirements?.minimumYearsExperience,
+        raw.minYearsExperience,
+      ];
+
+      for (const candidate of yearCandidates) {
+        if (typeof candidate === "number" && Number.isFinite(candidate)) {
+          return candidate * 12;
+        }
+        if (typeof candidate === "string" && candidate.trim()) {
+          const parsed = Number(candidate);
+          if (!Number.isNaN(parsed)) {
+            return parsed * 12;
+          }
+        }
+      }
+
+      return 0;
+    })(),
     createdAt: parseDateField(raw.createdAt),
     createdBy,
     status: (typeof raw.status === "string" && raw.status) || "Opening",
@@ -246,9 +377,18 @@ export default function JobsPage() {
       shortDescription: flat.shortDescription,
       jobDescription: flat.jobDescription,
       location: flat.location || "",
-      requiredEducation: flat.requiredEducation || "",
+      workModel: flat.workModel || "",
+      level: flat.level || "",
+      jobType: flat.jobType || "",
+      headcount: flat.headcount || 0,
+      roleType: flat.roleType || "",
     },
-    salary: "",
+    requirements: {
+      requiredEducation: flat.requiredEducation || "",
+      minMonthsExperience: flat.minMonthsExperience || 0,
+    },
+    salary: flat.salary || "",
+    client: flat.client || "",
   });
 
   const handleCreateJob = useCallback(

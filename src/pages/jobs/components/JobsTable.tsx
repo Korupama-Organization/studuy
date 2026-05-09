@@ -7,6 +7,8 @@ interface JobRow {
   slug: string;
   title: string;
   summary: string;
+  shortDescription?: string;
+  jobDescription?: string;
   locations: string[];
   workModel: string;
   level: string;
@@ -15,6 +17,8 @@ interface JobRow {
   roleType: string;
   requiredEducation: string;
   minMonthsExperience: number;
+  salary?: string;
+  client?: string;
   createdAt: string;
   createdBy: string;
   status: string;
@@ -106,7 +110,7 @@ export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }:
               </div>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Experience</p>
-                <p className="text-slate-700">{job.minMonthsExperience ? `${job.minMonthsExperience} months` : "-"}</p>
+                <p className="text-slate-700">{job.minMonthsExperience > 0 ? `${job.minMonthsExperience} months` : "0 months"}</p>
               </div>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Created At</p>
@@ -182,7 +186,7 @@ export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }:
             <div className="grid grid-cols-2 gap-2 pt-2">
               <div>
                 <p className="text-[10px] font-semibold uppercase text-slate-400">Experience</p>
-                <p className="text-slate-700 text-xs">{job.minMonthsExperience ? `${job.minMonthsExperience} months` : "-"}</p>
+                <p className="text-slate-700 text-xs">{job.minMonthsExperience > 0 ? `${job.minMonthsExperience} months` : "0 months"}</p>
               </div>
               <div>
                 <p className="text-[10px] font-semibold uppercase text-slate-400">Created At</p>
