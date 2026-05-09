@@ -5,20 +5,22 @@ import type { SaveJobPayload } from "../Index";
 
 interface TopHeaderProps {
   onCreateJob: (payload: SaveJobPayload) => Promise<void>;
+  onSortChange: (sort: "newest" | "oldest") => void;
 }
 
-export default function TopHeader({ onCreateJob }: TopHeaderProps) {
+export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
-  const [sortBy, setSortBy] = useState("Newest");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
 
   const handleApplyFilter = (filters: unknown) => {
     console.log("Applied filters:", filters);
   };
 
-  const handleSortChange = (option: string) => {
+  const handleSortChange = (option: "newest" | "oldest") => {
     setSortBy(option);
+    onSortChange(option);
     setIsSortOpen(false);
   };
 
@@ -67,32 +69,32 @@ export default function TopHeader({ onCreateJob }: TopHeaderProps) {
                 onClick={() => setIsSortOpen(!isSortOpen)}
                 className="flex h-11 items-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition"
                 type="button">
-                {sortBy}
+                {sortBy === "newest" ? "Newest" : "Oldest"}
                 <span className="material-symbols-outlined text-[18px]">expand_more</span>
               </button>
               {isSortOpen && (
                 <div className="absolute right-0 top-12 z-40 w-48 rounded-2xl border border-slate-100 bg-white shadow-lg">
                   <button
-                    onClick={() => handleSortChange("Newest")}
+                    onClick={() => handleSortChange("newest")}
                     className={`flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold transition ${
-                      sortBy === "Newest"
+                      sortBy === "newest"
                         ? "bg-[#EEF0FF] text-[#5B5BF6]"
                         : "text-slate-700 hover:bg-slate-50"
                     }`}>
                     <span className="material-symbols-outlined text-[16px]">
-                      {sortBy === "Newest" ? "check" : ""}
+                      {sortBy === "newest" ? "check" : ""}
                     </span>
                     Newest
                   </button>
                   <button
-                    onClick={() => handleSortChange("Oldest")}
+                    onClick={() => handleSortChange("oldest")}
                     className={`flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold transition ${
-                      sortBy === "Oldest"
+                      sortBy === "oldest"
                         ? "bg-[#EEF0FF] text-[#5B5BF6]"
                         : "text-slate-700 hover:bg-slate-50"
                     }`}>
                     <span className="material-symbols-outlined text-[16px]">
-                      {sortBy === "Oldest" ? "check" : ""}
+                      {sortBy === "oldest" ? "check" : ""}
                     </span>
                     Oldest
                   </button>

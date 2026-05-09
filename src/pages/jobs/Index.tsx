@@ -8,7 +8,19 @@ interface JobRow {
   id: string;
   slug: string;
   title: string;
-  salary: string;
+  summary: string;
+  shortDescription?: string;
+  jobDescription?: string;
+  locations: string[];
+  workModel: string;
+  level: string;
+  jobType: string;
+  headcount: number;
+  roleType: string;
+  requiredEducation: string;
+  minMonthsExperience: number;
+  salary?: string;
+  client?: string;
   createdAt: string;
   createdBy: string;
   status: string;
@@ -22,6 +34,12 @@ export interface SaveJobPayload {
   requiredEducation?: string;
   salary?: string;
   client?: string;
+  workModel?: string;
+  level?: string;
+  jobType?: string;
+  headcount?: number;
+  roleType?: string;
+  minMonthsExperience?: number;
 }
 
 const API_BASE_URL =
@@ -59,14 +77,94 @@ const parseDate = (value: unknown): string => {
 
 const normalizeJob = (raw: Record<string, unknown>): JobRow => {
   const basicInfo = raw.basicInfo as Record<string, unknown> | undefined;
+  const requirements = raw.requirements as Record<string, unknown> | undefined;
   const company = raw.company as Record<string, unknown> | undefined;
 
-  const creator = raw.createdBy as Record<string, unknown> | string | undefined;
   const createdBy =
     (typeof company?.name === "string" && company.name) ||
     (typeof raw.companyName === "string" && raw.companyName) ||
-    (typeof creator === "object" && creator && typeof creator.companyName === "string" && creator.companyName) ||
     "-";
+
+  const toStringArray = (value: unknown): string[] => {
+    if (Array.isArray(value)) {
+      return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+    }
+
+    if (typeof value === "string" && value.trim()) {
+      return [value.trim()];
+    }
+
+    return [];
+  };
+
+  const parseNumberValue = (value: unknown): number | null => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      const numericMatch = trimmed.match(/[-+]?[0-9]*\.?[0-9]+/);
+      if (numericMatch) {
+        const parsed = Number(numericMatch[0]);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+    }
+
+    if (typeof value === "object" && value !== null) {
+      const obj = value as Record<string, unknown>;
+      if (typeof obj.$numberInt === "string") {
+        const parsed = Number(obj.$numberInt);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+      if (typeof obj.$numberLong === "string") {
+        const parsed = Number(obj.$numberLong);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+      if (typeof obj.$numberDecimal === "string") {
+        const parsed = Number(obj.$numberDecimal);
+        if (!Number.isNaN(parsed)) {
+          return parsed;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const locationsFromBasicInfo = toStringArray(basicInfo?.locations);
+  const locationsFromBasicInfoSingle = toStringArray(basicInfo?.location);
+  const locationsFromRoot = toStringArray(raw.locations);
+  const locationsFromRootSingle = toStringArray(raw.location);
+
+  const locations =
+    locationsFromBasicInfo.length > 0
+      ? locationsFromBasicInfo
+      : locationsFromBasicInfoSingle.length > 0
+        ? locationsFromBasicInfoSingle
+        : locationsFromRoot.length > 0
+          ? locationsFromRoot
+          : locationsFromRootSingle;
+
+  const parseDateField = (dateVal: unknown): string => {
+    if (!dateVal) return "-";
+    if (typeof dateVal === "string") {
+      return parseDate(dateVal);
+    }
+    if (typeof dateVal === "object" && dateVal !== null) {
+      const dateObj = dateVal as Record<string, unknown>;
+      if (typeof dateObj.$date === "string") {
+        return parseDate(dateObj.$date);
+      }
+    }
+    return "-";
+  };
 
   return {
     id:
@@ -79,14 +177,94 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
       "",
     title:
       (typeof basicInfo?.title === "string" && basicInfo.title) ||
-      (typeof raw.jobTitle === "string" && raw.jobTitle) ||
-      (typeof raw.title === "string" && raw.title) ||
       "-",
+    summary:
+      (typeof basicInfo?.summary === "string" && basicInfo.summary) ||
+      "",
+    shortDescription:
+      (typeof basicInfo?.shortDescription === "string" && basicInfo.shortDescription) ||
+      undefined,
+    jobDescription:
+      (typeof basicInfo?.jobDescription === "string" && basicInfo.jobDescription) ||
+      undefined,
+    locations,
+    workModel:
+      (typeof basicInfo?.workModel === "string" && basicInfo.workModel) ||
+      (typeof basicInfo?.workmodel === "string" && basicInfo.workmodel) ||
+      (typeof raw.workModel === "string" && raw.workModel) ||
+      (typeof raw.workmodel === "string" && raw.workmodel) ||
+      "",
+    level:
+      (typeof basicInfo?.level === "string" && basicInfo.level) ||
+      (typeof basicInfo?.jobLevel === "string" && basicInfo.jobLevel) ||
+      (typeof raw.level === "string" && raw.level) ||
+      (typeof raw.jobLevel === "string" && raw.jobLevel) ||
+      "",
+    jobType:
+      (typeof basicInfo?.jobType === "string" && basicInfo.jobType) ||
+      (typeof basicInfo?.jobtype === "string" && basicInfo.jobtype) ||
+      (typeof raw.jobType === "string" && raw.jobType) ||
+      (typeof raw.jobtype === "string" && raw.jobtype) ||
+      "",
+    headcount:
+      typeof basicInfo?.headcount === "number"
+        ? basicInfo.headcount
+        : 0,
+    roleType:
+      (typeof basicInfo?.roleType === "string" && basicInfo.roleType) ||
+      "",
     salary:
       (typeof raw.salary === "string" && raw.salary) ||
-      (typeof raw.salaryRange === "string" && raw.salaryRange) ||
-      "-",
-    createdAt: parseDate(raw.createdAt),
+      "",
+    client:
+      (typeof raw.client === "string" && raw.client) ||
+      "",
+    requiredEducation:
+      (typeof requirements?.requiredEducation === "string" &&
+        requirements.requiredEducation) ||
+      "",
+    minMonthsExperience: (() => {
+      const monthCandidates: unknown[] = [
+        requirements?.minMonthsExperience,
+        requirements?.minimumMonthsExperience,
+        requirements?.monthsExperience,
+        raw.minMonthsExperience,
+        raw.minimumMonthsExperience,
+      ];
+
+      for (const candidate of monthCandidates) {
+        if (typeof candidate === "number" && Number.isFinite(candidate)) {
+          return candidate;
+        }
+        if (typeof candidate === "string" && candidate.trim()) {
+          const parsed = Number(candidate);
+          if (!Number.isNaN(parsed)) {
+            return parsed;
+          }
+        }
+      }
+
+      const yearCandidates: unknown[] = [
+        requirements?.minYearsExperience,
+        requirements?.minimumYearsExperience,
+        raw.minYearsExperience,
+      ];
+
+      for (const candidate of yearCandidates) {
+        if (typeof candidate === "number" && Number.isFinite(candidate)) {
+          return candidate * 12;
+        }
+        if (typeof candidate === "string" && candidate.trim()) {
+          const parsed = Number(candidate);
+          if (!Number.isNaN(parsed)) {
+            return parsed * 12;
+          }
+        }
+      }
+
+      return 0;
+    })(),
+    createdAt: parseDateField(raw.createdAt),
     createdBy,
     status: (typeof raw.status === "string" && raw.status) || "Opening",
   };
@@ -142,13 +320,17 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
 
-  const loadJobs = useCallback(async () => {
+  const loadJobs = useCallback(async (sort: "newest" | "oldest" = "newest") => {
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/jobs`, {
+      const url = new URL(`${API_BASE_URL}/api/jobs`);
+      url.searchParams.set("sort", sort);
+
+      const response = await fetch(url.toString(), {
         method: "GET",
         headers: getAuthHeaders(),
       });
@@ -169,8 +351,8 @@ export default function JobsPage() {
   }, []);
 
   useEffect(() => {
-    void loadJobs();
-  }, [loadJobs]);
+    void loadJobs(sortBy);
+  }, [loadJobs, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(jobs.length / PAGE_SIZE));
 
@@ -185,39 +367,67 @@ export default function JobsPage() {
     return jobs.slice(start, start + PAGE_SIZE);
   }, [currentPage, jobs]);
 
+  const handleSortChange = useCallback((newSort: "newest" | "oldest") => {
+    setSortBy(newSort);
+  }, []);
+
+  const toNestedPayload = (flat: SaveJobPayload) => ({
+    basicInfo: {
+      title: flat.jobTitle,
+      shortDescription: flat.shortDescription,
+      jobDescription: flat.jobDescription,
+      location: flat.location || "",
+      workModel: flat.workModel || "",
+      level: flat.level || "",
+      jobType: flat.jobType || "",
+      headcount: flat.headcount || 0,
+      roleType: flat.roleType || "",
+    },
+    requirements: {
+      requiredEducation: flat.requiredEducation || "",
+      minMonthsExperience: flat.minMonthsExperience || 0,
+    },
+    salary: flat.salary || "",
+    client: flat.client || "",
+  });
+
   const handleCreateJob = useCallback(
     async (payload: SaveJobPayload) => {
+      const nestedPayload = toNestedPayload(payload);
+
       const response = await fetch(`${API_BASE_URL}/api/jobs`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify(payload),
+        body: JSON.stringify(nestedPayload),
       });
 
       if (!response.ok) {
         throw new Error(await getResponseErrorMessage(response, "Tao job that bai."));
       }
 
-      await loadJobs();
+      await loadJobs(sortBy);
       setCurrentPage(1);
     },
-    [loadJobs],
+    [loadJobs, sortBy],
   );
 
   const handleUpdateJob = useCallback(
     async (id: string, payload: SaveJobPayload) => {
+      const nestedPayload = toNestedPayload(payload);
+
       const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(payload),
+        body: JSON.stringify(nestedPayload),
       });
 
       if (!response.ok) {
         throw new Error(await getResponseErrorMessage(response, "Cap nhat job that bai."));
       }
 
-      await loadJobs();
+      await loadJobs(sortBy);
     },
-    [loadJobs],
+    [loadJobs, sortBy],
   );
 
   const handleDeleteJob = useCallback(
@@ -247,7 +457,7 @@ export default function JobsPage() {
         <Sidebar />
 
         <main className="flex flex-1 flex-col gap-6">
-          <TopHeader onCreateJob={handleCreateJob} />
+          <TopHeader onCreateJob={handleCreateJob} onSortChange={handleSortChange} />
           {error ? <p className="text-sm text-red-500">{error}</p> : null}
           <JobsTable
             jobs={pagedJobs}

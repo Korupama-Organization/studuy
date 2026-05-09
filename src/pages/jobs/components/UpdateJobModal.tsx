@@ -4,8 +4,21 @@ import type { SaveJobPayload } from "../Index";
 
 interface JobRow {
   id: string;
+  slug: string;
   title: string;
-  salary: string;
+  summary: string;
+  shortDescription?: string;
+  jobDescription?: string;
+  locations: string[];
+  workModel: string;
+  level: string;
+  jobType: string;
+  headcount: number;
+  roleType: string;
+  requiredEducation: string;
+  minMonthsExperience: number;
+  salary?: string;
+  client?: string;
   createdAt: string;
   createdBy: string;
   status: string;
@@ -19,14 +32,62 @@ interface UpdateJobModalProps {
   onDelete: (id: string) => Promise<void>;
 }
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+const WORK_MODEL_OPTIONS: SelectOption[] = [
+  { value: "remote", label: "Remote" },
+  { value: "onsite", label: "On-site" },
+  { value: "hybrid", label: "Hybrid" },
+];
+
+const LEVEL_OPTIONS: SelectOption[] = [
+  { value: "intern", label: "Intern" },
+  { value: "fresher", label: "Fresher" },
+  { value: "junior", label: "Junior" },
+  { value: "middle", label: "Middle" },
+  { value: "senior", label: "Senior" },
+  { value: "lead", label: "Lead" },
+  { value: "manager", label: "Manager" },
+];
+
+const JOB_TYPE_OPTIONS: SelectOption[] = [
+  { value: "fulltime", label: "Full-time" },
+  { value: "parttime", label: "Part-time" },
+  { value: "contract", label: "Contract" },
+  { value: "internship", label: "Internship" },
+  { value: "freelance", label: "Freelance" },
+];
+
+const ROLE_TYPE_OPTIONS: SelectOption[] = [
+  { value: "backend", label: "Backend" },
+  { value: "frontend", label: "Frontend" },
+  { value: "fullstack", label: "Fullstack" },
+  { value: "mobile", label: "Mobile" },
+  { value: "devops", label: "DevOps" },
+  { value: "data", label: "Data" },
+  { value: "design", label: "Design" },
+  { value: "qa", label: "QA" },
+  { value: "pm", label: "PM" },
+  { value: "ba", label: "BA" },
+];
+
 const makeInitialForm = (job?: JobRow): SaveJobPayload => ({
   jobTitle: job?.title || "",
-  jobDescription: "",
-  shortDescription: "",
+  jobDescription: job?.jobDescription || job?.summary || "",
+  shortDescription: job?.shortDescription || job?.summary || "",
+  location: job?.locations?.join(", ") || "",
+  requiredEducation: job?.requiredEducation || "",
   salary: job?.salary || "",
-  client: "",
-  location: "",
-  requiredEducation: "",
+  client: job?.client || "",
+  workModel: job?.workModel || "",
+  level: job?.level || "",
+  jobType: job?.jobType || "",
+  headcount: job?.headcount || 1,
+  roleType: job?.roleType || "",
+  minMonthsExperience: job?.minMonthsExperience || 0,
 });
 
 export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelete }: UpdateJobModalProps) {
@@ -40,7 +101,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
     setError("");
   }, [job]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -169,6 +230,101 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                 onChange={handleInputChange}
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Work Model</label>
+                <select
+                  name="workModel"
+                  value={formData.workModel}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  <option value="">Select work model</option>
+                  {WORK_MODEL_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Level</label>
+                <select
+                  name="level"
+                  value={formData.level}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  <option value="">Select level</option>
+                  {LEVEL_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Job Type</label>
+                <select
+                  name="jobType"
+                  value={formData.jobType}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  <option value="">Select job type</option>
+                  {JOB_TYPE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Role Type</label>
+                <select
+                  name="roleType"
+                  value={formData.roleType}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  <option value="">Select role type</option>
+                  {ROLE_TYPE_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Headcount</label>
+                <input
+                  type="number"
+                  name="headcount"
+                  value={formData.headcount}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    setFormData((prev) => ({
+                      ...prev,
+                      headcount: isNaN(val) ? 0 : val,
+                    }));
+                  }}
+                  min={1}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Min Experience (months)</label>
+                <input
+                  type="number"
+                  name="minMonthsExperience"
+                  value={formData.minMonthsExperience}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10);
+                    setFormData((prev) => ({
+                      ...prev,
+                      minMonthsExperience: isNaN(val) ? 0 : val,
+                    }));
+                  }}
+                  min={0}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                />
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
