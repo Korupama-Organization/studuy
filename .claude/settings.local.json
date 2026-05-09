@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(Get-ChildItem -Recurse -Depth 3 \"D:\\\\CodeProjects\\\\SEeds\\\\SEed\\\\src\")",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }
