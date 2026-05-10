@@ -166,15 +166,18 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     return "-";
   };
 
+  const rawId =
+    (typeof raw._id === "string" && raw._id) ||
+    (typeof raw.id === "string" && raw.id) ||
+    "";
+  const rawSlug =
+    (typeof raw.slug === "string" && raw.slug) ||
+    (typeof raw.jobSlug === "string" && raw.jobSlug) ||
+    "";
+
   return {
-    id:
-      (typeof raw._id === "string" && raw._id) ||
-      (typeof raw.id === "string" && raw.id) ||
-      "N/A",
-    slug:
-      (typeof raw.slug === "string" && raw.slug) ||
-      (typeof raw.jobSlug === "string" && raw.jobSlug) ||
-      "",
+    id: rawId || "N/A",
+    slug: rawId ? `JOB-${rawId.slice(-5).toUpperCase()}` : "",
     title:
       (typeof basicInfo?.title === "string" && basicInfo.title) ||
       "-",
@@ -329,6 +332,7 @@ export default function JobsPage() {
     try {
       const url = new URL(`${API_BASE_URL}/api/jobs`);
       url.searchParams.set("sort", sort);
+      url.searchParams.set("limit", "100");
 
       const response = await fetch(url.toString(), {
         method: "GET",
@@ -374,7 +378,7 @@ export default function JobsPage() {
   const toNestedPayload = (flat: SaveJobPayload) => ({
     basicInfo: {
       title: flat.jobTitle,
-      shortDescription: flat.shortDescription,
+      summary: flat.shortDescription,
       jobDescription: flat.jobDescription,
       location: flat.location || "",
       workModel: flat.workModel || "",
