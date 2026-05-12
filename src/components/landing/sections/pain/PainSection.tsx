@@ -1,8 +1,10 @@
 import React from 'react';
 import Reveal from '../../shared/Reveal';
 import './PainSection.css';
+import { useNavigation } from '../../../../contexts/NavigationContext';
 
 const PainSection: React.FC = () => {
+  const { goToSlide } = useNavigation();
   return (
     <section className="pain-section">
       <div className="pain-bg-orbs">
@@ -29,6 +31,16 @@ const PainSection: React.FC = () => {
           delay={180}
         >
           Không có feedback, không biết cải thiện, và cứ lặp lại sai lầm.
+        </Reveal>
+
+        <Reveal
+          as="button"
+          className="pain-btn"
+          delay={240}
+          onClick={() => goToSlide(4)}
+        >
+          Cách hoạt động
+          <i className="ti ti-arrow-right" style={{ marginLeft: '8px' }}></i>
         </Reveal>
       </div>
     </section>

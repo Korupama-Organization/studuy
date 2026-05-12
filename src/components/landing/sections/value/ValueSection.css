@@ -136,6 +136,28 @@
   font-size: 1.3rem;
 }
 
+.value-footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: #7C5CFC;
+  padding: 16px 32px;
+  border-radius: 100px;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  box-shadow: 0 4px 15px rgba(124, 92, 252, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.value-footer-btn:hover {
+  background: #6D52E5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(124, 92, 252, 0.4);
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .value-grid {

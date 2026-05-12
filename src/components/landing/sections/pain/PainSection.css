@@ -51,6 +51,30 @@
   line-height: 1.6;
 }
 
+.pain-btn {
+  margin-top: 40px;
+  background: #101828;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.2);
+}
+
+.pain-btn:hover {
+  transform: translateY(-2px);
+  background: #3F46B0;
+  box-shadow: 0 10px 25px rgba(63, 70, 176, 0.4);
+}
+
 .pain-bg-orbs {
   position: absolute;
   inset: 0;
