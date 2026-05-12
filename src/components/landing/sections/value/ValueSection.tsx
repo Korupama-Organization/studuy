@@ -5,8 +5,10 @@ import pandaInterview from '../../../../assets/panda_interview.png';
 import pandaSpeech from '../../../../assets/panda_speech.png';
 import Reveal from '../../shared/Reveal';
 import './ValueSection.css';
+import { useNavigation } from '../../../../contexts/NavigationContext';
 
 const ValueSection: React.FC = () => {
+  const { goToSlide } = useNavigation();
   return (
     <section className="value-section">
       <div className="value-container">
@@ -59,10 +61,17 @@ const ValueSection: React.FC = () => {
           </Reveal>
         </div>
 
-        <Reveal className="value-footer-tag" delay={300}>
-          <span className="sparkle-icon">✨</span>
-          Sản phẩm phục vụ cho sinh viên ngành KTPM
-        </Reveal>
+        <div className="value-footer-container" style={{ display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Reveal className="value-footer-tag" delay={300}>
+            <span className="sparkle-icon">✨</span>
+            Sản phẩm phục vụ cho sinh viên ngành KTPM
+          </Reveal>
+          
+          <Reveal as="button" className="value-footer-btn" delay={360} onClick={() => goToSlide(7)}>
+            Vậy còn việc làm?
+            <i className="ti ti-arrow-right" style={{ marginLeft: '8px' }}></i>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
