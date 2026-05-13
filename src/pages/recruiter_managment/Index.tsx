@@ -24,9 +24,16 @@ export interface Recruiter {
 export interface CreateRecruiterPayload {
   fullName: string;
   email: string;
+  password: string;
   phone?: string;
-  role: string;
-  status: "active" | "inactive";
+  linkedinUrl?: string;
+  githubUrl?: string;
+  facebookUrl?: string;
+  avatarUrl?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  jobTitle?: string;
+  membershipRole?: string;
 }
 
 export interface UpdateProfilePayload {
@@ -169,7 +176,12 @@ const normalizeRecruiter = (raw: Record<string, unknown>): Recruiter => ({
       ? nestedContactInfo.facebookUrl
       : undefined;
   })(),
-  role: typeof raw.role === "string" ? raw.role : "recruiter",
+  role: (() => {
+    if (typeof raw.membershipRole === "string") return raw.membershipRole;
+    if (typeof raw.role === "string") return raw.role;
+    const userId = raw.userId as Record<string, unknown> | undefined;
+    return typeof userId?.role === "string" ? userId.role : "recruiter";
+  })(),
   status: raw.status === "inactive" ? "inactive" : "active",
   avatarUrl:
     typeof raw.avatarUrl === "string"
@@ -268,11 +280,14 @@ export default function RecruiterManagementPage() {
 
   const handleCreateRecruiter = useCallback(
     async (payload: CreateRecruiterPayload) => {
-      const response = await fetch(`${API_BASE_URL}/api/company-members`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/company-members/create-member`,
+        {
+          method: "POST",
+          headers: getAuthHeaders(),
+          body: JSON.stringify(payload),
+        },
+      );
       if (!response.ok) {
         throw new Error(
           await getResponseErrorMessage(response, "Tao recruiter that bai."),
