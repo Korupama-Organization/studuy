@@ -1,7 +1,15 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../../../assets/Logo.png";
 import { navItems } from "../data";
 
 export default function Sidebar() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isActive = (label: string) => {
+    const path = label === "Jobs" ? "/jobs" : `/${label.toLowerCase()}`;
+    return location.pathname.startsWith(path);
+  };
   return (
     <aside className="hidden w-[220px] flex-shrink-0 rounded-[24px] border border-slate-100 bg-white px-5 py-6 shadow-[0_10px_30px_rgba(109,120,196,0.1)] lg:block">
       <div className="mb-4 flex items-center gap-3">
@@ -20,8 +28,9 @@ export default function Sidebar() {
         {navItems.map((item) => (
           <button
             key={item.label}
+            onClick={() => navigate(item.label === "Jobs" ? "/jobs" : `/${item.label.toLowerCase()}`)}
             className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-              item.label === "Jobs"
+              isActive(item.label)
                 ? "bg-[#EEF0FF] text-[#5B5BF6] shadow-[0_8px_20px_rgba(91,91,246,0.12)]"
                 : "text-slate-500 hover:bg-slate-100"
             }`}
