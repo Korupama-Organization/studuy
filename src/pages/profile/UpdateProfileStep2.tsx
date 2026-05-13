@@ -10,9 +10,22 @@ const STEPS = [
     { label: "Bước 4", sub: "Mục tiêu sự nghiệp" },
 ];
 
+
+
+const TECH_CATEGORIES = [
+    { key: 'Ngôn ngữ lập trình', label: 'Ngôn ngữ lập trình', placeholder: 'Ví dụ: C#, Python, Java...', addLabel: 'Thêm ngôn ngữ lập trình' },
+    { key: 'Framework', label: 'Frameworks', placeholder: 'Ví dụ: React, Spring Boot...', addLabel: 'Thêm Framework' },
+    { key: 'OS', label: 'Hệ điều hành', placeholder: 'Ví dụ: Linux, Windows...', addLabel: 'Thêm hệ điều hành' },
+    { key: 'Database', label: 'Cơ sở dữ liệu', placeholder: 'Ví dụ: MySQL, MongoDB...', addLabel: 'Thêm cơ sở dữ liệu' },
+    { key: 'Cloud', label: 'Điện toán đám mây', placeholder: 'Ví dụ: AWS, GCP...', addLabel: 'Thêm dịch vụ đám mây' },
+    { key: 'Version Control', label: 'Quản lý phiên bản', placeholder: 'Ví dụ: Git, SVN...', addLabel: 'Thêm công cụ quản lý phiên bản' },
+    { key: 'Công cụ quản lý dự án', label: 'Công cụ quản lý dự án', placeholder: 'Ví dụ: Jira, Trello...', addLabel: 'Thêm công cụ quản lý dự án' },
+];
+
 export default function UpdateProfileStep2() {
     const [activeStep] = useState(1);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [newSoftSkill, setNewSoftSkill] = useState('');
     const navigate = useNavigate();
     const { form, updateField, completion, completionLoading, saveStep2, saving } = useProfileForm();
 
@@ -165,68 +178,31 @@ export default function UpdateProfileStep2() {
                                 <div className="sub-section">
                                     <h3 className="sub-section-title" style={{ borderBottom: '1px solid #E5E7EB', paddingBottom: '8px', marginBottom: '16px' }}>Công nghệ sử dụng</h3>
                                     
-                                    <div className="tech-section-card">
-                                        <label className="field-label" style={{ fontWeight: 600, color: '#101828', marginBottom: '12px', display: 'block' }}>Ngôn ngữ lập trình</label>
-                                        <div className="tech-input-row">
-                                            <input type="text" className="field-input" placeholder="C#" style={{flex: 1, background: '#F3F4F6', border: '1px solid #E5E7EB'}} />
-                                            <input type="text" className="field-input input-short" placeholder="2" style={{background: '#F3F4F6', border: '1px solid #E5E7EB'}} />
-                                            <select className="field-input input-short" style={{width: '120px', border: 'none', background: 'transparent', padding: 0, color: '#374151'}}><option>Tự tin</option></select>
-                                            <button className="btn-icon" style={{ marginLeft: 'auto' }}>
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E7000B" strokeWidth="1.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-                                            </button>
-                                        </div>
-                                        <button className="btn-add-text" style={{ color: '#8B4CFF' }}>+ Thêm ngôn ngữ lập trình</button>
-                                    </div>
-
-                                    <div className="tech-section-card">
-                                        <label className="field-label" style={{ fontWeight: 600, color: '#101828', marginBottom: '12px', display: 'block' }}>Frameworks</label>
-                                        <button className="btn-add-text" style={{ color: '#8B4CFF' }}>+ Thêm Frameworks</button>
-                                    </div>
-
-                                    <div className="tech-section-card">
-                                        <label className="field-label" style={{ fontWeight: 600, color: '#101828', marginBottom: '12px', display: 'block' }}>Hệ điều hành</label>
-                                        <div className="tech-input-row">
-                                            <input type="text" className="field-input" placeholder="Linux" style={{flex: 1, background: '#F3F4F6', border: '1px solid #E5E7EB'}} />
-                                            <input type="text" className="field-input input-short" placeholder="Years" style={{background: '#F3F4F6', border: '1px solid #E5E7EB'}} />
-                                            <select className="field-input input-short" style={{width: '120px', border: 'none', background: 'transparent', padding: 0, color: '#374151'}}><option>Confident</option></select>
-                                            <button className="btn-icon" style={{ marginLeft: 'auto' }}>
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E7000B" strokeWidth="1.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-                                            </button>
-                                        </div>
-                                        <button className="btn-add-text" style={{ color: '#8B4CFF' }}>+ Thêm hệ điều hành</button>
-                                    </div>
-
-                                    <div className="tech-section-card">
-                                        <label className="field-label" style={{ fontWeight: 600, color: '#101828', marginBottom: '12px', display: 'block' }}>Cơ sở dữ liệu</label>
-                                        <button className="btn-add-text" style={{ color: '#8B4CFF' }}>+ Thêm Cơ sở dữ liệu</button>
-                                    </div>
-
-                                    <div className="tech-section-card">
-                                        <label className="field-label" style={{ fontWeight: 600, color: '#101828', marginBottom: '12px', display: 'block' }}>Cloud</label>
-                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                            <input type="text" className="field-input" placeholder="Google Cloud Platform" style={{flex: 1, background: '#FFF'}} />
-                                            <button className="btn-pill btn-pill--purple" style={{ padding: '10px 24px', borderRadius: '8px' }}>Add</button>
-                                            <button className="btn-pill" style={{ padding: '10px 24px', borderRadius: '8px', background: '#E5E7EB', color: '#4B5563', border: 'none' }}>Cancel</button>
-                                        </div>
-                                    </div>
-
-                                    <div className="tech-section-card">
-                                        <label className="field-label" style={{ fontWeight: 600, color: '#101828', marginBottom: '12px', display: 'block' }}>Version Control</label>
-                                        <button className="btn-add-text" style={{ color: '#8B4CFF' }}>+ Add Version Control Tools</button>
-                                    </div>
-
-                                    <div className="tech-section-card">
-                                        <label className="field-label" style={{ fontWeight: 600, color: '#101828', marginBottom: '12px', display: 'block' }}>Công cụ quản lý dự án</label>
-                                        <div className="tech-input-row">
-                                            <input type="text" className="field-input" placeholder="Jira" style={{flex: 1, background: '#F3F4F6', border: '1px solid #E5E7EB'}} />
-                                            <input type="text" className="field-input input-short" placeholder="Years" style={{background: '#F3F4F6', border: '1px solid #E5E7EB'}} />
-                                            <select className="field-input input-short" style={{width: '120px', border: 'none', background: 'transparent', padding: 0, color: '#374151'}}><option>Confident</option></select>
-                                            <button className="btn-icon" style={{ marginLeft: 'auto' }}>
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E7000B" strokeWidth="1.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-                                            </button>
-                                        </div>
-                                        <button className="btn-add-text" style={{ color: '#8B4CFF' }}>+ Add Project Management Tools</button>
-                                    </div>
+                                    {TECH_CATEGORIES.map((cat) => {
+                                        const catSkills = form.technicalSkills.filter(s => s.category === cat.key);
+                                        return (
+                                            <div className="tech-section-card" key={cat.key}>
+                                                <label className="field-label" style={{ fontWeight: 600, color: '#101828', marginBottom: '12px', display: 'block' }}>{cat.label}</label>
+                                                {catSkills.map((skill, idx) => {
+                                                    const globalIdx = form.technicalSkills.indexOf(skill);
+                                                    return (
+                                                        <div className="tech-input-row" key={idx}>
+                                                            <input type="text" className="field-input" placeholder={cat.placeholder} style={{flex: 1, background: '#F3F4F6', border: '1px solid #E5E7EB'}} value={skill.name || ''} onChange={(e) => { const updated = [...form.technicalSkills]; updated[globalIdx] = { ...updated[globalIdx], name: e.target.value }; updateField('technicalSkills', updated); }} />
+                                                            <input type="number" className="field-input input-short" placeholder="Năm" style={{background: '#F3F4F6', border: '1px solid #E5E7EB'}} value={skill.yearsOfExperience || ''} onChange={(e) => { const updated = [...form.technicalSkills]; updated[globalIdx] = { ...updated[globalIdx], yearsOfExperience: parseInt(e.target.value) || 0 }; updateField('technicalSkills', updated); }} />
+                                                            <select className="field-input" style={{width: '140px', border: '1px solid #E5E7EB', background: '#F3F4F6', color: '#374151'}} value={skill.confidence ? 'true' : 'false'} onChange={(e) => { const updated = [...form.technicalSkills]; updated[globalIdx] = { ...updated[globalIdx], confidence: e.target.value === 'true' }; updateField('technicalSkills', updated); }}>
+                                                                <option value="true">Tự tin</option>
+                                                                <option value="false">Không tự tin</option>
+                                                            </select>
+                                                            <button className="btn-icon btn-delete-icon" onClick={() => { const updated = form.technicalSkills.filter((_, i) => i !== globalIdx); updateField('technicalSkills', updated); }}>
+                                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
+                                                            </button>
+                                                        </div>
+                                                    );
+                                                })}
+                                                <button className="btn-add-text" style={{ color: '#8B4CFF' }} onClick={() => { const newSkill = { category: cat.key, name: '', yearsOfExperience: 0, confidence: true }; updateField('technicalSkills', [...form.technicalSkills, newSkill]); }}>+ {cat.addLabel}</button>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                                     
                                 {/* Kỹ năng mềm */}
@@ -234,17 +210,25 @@ export default function UpdateProfileStep2() {
                                     <h3 className="sub-section-title" style={{ borderBottom: '1px solid #E5E7EB', paddingBottom: '8px', marginBottom: '16px' }}>Kỹ năng mềm</h3>
                                     
                                     <div className="tags-container" style={{ marginTop: '8px' }}>
-                                        <span className="tag tag--active">Communication <span style={{marginLeft: '4px', cursor: 'pointer'}}>×</span></span>
-                                        <span className="tag tag--active">Critical Thinking <span style={{marginLeft: '4px', cursor: 'pointer'}}>×</span></span>
-                                        <span className="tag tag--active">Problem Solving <span style={{marginLeft: '4px', cursor: 'pointer'}}>×</span></span>
+                                        {form.softSkills.map((skill, idx) => (
+                                            <span key={idx} className="tag tag--active">{skill} <span style={{marginLeft: '4px', cursor: 'pointer'}} onClick={() => { const updated = form.softSkills.filter((_, i) => i !== idx); updateField('softSkills', updated); }}>×</span></span>
+                                        ))}
                                     </div>
-                                    <p className="field-hint" style={{marginTop:'12px', marginBottom: '8px'}}>Suggested skills:</p>
+
+                                    {/* Custom soft skill input */}
+                                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                                        <input type="text" className="field-input" placeholder="Nhập kỹ năng mềm..." style={{ flex: 1 }} value={newSoftSkill} onChange={(e) => setNewSoftSkill(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && newSoftSkill.trim()) { if (!form.softSkills.includes(newSoftSkill.trim())) { updateField('softSkills', [...form.softSkills, newSoftSkill.trim()]); } setNewSoftSkill(''); } }} />
+                                        <button className="btn-add-solid" onClick={() => { if (newSoftSkill.trim() && !form.softSkills.includes(newSoftSkill.trim())) { updateField('softSkills', [...form.softSkills, newSoftSkill.trim()]); setNewSoftSkill(''); } }}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg>
+                                            Thêm kỹ năng mềm
+                                        </button>
+                                    </div>
+
+                                    <p className="field-hint" style={{marginTop:'12px', marginBottom: '8px'}}>Kỹ năng gợi ý:</p>
                                     <div className="tags-container">
-                                        <span className="tag">+ Teamwork</span>
-                                        <span className="tag">+ Time Management</span>
-                                        <span className="tag">+ Leadership</span>
-                                        <span className="tag">+ Adaptability</span>
-                                        <span className="tag">+ Creativity</span>
+                                        {['Làm việc nhóm', 'Quản lý thời gian', 'Lãnh đạo', 'Thích ứng', 'Sáng tạo', 'Giao tiếp', 'Tư duy phản biện', 'Giải quyết vấn đề'].filter(s => !form.softSkills.includes(s)).map(s => (
+                                            <span key={s} className="tag" onClick={() => updateField('softSkills', [...form.softSkills, s])}>+ {s}</span>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -252,38 +236,44 @@ export default function UpdateProfileStep2() {
                                 <div className="sub-section certificate-section">
                                     <div className="sub-section-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                                         <h3 className="sub-section-title">Chứng chỉ ngoại ngữ</h3>
-                                        <button className="btn-add-solid">
+                                        <button className="btn-add-solid" onClick={() => { updateField('languages', [...form.languages, { certificateName: '', score: 0, issuedAt: '', expiresAt: '' }]); }}>
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg>
                                             Thêm chứng chỉ
                                         </button>
                                     </div>
 
-                                    <div className="certificate-card">
-                                        <div className="certificate-card-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
-                                            <h4 className="certificate-title" style={{margin:0,fontSize:'14px',fontWeight:600}}>Chứng chỉ 1</h4>
-                                            <button className="btn-icon">
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E7000B" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-                                            </button>
+                                    {form.languages.length === 0 && (
+                                        <p className="field-hint" style={{ textAlign: 'center', padding: '1.5rem', color: '#9CA3AF' }}>Chưa có chứng chỉ nào. Bấm "Thêm chứng chỉ" để thêm.</p>
+                                    )}
+
+                                    {form.languages.map((lang, idx) => (
+                                        <div className="certificate-card" key={idx}>
+                                            <div className="certificate-card-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
+                                                <h4 className="certificate-title" style={{margin:0,fontSize:'14px',fontWeight:600}}>Chứng chỉ {idx + 1}</h4>
+                                                <button className="btn-icon btn-delete-icon" onClick={() => { const updated = form.languages.filter((_, i) => i !== idx); updateField('languages', updated); }}>
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
+                                                </button>
+                                            </div>
+                                            <div className="form-grid">
+                                                <div className="form-field">
+                                                    <label className="field-label">Tên chứng chỉ</label>
+                                                    <input type="text" className="field-input" placeholder="IELTS" value={lang.certificateName} onChange={(e) => { const updated = [...form.languages]; updated[idx] = { ...updated[idx], certificateName: e.target.value }; updateField('languages', updated); }} />
+                                                </div>
+                                                <div className="form-field">
+                                                    <label className="field-label">Điểm</label>
+                                                    <input type="number" step="0.1" className="field-input" placeholder="7.0" value={lang.score || ''} onChange={(e) => { const updated = [...form.languages]; updated[idx] = { ...updated[idx], score: parseFloat(e.target.value) || 0 }; updateField('languages', updated); }} />
+                                                </div>
+                                                <div className="form-field">
+                                                    <label className="field-label">Ngày cấp</label>
+                                                    <input type="date" className="field-input" value={lang.issuedAt} onChange={(e) => { const updated = [...form.languages]; updated[idx] = { ...updated[idx], issuedAt: e.target.value }; updateField('languages', updated); }} />
+                                                </div>
+                                                <div className="form-field">
+                                                    <label className="field-label">Ngày hết hạn</label>
+                                                    <input type="date" className="field-input" value={lang.expiresAt} onChange={(e) => { const updated = [...form.languages]; updated[idx] = { ...updated[idx], expiresAt: e.target.value }; updateField('languages', updated); }} />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="form-grid">
-                                            <div className="form-field">
-                                                <label className="field-label">Tên chứng chỉ</label>
-                                                <input type="text" className="field-input" placeholder="IELTS" />
-                                            </div>
-                                            <div className="form-field">
-                                                <label className="field-label">Điểm</label>
-                                                <input type="text" className="field-input" placeholder="7.0" />
-                                            </div>
-                                            <div className="form-field">
-                                                <label className="field-label">Ngày cấp (Tháng, Năm)</label>
-                                                <input type="date" className="field-input" />
-                                            </div>
-                                            <div className="form-field">
-                                                <label className="field-label">Ngày hết hạn (Tháng, Năm)</label>
-                                                <input type="date" className="field-input" />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    ))}
                                 </div>
 
                                 {/* Action Buttons */}
@@ -697,6 +687,8 @@ export default function UpdateProfileStep2() {
                 .input-short { width: 100px; flex-shrink: 0; }
                 .btn-icon { background: none; border: none; cursor: pointer; color: #6A7282; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; }
                 .btn-icon:hover { background: #F3F4F6; }
+                .btn-delete-icon { color: #9CA3AF; transition: color 0.2s; }
+                .btn-delete-icon:hover { color: #E7000B; background: #FEF2F2; }
                 .btn-add-text { background: none; border: none; color: #6D52E5; font-size: 14px; font-weight: 500; cursor: pointer; padding: 0; margin-top: 8px; text-align: left; }
                 .btn-add-text:hover { text-decoration: underline; }
                 .btn-add-solid { display: flex; align-items: center; gap: 6px; background: #6D52E5; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 14px; font-weight: 500; cursor: pointer; }

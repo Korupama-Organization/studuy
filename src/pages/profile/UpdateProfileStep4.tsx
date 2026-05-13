@@ -14,7 +14,16 @@ export default function UpdateProfileStep4() {
     const [activeStep] = useState(3);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const navigate = useNavigate();
-    const { form, updateField, completion, completionLoading, saveAllSteps, saving } = useProfileForm();
+    const { form, updateField, completion, completionLoading, saveStep4, saveAllSteps, saving, saveError, saveSuccess } = useProfileForm();
+    const [showToast, setShowToast] = useState(false);
+
+    useEffect(() => {
+        if (saveSuccess) {
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [saveSuccess]);
 
     const progress = completion?.completionPercentage ?? 0;
 
@@ -24,6 +33,29 @@ export default function UpdateProfileStep4() {
 
     return (
         <div className="profile-page">
+            {/* Success Toast */}
+            {showToast && (
+                <div style={{
+                    position: 'fixed',
+                    top: '24px',
+                    right: '24px',
+                    backgroundColor: '#10B981',
+                    color: 'white',
+                    padding: '12px 20px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    zIndex: 9999,
+                    animation: 'slideIn 0.3s ease-out'
+                }}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span style={{ fontWeight: 500 }}>{saveSuccess || 'Hồ sơ đã được nộp thành công!'}</span>
+                </div>
+            )}
             {/* Header */}
             <header className="profile-header">
                 <div className="header-container">
@@ -139,7 +171,20 @@ export default function UpdateProfileStep4() {
                                     <div className="form-grid" style={{ gap: '1.25rem' }}>
                                         <div className="form-field form-field--full">
                                             <label className="field-label">Vị trí mong muốn <span className="required-star">*</span></label>
-                                            <input type="text" className="field-input" placeholder="VD: Frontend Developer" value={form.introductionQuestions.preferredRoles[0]?.preferredRole || ''} onChange={(e) => updateField('introductionQuestions', { ...form.introductionQuestions, preferredRoles: [{ preferredRole: e.target.value }] })} />
+                                            <select 
+                                                className="field-input" 
+                                                value={form.introductionQuestions.preferredRoles[0]?.preferredRole || ''} 
+                                                onChange={(e) => updateField('introductionQuestions', { ...form.introductionQuestions, preferredRoles: [{ preferredRole: e.target.value }] })}
+                                            >
+                                                <option value="" disabled>Chọn vị trí mong muốn</option>
+                                                <option value="Frontend">Frontend</option>
+                                                <option value="Backend">Backend</option>
+                                                <option value="Fullstack">Fullstack</option>
+                                                <option value="Mobile">Mobile</option>
+                                                <option value="DevOps">DevOps</option>
+                                                <option value="QA">QA</option>
+                                                <option value="Khác">Khác</option>
+                                            </select>
                                             <p className="field-hint">Điều này giúp chúng tôi đề xuất các cơ hội phù hợp</p>
                                         </div>
                                         <div className="form-field form-field--full">
@@ -148,7 +193,7 @@ export default function UpdateProfileStep4() {
                                             <p className="field-hint">Hãy cụ thể nhất có thể về mục tiêu của bạn (tối thiểu 50 ký tự)</p>
                                         </div>
                                         <div className="form-field form-field--full">
-                                            <label className="field-label">Mục tiêu nghề nghiệp</label>
+                                            <label className="field-label">Mục tiêu nghề nghiệp <span className="required-star">*</span></label>
                                             <textarea className="field-input" style={{ height: '100px', paddingTop: '12px', resize: 'vertical' }} placeholder="Bạn thấy mình ở đâu trong 3-5 năm tới? Nguyện vọng nghề nghiệp của bạn là gì?" value={form.introductionQuestions.futureGoals} onChange={(e) => updateField('introductionQuestions', { ...form.introductionQuestions, futureGoals: e.target.value })}></textarea>
                                             <p className="field-hint">Bao gồm tầm nhìn dài hạn và các cột mốc bạn muốn đạt được</p>
                                         </div>
@@ -232,6 +277,20 @@ export default function UpdateProfileStep4() {
                                         </li>
                                     </ul>
                                 </div>
+                                
+                                {saveError && (
+                                    <div style={{ 
+                                        marginTop: '1.5rem', 
+                                        padding: '1rem', 
+                                        background: '#FEF2F2', 
+                                        border: '1px solid #FCA5A5', 
+                                        borderRadius: '8px', 
+                                        color: '#B91C1C',
+                                        fontSize: '14px'
+                                    }}>
+                                        <strong>Lỗi:</strong> {saveError}
+                                    </div>
+                                )}
 
                                 <div className="form-actions" style={{ paddingTop: '1.5rem', marginTop: '2rem', borderTop: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <button className="btn-back" onClick={() => navigate('/profile/update/step3')}>
@@ -241,11 +300,14 @@ export default function UpdateProfileStep4() {
                                         Quay lại
                                     </button>
                                     <div className="form-actions-right">
-                                        <button className="btn-save" onClick={saveAllSteps} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu nháp'}</button>
+                                        <button className="btn-save" onClick={saveStep4} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu nháp'}</button>
                                         <button className="btn-next btn-submit" style={{ background: '#d946ef' }} disabled={saving} onClick={async () => {
                                             const success = await saveAllSteps();
                                             if (success) {
-                                                navigate('/candidate-dashboard'); // Redirect to dashboard or success page later
+                                                // Wait 2 seconds for user to see the success toast before redirecting
+                                                setTimeout(() => {
+                                                    navigate('/dashboard'); 
+                                                }, 2000);
                                             }
                                         }}>
                                             Nộp hồ sơ
@@ -738,6 +800,11 @@ export default function UpdateProfileStep4() {
                 .tips-item { display: flex; gap: 8px; align-items: flex-start; }
                 .tips-bullet { color: #AD46FF; font-size: 14px; flex-shrink: 0; line-height: 20px; }
                 .tips-text { font-size: 14px; color: #364153; line-height: 20px; }
+
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
             `}</style>
         </div>
     );

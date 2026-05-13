@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import {
+    getCandidateProfile,
     getProfileCompletion,
     updateCandidateProfile,
     type CandidateProfileData,
@@ -16,7 +17,7 @@ import {
     type WorkExperienceResponse,
     type IntroductionQuestions,
 } from '../../services/candidateProfile';
-import { hasValidStoredAccessToken } from '../../services/auth';
+import { hasValidStoredAccessToken, refreshAuthSession } from '../../services/auth';
 
 // ── Form state types ──
 
@@ -110,8 +111,10 @@ export interface ProfileFormContextValue {
     saveStep3: () => Promise<boolean>;
     saveStep4: () => Promise<boolean>;
     saveAllSteps: () => Promise<boolean>;
+    saveDraft: (step?: number) => Promise<boolean>;
 
     profileLoaded: boolean;
+    profileLoading: boolean;
     isAuthenticated: boolean;
     profileData: CandidateProfileData | null;
 }
@@ -133,8 +136,8 @@ const populateFormFromProfile = (profile: CandidateProfileData): Partial<Profile
         skillId: ts.skillId,
         category: ts.skill?.category || 'Khác',
         name: ts.skill?.name || '',
-        yearsOfExperience: ts.yearsOfExperience,
-        confidence: ts.confidence,
+        yearsOfExperience: ts.yearsOfExperience || 0,
+        confidence: typeof ts.confidence === 'boolean' ? ts.confidence : true,
     }));
 
     const projectsPayload: ProjectPayload[] = (profile.projects || []).map((p) => ({
@@ -192,7 +195,9 @@ export const ProfileFormProvider = ({ children }: { children: ReactNode }) => {
     const [saveError, setSaveError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
     const [profileLoaded, setProfileLoaded] = useState(false);
+    const [profileLoading, setProfileLoading] = useState(false);
     const [profileData, setProfileData] = useState<CandidateProfileData | null>(null);
+    const fetchedRef = useRef(false);
     const isAuthenticated = hasValidStoredAccessToken();
 
     // Load user info from localStorage
@@ -223,7 +228,12 @@ export const ProfileFormProvider = ({ children }: { children: ReactNode }) => {
 
     // Fetch profile completion on mount
     const refreshCompletion = useCallback(async () => {
-        if (!isAuthenticated) return;
+        let validToken = hasValidStoredAccessToken();
+        if (!validToken) {
+            validToken = await refreshAuthSession();
+        }
+        if (!validToken) return;
+        
         setCompletionLoading(true);
         try {
             const result = await getProfileCompletion();
@@ -233,15 +243,49 @@ export const ProfileFormProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setCompletionLoading(false);
         }
-    }, [isAuthenticated]);
+    }, []);
+
+    // Fetch existing profile data on mount to hydrate form
+    const fetchProfile = useCallback(async () => {
+        let validToken = hasValidStoredAccessToken();
+        if (!validToken) {
+            validToken = await refreshAuthSession();
+        }
+        if (!validToken) return;
+
+        setProfileLoading(true);
+        try {
+            const result = await getCandidateProfile();
+            if (result.data) {
+                setProfileData(result.data);
+                const formUpdates = populateFormFromProfile(result.data);
+                setForm((prev) => ({ ...prev, ...formUpdates }));
+            }
+            setProfileLoaded(true);
+        } catch (err: unknown) {
+            console.error('Failed to fetch profile:', err);
+            setProfileLoaded(true);
+        } finally {
+            setProfileLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        refreshCompletion();
-    }, [refreshCompletion]);
+        if (!fetchedRef.current) {
+            fetchedRef.current = true;
+            refreshCompletion();
+            fetchProfile();
+        }
+    }, [refreshCompletion, fetchProfile]);
 
     // Helper: send PATCH and update local state from response
     const performSave = async (payload: UpdateCandidateProfilePayload): Promise<boolean> => {
-        if (!isAuthenticated) {
+        let validToken = hasValidStoredAccessToken();
+        if (!validToken) {
+            validToken = await refreshAuthSession();
+        }
+
+        if (!validToken) {
             setSaveError('Bạn chưa đăng nhập. Vui lòng đăng nhập lại.');
             return false;
         }
@@ -283,12 +327,14 @@ export const ProfileFormProvider = ({ children }: { children: ReactNode }) => {
                 graduationYear: Number(form.academicInfo.graduationYear) || new Date().getFullYear() + 1,
                 gpa: form.academicInfo.gpa ? Number(form.academicInfo.gpa) : undefined,
             },
-            technicalSkills: form.technicalSkills,
+            technicalSkills: form.technicalSkills.filter((s) => s.name && s.name.trim()),
             softSkills: form.softSkills,
-            languages: form.languages.map((l) => ({
-                ...l,
-                score: Number(l.score),
-            })),
+            languages: form.languages
+                .filter((l) => l.certificateName && l.certificateName.trim() && l.issuedAt && l.expiresAt)
+                .map((l) => ({
+                    ...l,
+                    score: Number(l.score),
+                })),
         };
         return performSave(payload);
     };
@@ -296,15 +342,19 @@ export const ProfileFormProvider = ({ children }: { children: ReactNode }) => {
     // Step 3: Projects & Work Experiences
     const saveStep3 = async (): Promise<boolean> => {
         const payload: UpdateCandidateProfilePayload = {
-            projects: form.projects.map((p) => ({
-                ...p,
-                teamSize: Number(p.teamSize) || 1,
-                technologies: p.technologies,
-            })),
-            workExperiences: form.workExperiences.map((w) => ({
-                ...w,
-                technologiesUsed: w.technologiesUsed,
-            })),
+            projects: form.projects
+                .filter(p => p.name && p.description && p.role && p.contribution && p.startDate && p.endDate && p.teamSize)
+                .map((p) => ({
+                    ...p,
+                    teamSize: Number(p.teamSize) || 1,
+                    technologies: p.technologies,
+                })),
+            workExperiences: form.workExperiences
+                .filter(w => w.companyName && w.position && w.startDate && w.endDate && w.description)
+                .map((w) => ({
+                    ...w,
+                    technologiesUsed: w.technologiesUsed,
+                })),
         };
         return performSave(payload);
     };
@@ -327,22 +377,37 @@ export const ProfileFormProvider = ({ children }: { children: ReactNode }) => {
                 graduationYear: Number(form.academicInfo.graduationYear) || new Date().getFullYear() + 1,
                 gpa: form.academicInfo.gpa ? Number(form.academicInfo.gpa) : undefined,
             },
-            technicalSkills: form.technicalSkills,
+            technicalSkills: form.technicalSkills.filter((s) => s.name && s.name.trim()),
             softSkills: form.softSkills,
-            languages: form.languages.map((l) => ({
-                ...l,
-                score: Number(l.score),
-            })),
-            projects: form.projects.map((p) => ({
-                ...p,
-                teamSize: Number(p.teamSize) || 1,
-            })),
-            workExperiences: form.workExperiences,
+            languages: form.languages
+                .filter((l) => l.certificateName && l.certificateName.trim() && l.issuedAt && l.expiresAt)
+                .map((l) => ({
+                    ...l,
+                    score: Number(l.score),
+                })),
+            projects: form.projects
+                .filter(p => p.name && p.description && p.role && p.contribution && p.startDate && p.endDate && p.teamSize)
+                .map((p) => ({
+                    ...p,
+                    teamSize: Number(p.teamSize) || 1,
+                    technologies: p.technologies,
+                })),
+            workExperiences: form.workExperiences.filter(w => w.companyName && w.position && w.startDate && w.endDate && w.description),
             introductionQuestions: form.introductionQuestions,
             advantagePoint: form.advantagePoint,
             achievements: form.achievements,
         };
         return performSave(payload);
+    };
+
+    // Save draft for a specific step (or all steps if not specified)
+    const saveDraft = async (step?: number): Promise<boolean> => {
+        switch (step) {
+            case 2: return saveStep2();
+            case 3: return saveStep3();
+            case 4: return saveStep4();
+            default: return saveAllSteps();
+        }
     };
 
     const value: ProfileFormContextValue = {
@@ -360,7 +425,9 @@ export const ProfileFormProvider = ({ children }: { children: ReactNode }) => {
         saveStep3,
         saveStep4,
         saveAllSteps,
+        saveDraft,
         profileLoaded,
+        profileLoading,
         isAuthenticated,
         profileData,
     };

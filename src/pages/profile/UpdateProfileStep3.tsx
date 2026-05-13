@@ -137,118 +137,133 @@ export default function UpdateProfileStep3() {
                                 {/* DỰ ÁN */}
                                 <div className="section-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                     <h3 style={{ fontSize: '18px', fontWeight: 600, margin: 0, color: '#101828' }}>Dự án</h3>
-                                    <button className="btn-add-solid">
+                                    <button className="btn-add-solid" onClick={() => updateField('projects', [...form.projects, { name: '', description: '', role: '', contribution: '', startDate: '', endDate: '', teamSize: 1, technologies: [], projectUrl: '', reportUrl: '' }])}>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                                         Thêm dự án
                                     </button>
                                 </div>
 
-                                <div className="item-card project-card" style={{ background: '#F5F3FF', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', border: '1px solid #E0D4FF' }}>
-                                    <div className="item-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h4 style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#101828' }}>Dự án 1</h4>
-                                        <button className="btn-icon">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-                                        </button>
-                                    </div>
+                                {form.projects.length === 0 && (
+                                    <p className="field-hint" style={{ textAlign: 'center', padding: '1.5rem', color: '#9CA3AF' }}>Chưa có dự án nào. Bấm "Thêm dự án" để thêm.</p>
+                                )}
 
-                                    <div className="form-grid" style={{ gap: '1.25rem' }}>
-                                        <div className="form-field form-field--full">
-                                            <label className="field-label">Tên dự án <span className="required-star">*</span></label>
-                                            <input type="text" className="field-input" placeholder="VD: Nền tảng thương mại điện tử" style={{background: '#FFF'}} />
+                                {form.projects.map((proj, idx) => (
+                                    <div key={idx} className="item-card project-card" style={{ background: '#F5F3FF', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', border: '1px solid #E0D4FF' }}>
+                                        <div className="item-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h4 style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#101828' }}>Dự án {idx + 1}</h4>
+                                            <button className="btn-icon btn-delete-icon" onClick={() => { const updated = form.projects.filter((_, i) => i !== idx); updateField('projects', updated); }}>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
+                                            </button>
                                         </div>
-                                        <div className="form-field form-field--full">
-                                            <label className="field-label">Mô tả</label>
-                                            <textarea className="field-input" style={{ height: '80px', paddingTop: '12px', resize: 'vertical', background: '#FFF' }} placeholder="Mô tả ngắn gọn về dự án, mục đích và các tính năng chính..."></textarea>
-                                        </div>
-                                        <div className="form-field form-field--full">
-                                            <label className="field-label">Công nghệ sử dụng</label>
-                                            <div className="field-input" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', height: 'auto', minHeight: '50px', padding: '8px 12px', background: '#FFF' }}>
-                                                <span className="tag" style={{ margin: 0, background: '#F5F3FF', color: '#8B4CFF', border: 'none', borderRadius: '16px', padding: '4px 12px' }}>React <span style={{ marginLeft: '4px', cursor: 'pointer' }}>×</span></span>
-                                                <input type="text" style={{ border: 'none', outline: 'none', flex: 1, minWidth: '150px', fontSize: '14px', background: 'transparent' }} placeholder="Thêm công nghệ khác..." />
+
+                                        <div className="form-grid" style={{ gap: '1.25rem' }}>
+                                            <div className="form-field form-field--full">
+                                                <label className="field-label">Tên dự án <span className="required-star">*</span></label>
+                                                <input type="text" className="field-input" placeholder="VD: Nền tảng thương mại điện tử" style={{background: '#FFF'}} value={proj.name} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], name: e.target.value }; updateField('projects', updated); }} />
                                             </div>
-                                            <p className="field-hint" style={{ marginTop: '4px' }}>Nhấn Enter hoặc dấu phẩy để thêm công nghệ</p>
-                                        </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Vai trò của bạn</label>
-                                            <input type="text" className="field-input" placeholder="VD: Full-stack Developer" style={{background: '#FFF'}} />
-                                        </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Quy mô nhóm</label>
-                                            <input type="text" className="field-input" placeholder="VD: 4" style={{background: '#FFF'}} />
-                                        </div>
-                                        <div className="form-field form-field--full">
-                                            <label className="field-label">Đóng góp của bạn</label>
-                                            <textarea className="field-input" style={{ height: '80px', paddingTop: '12px', resize: 'vertical', background: '#FFF' }} placeholder="Mô tả các đóng góp cụ thể của bạn cho dự án..."></textarea>
-                                        </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Ngày bắt đầu</label>
-                                            <input type="date" className="field-input" style={{background: '#FFF'}} />
-                                        </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Ngày kết thúc</label>
-                                            <input type="date" className="field-input" style={{background: '#FFF'}} />
-                                        </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Repository URL</label>
-                                            <input type="url" className="field-input" placeholder="https://github.com/username/repo" style={{background: '#FFF'}} />
-                                        </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Báo cáo URL</label>
-                                            <input type="url" className="field-input" placeholder="Liên kết tài liệu dự án" style={{background: '#FFF'}} />
+                                            <div className="form-field form-field--full">
+                                                <label className="field-label">Mô tả</label>
+                                                <textarea className="field-input" style={{ height: '80px', paddingTop: '12px', resize: 'vertical', background: '#FFF' }} placeholder="Mô tả ngắn gọn về dự án, mục đích và các tính năng chính..." value={proj.description} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], description: e.target.value }; updateField('projects', updated); }}></textarea>
+                                            </div>
+                                            <div className="form-field form-field--full">
+                                                <label className="field-label">Công nghệ sử dụng</label>
+                                                <div className="field-input" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', height: 'auto', minHeight: '50px', padding: '8px 12px', background: '#FFF' }}>
+                                                    {proj.technologies?.map((tech, tIdx) => (
+                                                        <span key={tIdx} className="tag" style={{ margin: 0, background: '#F5F3FF', color: '#8B4CFF', border: 'none', borderRadius: '16px', padding: '4px 12px' }}>{tech} <span style={{ marginLeft: '4px', cursor: 'pointer' }} onClick={() => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], technologies: updated[idx].technologies.filter((_, i) => i !== tIdx) }; updateField('projects', updated); }}>×</span></span>
+                                                    ))}
+                                                    <input type="text" style={{ border: 'none', outline: 'none', flex: 1, minWidth: '150px', fontSize: '14px', background: 'transparent' }} placeholder="Thêm công nghệ khác..." onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const val = (e.target as HTMLInputElement).value.trim(); if (val && !proj.technologies?.includes(val)) { const updated = [...form.projects]; updated[idx] = { ...updated[idx], technologies: [...(updated[idx].technologies || []), val] }; updateField('projects', updated); } (e.target as HTMLInputElement).value = ''; } }} />
+                                                </div>
+                                                <p className="field-hint" style={{ marginTop: '4px' }}>Nhấn Enter hoặc dấu phẩy để thêm công nghệ</p>
+                                            </div>
+                                            <div className="form-field">
+                                                <label className="field-label">Vai trò của bạn</label>
+                                                <input type="text" className="field-input" placeholder="VD: Full-stack Developer" style={{background: '#FFF'}} value={proj.role} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], role: e.target.value }; updateField('projects', updated); }} />
+                                            </div>
+                                            <div className="form-field">
+                                                <label className="field-label">Quy mô nhóm</label>
+                                                <input type="number" className="field-input" placeholder="VD: 4" style={{background: '#FFF'}} value={proj.teamSize || ''} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], teamSize: parseInt(e.target.value) || 0 }; updateField('projects', updated); }} />
+                                            </div>
+                                            <div className="form-field form-field--full">
+                                                <label className="field-label">Đóng góp của bạn</label>
+                                                <textarea className="field-input" style={{ height: '80px', paddingTop: '12px', resize: 'vertical', background: '#FFF' }} placeholder="Mô tả các đóng góp cụ thể của bạn cho dự án..." value={proj.contribution} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], contribution: e.target.value }; updateField('projects', updated); }}></textarea>
+                                            </div>
+                                            <div className="form-field">
+                                                <label className="field-label">Ngày bắt đầu</label>
+                                                <input type="date" className="field-input" style={{background: '#FFF'}} value={proj.startDate} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], startDate: e.target.value }; updateField('projects', updated); }} />
+                                            </div>
+                                            <div className="form-field">
+                                                <label className="field-label">Ngày kết thúc</label>
+                                                <input type="date" className="field-input" style={{background: '#FFF'}} value={proj.endDate} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], endDate: e.target.value }; updateField('projects', updated); }} />
+                                            </div>
+                                            <div className="form-field">
+                                                <label className="field-label">Repository URL</label>
+                                                <input type="url" className="field-input" placeholder="https://github.com/username/repo" style={{background: '#FFF'}} value={proj.projectUrl || ''} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], projectUrl: e.target.value }; updateField('projects', updated); }} />
+                                            </div>
+                                            <div className="form-field">
+                                                <label className="field-label">Báo cáo URL</label>
+                                                <input type="url" className="field-input" placeholder="Liên kết tài liệu dự án" style={{background: '#FFF'}} value={proj.reportUrl || ''} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], reportUrl: e.target.value }; updateField('projects', updated); }} />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ))}
 
                                 {/* KINH NGHIỆM */}
                                 <div className="section-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingTop: '1rem' }}>
                                     <h3 style={{ fontSize: '18px', fontWeight: 600, margin: 0, color: '#101828' }}>Kinh nghiệm làm việc</h3>
-                                    <button className="btn-add-solid">
+                                    <button className="btn-add-solid" onClick={() => updateField('workExperiences', [...form.workExperiences, { companyName: '', position: '', startDate: '', endDate: '', description: '', technologiesUsed: [] }])}>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6M16 8V6a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 8h16v5H4z"></path></svg>
                                         Thêm kinh nghiệm
                                     </button>
                                 </div>
 
-                                <div className="item-card experience-card" style={{ background: '#FAFAFA', borderRadius: '8px', padding: '1.5rem', border: '1px solid #E5E7EB' }}>
-                                    <div className="item-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                        <h4 style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#101828' }}>Kinh nghiệm 1</h4>
-                                        <button className="btn-icon">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-                                        </button>
-                                    </div>
+                                {form.workExperiences.length === 0 && (
+                                    <p className="field-hint" style={{ textAlign: 'center', padding: '1.5rem', color: '#9CA3AF' }}>Chưa có kinh nghiệm làm việc nào. Bấm "Thêm kinh nghiệm" để thêm.</p>
+                                )}
 
-                                    <div className="form-grid" style={{ gap: '1.25rem' }}>
-                                        <div className="form-field">
-                                            <label className="field-label">Chức danh <span className="required-star">*</span></label>
-                                            <input type="text" className="field-input" placeholder="VD: Junior Developer" style={{background: '#FFF'}} />
+                                {form.workExperiences.map((exp, idx) => (
+                                    <div key={idx} className="item-card experience-card" style={{ background: '#FAFAFA', borderRadius: '8px', padding: '1.5rem', border: '1px solid #E5E7EB', marginBottom: '1.5rem' }}>
+                                        <div className="item-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                            <h4 style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#101828' }}>Kinh nghiệm {idx + 1}</h4>
+                                            <button className="btn-icon btn-delete-icon" onClick={() => { const updated = form.workExperiences.filter((_, i) => i !== idx); updateField('workExperiences', updated); }}>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
+                                            </button>
                                         </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Tổ chức</label>
-                                            <input type="text" className="field-input" placeholder="VD: Công ty Công nghệ ABC" style={{background: '#FFF'}} />
-                                        </div>
-                                        <div className="form-field form-field--full">
-                                            <label className="field-label">Công nghệ sử dụng</label>
-                                            <div className="field-input" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', height: 'auto', minHeight: '50px', padding: '8px 12px', background: '#FFF' }}>
-                                                <span className="tag" style={{ margin: 0, background: '#F5F3FF', color: '#8B4CFF', border: 'none', borderRadius: '16px', padding: '4px 12px' }}>.NET <span style={{ marginLeft: '4px', cursor: 'pointer' }}>×</span></span>
-                                                <span className="tag" style={{ margin: 0, background: '#F5F3FF', color: '#8B4CFF', border: 'none', borderRadius: '16px', padding: '4px 12px' }}>MongoDB <span style={{ marginLeft: '4px', cursor: 'pointer' }}>×</span></span>
-                                                <input type="text" style={{ border: 'none', outline: 'none', flex: 1, minWidth: '150px', fontSize: '14px', background: 'transparent' }} placeholder="Thêm công nghệ khác..." />
+
+                                        <div className="form-grid" style={{ gap: '1.25rem' }}>
+                                            <div className="form-field">
+                                                <label className="field-label">Chức danh <span className="required-star">*</span></label>
+                                                <input type="text" className="field-input" placeholder="VD: Junior Developer" style={{background: '#FFF'}} value={exp.position} onChange={(e) => { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], position: e.target.value }; updateField('workExperiences', updated); }} />
                                             </div>
-                                            <p className="field-hint" style={{ marginTop: '4px' }}>Nhấn Enter hoặc dấu phẩy để thêm công nghệ</p>
-                                        </div>
-                                        <div className="form-field form-field--full">
-                                            <label className="field-label">Mô tả</label>
-                                            <textarea className="field-input" style={{ height: '80px', paddingTop: '12px', resize: 'vertical', background: '#FFF' }} placeholder="Mô tả trách nhiệm, thành tích và kỹ năng đã phát triển..."></textarea>
-                                        </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Ngày bắt đầu</label>
-                                            <input type="date" className="field-input" style={{background: '#FFF'}} />
-                                        </div>
-                                        <div className="form-field">
-                                            <label className="field-label">Ngày kết thúc</label>
-                                            <input type="date" className="field-input" style={{background: '#FFF'}} />
-                                            <p className="field-hint" style={{ marginTop: '4px', textAlign: 'left' }}>Để trống nếu đang làm việc</p>
+                                            <div className="form-field">
+                                                <label className="field-label">Tổ chức</label>
+                                                <input type="text" className="field-input" placeholder="VD: Công ty Công nghệ ABC" style={{background: '#FFF'}} value={exp.companyName} onChange={(e) => { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], companyName: e.target.value }; updateField('workExperiences', updated); }} />
+                                            </div>
+                                            <div className="form-field form-field--full">
+                                                <label className="field-label">Công nghệ sử dụng</label>
+                                                <div className="field-input" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', height: 'auto', minHeight: '50px', padding: '8px 12px', background: '#FFF' }}>
+                                                    {exp.technologiesUsed?.map((tech, tIdx) => (
+                                                        <span key={tIdx} className="tag" style={{ margin: 0, background: '#F5F3FF', color: '#8B4CFF', border: 'none', borderRadius: '16px', padding: '4px 12px' }}>{tech} <span style={{ marginLeft: '4px', cursor: 'pointer' }} onClick={() => { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], technologiesUsed: updated[idx].technologiesUsed.filter((_, i) => i !== tIdx) }; updateField('workExperiences', updated); }}>×</span></span>
+                                                    ))}
+                                                    <input type="text" style={{ border: 'none', outline: 'none', flex: 1, minWidth: '150px', fontSize: '14px', background: 'transparent' }} placeholder="Thêm công nghệ khác..." onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const val = (e.target as HTMLInputElement).value.trim(); if (val && !exp.technologiesUsed?.includes(val)) { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], technologiesUsed: [...(updated[idx].technologiesUsed || []), val] }; updateField('workExperiences', updated); } (e.target as HTMLInputElement).value = ''; } }} />
+                                                </div>
+                                                <p className="field-hint" style={{ marginTop: '4px' }}>Nhấn Enter hoặc dấu phẩy để thêm công nghệ</p>
+                                            </div>
+                                            <div className="form-field form-field--full">
+                                                <label className="field-label">Mô tả</label>
+                                                <textarea className="field-input" style={{ height: '80px', paddingTop: '12px', resize: 'vertical', background: '#FFF' }} placeholder="Mô tả trách nhiệm, thành tích và kỹ năng đã phát triển..." value={exp.description} onChange={(e) => { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], description: e.target.value }; updateField('workExperiences', updated); }}></textarea>
+                                            </div>
+                                            <div className="form-field">
+                                                <label className="field-label">Ngày bắt đầu</label>
+                                                <input type="date" className="field-input" style={{background: '#FFF'}} value={exp.startDate} onChange={(e) => { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], startDate: e.target.value }; updateField('workExperiences', updated); }} />
+                                            </div>
+                                            <div className="form-field">
+                                                <label className="field-label">Ngày kết thúc</label>
+                                                <input type="date" className="field-input" style={{background: '#FFF'}} value={exp.endDate} onChange={(e) => { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], endDate: e.target.value }; updateField('workExperiences', updated); }} />
+                                                <p className="field-hint" style={{ marginTop: '4px', textAlign: 'left' }}>Để trống nếu đang làm việc</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ))}
 
                                 {/* Action Buttons */}
                                 <div className="form-actions" style={{ background: '#FFF', padding: '1.25rem', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

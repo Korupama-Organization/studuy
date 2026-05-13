@@ -14,7 +14,7 @@ export default function UpdateProfile() {
     const [activeStep] = useState(0);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const navigate = useNavigate();
-    const { form, updateField, completion, completionLoading } = useProfileForm();
+    const { form, updateField, completion, completionLoading, saving, saveStep2 } = useProfileForm();
 
     const progress = completion?.completionPercentage ?? 0;
 
@@ -286,8 +286,11 @@ export default function UpdateProfile() {
                                         Trở lại
                                     </button>
                                     <div className="form-actions-right">
-                                        <button className="btn-save">Lưu bản nháp</button>
-                                        <button className="btn-next" onClick={() => navigate('/profile/update/step2')}>
+                                        <button className="btn-save" onClick={saveStep2} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
+                                        <button className="btn-next" disabled={saving} onClick={async () => {
+                                            await saveStep2();
+                                            navigate('/profile/update/step2');
+                                        }}>
                                             Tiếp
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                                 <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

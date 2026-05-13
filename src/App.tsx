@@ -12,8 +12,9 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<LandingPage />} />
+                <Route path="/" element={<LoginPage />} />
                 <Route path="/login/*" element={<LoginPage />} />
+                <Route path="/dashboard" element={<LandingPage />} />
                 <Route path="/register/*" element={<RegisterPage />} />
                 <Route path="/profile/update" element={<ProfileFormProvider><UpdateProfile /></ProfileFormProvider>} />
                 <Route path="/profile/update/step2" element={<ProfileFormProvider><UpdateProfileStep2 /></ProfileFormProvider>} />

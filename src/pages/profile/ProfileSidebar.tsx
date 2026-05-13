@@ -95,10 +95,10 @@ export default function ProfileSidebar({ activeStep }: ProfileSidebarProps) {
                 <h3 className="progress-card-title">Tiến độ hoàn thành hồ sơ</h3>
 
                 <div className="progress-circle-wrapper">
-                    <svg width="128" height="128" viewBox="0 0 128 128" fill="none">
-                        <path d="M120 64C120 33.0721 94.9279 8 64 8C33.0721 8 8 33.0721 8 64C8 94.9279 33.0721 120 64 120C94.9279 120 120 94.9279 120 64Z" stroke="#E5E7EB" strokeWidth="8" />
-                        <path
-                            d="M120 64C120 33.0721 94.9279 8 64 8C33.0721 8 8 33.0721 8 64C8 94.9279 33.0721 120 64 120C94.9279 120 120 94.9279 120 64Z"
+                    <svg width="128" height="128" viewBox="0 0 128 128" fill="none" style={{ transform: 'rotate(-90deg)' }}>
+                        <circle cx="64" cy="64" r="56" stroke="#E5E7EB" strokeWidth="8" />
+                        <circle
+                            cx="64" cy="64" r="56"
                             stroke="url(#progress-gradient)"
                             strokeWidth="8"
                             strokeLinecap="round"

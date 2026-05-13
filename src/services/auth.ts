@@ -189,6 +189,16 @@ export const getStoredAccessToken = (): string => {
     return localStorage.getItem(STORAGE_KEYS.accessToken) || '';
 };
 
+export const getStoredUser = (): AuthUser | null => {
+    const userStr = localStorage.getItem(STORAGE_KEYS.currentUser);
+    if (!userStr) return null;
+    try {
+        return JSON.parse(userStr) as AuthUser;
+    } catch {
+        return null;
+    }
+};
+
 const parseJwtPayload = (token: string): Record<string, unknown> | null => {
     const parts = token.split('.');
     if (parts.length !== 3) {
@@ -204,8 +214,44 @@ const parseJwtPayload = (token: string): Record<string, unknown> | null => {
     }
 };
 
+export const refreshAuthSession = async (): Promise<boolean> => {
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken);
+    if (!refreshToken) {
+        clearAuthSession();
+        return false;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refreshToken }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.accessToken) {
+                localStorage.setItem(STORAGE_KEYS.accessToken, result.accessToken);
+                if (result.refreshToken) {
+                    localStorage.setItem(STORAGE_KEYS.refreshToken, result.refreshToken);
+                }
+                return true;
+            }
+        }
+    } catch {
+        // network error, maybe ignore
+    }
+
+    clearAuthSession();
+    return false;
+};
+
 export const hasValidStoredAccessToken = (): boolean => {
     const token = getStoredAccessToken();
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken);
+    
     if (!token) {
         return false;
     }
@@ -220,7 +266,11 @@ export const hasValidStoredAccessToken = (): boolean => {
     const isTokenValid = payload.exp > nowInSeconds;
 
     if (!isTokenValid) {
-        clearAuthSession();
+        // If we have a refresh token, we don't clear the session yet, we return false
+        // so the caller can attempt to refresh it.
+        if (!refreshToken) {
+            clearAuthSession();
+        }
     }
 
     return isTokenValid;

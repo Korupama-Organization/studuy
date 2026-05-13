@@ -7,6 +7,7 @@ import {
     loginNormalAuth,
     storeAuthSession,
     loginWithUIT,
+    getStoredUser,
 } from "../../services/auth";
 import LoginFormCard from "./components/LoginFormCard";
 import MobileFormScreen from "./components/MobileFormScreen";
@@ -32,7 +33,12 @@ export default function LoginPage() {
 
     useEffect(() => {
         if (hasValidStoredAccessToken()) {
-            navigate("/", { replace: true });
+            const user = getStoredUser();
+            if (user?.role === 'candidate') {
+                navigate("/profile/update", { replace: true });
+            } else {
+                navigate("/dashboard", { replace: true });
+            }
         }
     }, [navigate]);
 
@@ -81,7 +87,11 @@ export default function LoginPage() {
                 var result = await loginWithUIT(normalizedIdentifier, normalizedPassword);
             }
             storeAuthSession(result);
-            navigate("/", { replace: true });
+            if (result.user?.role === 'candidate') {
+                navigate("/profile/update", { replace: true });
+            } else {
+                navigate("/dashboard", { replace: true });
+            }
         } catch (error) {
             const fallbackMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
             setErrorMessage(
