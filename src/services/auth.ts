@@ -35,6 +35,9 @@ export interface RegisterHrPayload {
     linkedinUrl?: string;
     githubUrl?: string;
     facebookUrl?: string;
+    companyName?: string;
+    companyWebsite?: string;
+    companyAddress?: string;
 }
 
 interface ApiErrorShape {
@@ -217,6 +220,29 @@ export const checkHrEmailAvailability = async (email: string): Promise<void> => 
     }
 };
 
+export const createCompany = async (
+    token: string,
+    payload: Record<string, any>
+): Promise<any> => {
+    const response = await fetch(buildApiUrl('/api/companies'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+    });
+
+    const rawBody = await extractResponseText(response);
+
+    if (!response.ok) {
+        const message = extractApiErrorMessage(rawBody);
+        throw new Error(message || 'Tạo công ty thất bại.');
+    }
+
+    return JSON.parse(rawBody);
+};
+
 export const storeAuthSession = (result: LoginResponse): void => {
     localStorage.setItem(STORAGE_KEYS.accessToken, result.accessToken);
     localStorage.setItem(STORAGE_KEYS.refreshToken, result.refreshToken);
@@ -262,6 +288,17 @@ export const hasValidStoredAccessToken = (): boolean => {
     }
 
     return isTokenValid;
+};
+
+export const getStoredUserRole = (): string | null => {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.currentUser);
+        if (!raw) return null;
+        const user = JSON.parse(raw) as AuthUser;
+        return user.role ?? null;
+    } catch {
+        return null;
+    }
 };
 
 export const clearAuthSession = (): void => {
