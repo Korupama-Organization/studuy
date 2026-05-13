@@ -1,5 +1,6 @@
 import LandingPage from '../pages/landing/Index';
 import JobsPage from '../pages/jobs/Index';
+import RecruiterManagementPage from '../pages/recruiter_managment/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import DashboardPage from '../pages/dashboard/Index';
