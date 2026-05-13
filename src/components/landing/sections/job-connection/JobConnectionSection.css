@@ -1,5 +1,5 @@
 .job-connection-section {
-  padding: 120px 0;
+  padding: clamp(4rem, 6vw, 6rem) 0;
   background-color: #F4F7FB;
   overflow: hidden;
 }
@@ -19,11 +19,12 @@
 }
 
 .job-title {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 800;
   color: #101828;
-  line-height: 1.1;
-  margin-bottom: 32px;
+  line-height: 1.15;
+  margin-bottom: 28px;
+  max-width: 700px;
 }
 
 .job-title .highlight-text {
@@ -31,11 +32,11 @@
 }
 
 .job-description {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
   color: #4A5565;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
   max-width: 540px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .job-benefits {
@@ -279,11 +280,16 @@
 
 @media (max-width: 768px) {
   .job-title {
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  .job-description {
+    font-size: 0.95rem;
   }
   
   .job-container {
     padding: 0 24px;
+    gap: 60px;
   }
   
   .floating-badge {

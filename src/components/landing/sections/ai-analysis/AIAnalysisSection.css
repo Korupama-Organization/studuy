@@ -1,5 +1,5 @@
 .ai-analysis-section {
-  padding: 100px 0;
+  padding: clamp(4rem, 6vw, 6rem) 0;
   background-color: white;
   overflow: hidden;
 }
@@ -21,19 +21,19 @@
 .ai-tag {
   color: #E484EB;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: block;
 }
 
 .ai-analysis-title {
-  font-size: 3rem;
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
   font-weight: 800;
   color: #101828;
   line-height: 1.2;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .ai-analysis-title span {
@@ -41,9 +41,9 @@
 }
 
 .ai-analysis-desc {
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
   color: #4A5565;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .ai-analysis-grid {
@@ -113,10 +113,15 @@
 @media (max-width: 640px) {
   .ai-analysis-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .ai-analysis-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
+  }
+  
+  .ai-analysis-desc {
+    font-size: 0.9rem;
   }
   
   .ai-card {

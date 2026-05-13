@@ -1,5 +1,5 @@
 .recruiter-section {
-  padding: 120px 0;
+  padding: clamp(4rem, 6vw, 6rem) 0;
   background-color: #101828;
   color: white;
   overflow: hidden;
@@ -22,17 +22,18 @@
 .recruiter-label {
   color: #E484EB;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   letter-spacing: 0.1em;
   display: block;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .recruiter-title {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: 32px;
+  line-height: 1.15;
+  margin-bottom: 28px;
+  max-width: 700px;
 }
 
 .recruiter-title .highlight {
@@ -40,10 +41,10 @@
 }
 
 .recruiter-description {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
   color: #99A1AF;
-  line-height: 1.6;
-  margin-bottom: 48px;
+  line-height: 1.7;
+  margin-bottom: 40px;
   max-width: 500px;
 }
 
@@ -148,11 +149,16 @@
 
 @media (max-width: 768px) {
   .recruiter-title {
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 5vw, 2rem);
   }
   
   .recruiter-container {
     padding: 0 24px;
+    gap: 60px;
+  }
+  
+  .recruiter-description {
+    font-size: 0.95rem;
   }
   
   .recruiter-feature-card {

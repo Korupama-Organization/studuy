@@ -25,6 +25,10 @@ const PainSection: React.FC = () => {
           </span>
         </Reveal>
 
+        <Reveal className="pain-divider" delay={150}>
+          <div />
+        </Reveal>
+
         <Reveal
           as="p"
           className="pain-subtitle"
