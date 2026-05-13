@@ -1,15 +1,12 @@
 import { useState } from "react";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import UpdateRecruiterModal from "./UpdateRecruiterModal";
-import type { Recruiter, CreateRecruiterPayload } from "./Index";
+import type { Recruiter, UpdateProfilePayload } from "./Index";
 
 interface RecruiterTableProps {
   recruiters: Recruiter[];
   isLoading: boolean;
-  onUpdateRecruiter: (
-    id: string,
-    payload: CreateRecruiterPayload,
-  ) => Promise<void>;
+  onUpdateRecruiter: (payload: UpdateProfilePayload) => Promise<void>;
   onDeleteRecruiter: (id: string) => Promise<void>;
 }
 
@@ -73,16 +70,6 @@ export default function RecruiterTable({
     return role
       .replace(/_/g, " ")
       .replace(/\b\w/g, (match) => match.toUpperCase());
-  };
-
-  const getInitials = (fullName: string) => {
-    const parts = fullName.trim().split(/\s+/).filter(Boolean);
-    if (!parts.length) return "-";
-
-    const first = parts[0]?.charAt(0) || "";
-    const last =
-      parts.length > 1 ? parts[parts.length - 1]?.charAt(0) || "" : "";
-    return `${first}${last}`.toUpperCase();
   };
 
   const handleDeleteConfirm = async () => {
@@ -165,24 +152,9 @@ export default function RecruiterTable({
                 key={recruiter._id || recruiter.email}
                 className="transition hover:bg-slate-50/70">
                 <td className="whitespace-nowrap px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#EEF0FF] to-[#DDE0FF] text-sm font-bold text-[#5B5BF6] ring-1 ring-[#5B5BF6]/10">
-                      {recruiter.avatarUrl ? (
-                        <img
-                          src={recruiter.avatarUrl}
-                          alt={recruiter.fullName}
-                          className="h-10 w-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        getInitials(recruiter.fullName)
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">
-                        {recruiter.fullName || "-"}
-                      </p>
-                    </div>
-                  </div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {recruiter.fullName || "-"}
+                  </p>
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
                   {recruiter.email || "-"}

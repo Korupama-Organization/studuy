@@ -8,9 +8,16 @@ export interface Recruiter {
   fullName: string;
   email: string;
   phone?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  facebookUrl?: string;
+  avatarUrl?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  jobTitle?: string;
+  membershipRole?: string;
   role: string;
   status: "active" | "inactive";
-  avatarUrl?: string;
   createdAt: string;
 }
 
@@ -20,6 +27,19 @@ export interface CreateRecruiterPayload {
   phone?: string;
   role: string;
   status: "active" | "inactive";
+}
+
+export interface UpdateProfilePayload {
+  fullName: string;
+  phone?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  facebookUrl?: string;
+  avatarUrl?: string;
+  gender?: string;
+  dateOfBirth?: string;
+  jobTitle?: string;
+  membershipRole?: string;
 }
 
 const API_BASE_URL =
@@ -70,9 +90,85 @@ const normalizeRecruiter = (raw: Record<string, unknown>): Recruiter => ({
         ? raw.fullname
         : typeof raw.name === "string"
           ? raw.name
-          : "-",
-  email: typeof raw.email === "string" ? raw.email : "-",
-  phone: typeof raw.phone === "string" ? raw.phone : undefined,
+          : (() => {
+              const userId = raw.userId as Record<string, unknown> | undefined;
+              return typeof userId?.fullName === "string"
+                ? userId.fullName
+                : "-";
+            })(),
+  email:
+    typeof raw.email === "string"
+      ? raw.email
+      : (() => {
+          const contactInfo = raw.contactInfo as
+            | Record<string, unknown>
+            | undefined;
+          if (typeof contactInfo?.email === "string") return contactInfo.email;
+
+          const userId = raw.userId as Record<string, unknown> | undefined;
+          const nestedContactInfo = userId?.contactInfo as
+            | Record<string, unknown>
+            | undefined;
+          return typeof nestedContactInfo?.email === "string"
+            ? nestedContactInfo.email
+            : "-";
+        })(),
+  phone:
+    typeof raw.phone === "string"
+      ? raw.phone
+      : (() => {
+          const contactInfo = raw.contactInfo as
+            | Record<string, unknown>
+            | undefined;
+          if (typeof contactInfo?.phone === "string") return contactInfo.phone;
+
+          const userId = raw.userId as Record<string, unknown> | undefined;
+          const nestedContactInfo = userId?.contactInfo as
+            | Record<string, unknown>
+            | undefined;
+          return typeof nestedContactInfo?.phone === "string"
+            ? nestedContactInfo.phone
+            : undefined;
+        })(),
+  linkedinUrl: (() => {
+    const contactInfo = raw.contactInfo as Record<string, unknown> | undefined;
+    if (typeof contactInfo?.linkedinUrl === "string")
+      return contactInfo.linkedinUrl;
+
+    const userId = raw.userId as Record<string, unknown> | undefined;
+    const nestedContactInfo = userId?.contactInfo as
+      | Record<string, unknown>
+      | undefined;
+    return typeof nestedContactInfo?.linkedinUrl === "string"
+      ? nestedContactInfo.linkedinUrl
+      : undefined;
+  })(),
+  githubUrl: (() => {
+    const contactInfo = raw.contactInfo as Record<string, unknown> | undefined;
+    if (typeof contactInfo?.githubUrl === "string")
+      return contactInfo.githubUrl;
+
+    const userId = raw.userId as Record<string, unknown> | undefined;
+    const nestedContactInfo = userId?.contactInfo as
+      | Record<string, unknown>
+      | undefined;
+    return typeof nestedContactInfo?.githubUrl === "string"
+      ? nestedContactInfo.githubUrl
+      : undefined;
+  })(),
+  facebookUrl: (() => {
+    const contactInfo = raw.contactInfo as Record<string, unknown> | undefined;
+    if (typeof contactInfo?.facebookUrl === "string")
+      return contactInfo.facebookUrl;
+
+    const userId = raw.userId as Record<string, unknown> | undefined;
+    const nestedContactInfo = userId?.contactInfo as
+      | Record<string, unknown>
+      | undefined;
+    return typeof nestedContactInfo?.facebookUrl === "string"
+      ? nestedContactInfo.facebookUrl
+      : undefined;
+  })(),
   role: typeof raw.role === "string" ? raw.role : "recruiter",
   status: raw.status === "inactive" ? "inactive" : "active",
   avatarUrl:
@@ -80,7 +176,27 @@ const normalizeRecruiter = (raw: Record<string, unknown>): Recruiter => ({
       ? raw.avatarUrl
       : typeof raw.avatar === "string"
         ? raw.avatar
-        : undefined,
+        : (() => {
+            const userId = raw.userId as Record<string, unknown> | undefined;
+            return typeof userId?.avatarUrl === "string"
+              ? userId.avatarUrl
+              : undefined;
+          })(),
+  gender: (() => {
+    if (typeof raw.gender === "string") return raw.gender;
+    const userId = raw.userId as Record<string, unknown> | undefined;
+    return typeof userId?.gender === "string" ? userId.gender : undefined;
+  })(),
+  dateOfBirth: (() => {
+    if (typeof raw.dateOfBirth === "string") return raw.dateOfBirth;
+    const userId = raw.userId as Record<string, unknown> | undefined;
+    return typeof userId?.dateOfBirth === "string"
+      ? userId.dateOfBirth
+      : undefined;
+  })(),
+  jobTitle: typeof raw.jobTitle === "string" ? raw.jobTitle : undefined,
+  membershipRole:
+    typeof raw.membershipRole === "string" ? raw.membershipRole : undefined,
   createdAt: typeof raw.createdAt === "string" ? raw.createdAt : "-",
 });
 
@@ -168,9 +284,9 @@ export default function RecruiterManagementPage() {
   );
 
   const handleUpdateRecruiter = useCallback(
-    async (id: string, payload: CreateRecruiterPayload) => {
+    async (payload: UpdateProfilePayload) => {
       const response = await fetch(
-        `${API_BASE_URL}/api/company-members/${encodeURIComponent(id)}`,
+        `${API_BASE_URL}/api/company-members/profile`,
         {
           method: "PUT",
           headers: getAuthHeaders(),
