@@ -87,7 +87,7 @@ export default function RegisterPage() {
         await checkHrEmailAvailability(email);
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (): Promise<string | null> => {
         const normalizedFullName = fullName.trim();
         const normalizedIdentifier = identifier.trim();
         const normalizedPassword = password.trim();
@@ -115,13 +115,15 @@ export default function RegisterPage() {
         }
 
         if (normalizedPassword !== normalizedConfirmPassword) {
-            setErrorMessage('Mật khẩu xác nhận không khớp.');
-            return;
+            const message = 'Mật khẩu xác nhận không khớp.';
+            setErrorMessage(message);
+            return message;
         }
 
         if (!normalizedIdentifier.includes('@')) {
-            setErrorMessage('Email không hợp lệ.');
-            return;
+            const message = 'Email không hợp lệ.';
+            setErrorMessage(message);
+            return message;
         }
 
         try {

@@ -51,7 +51,7 @@ interface MobileFormScreenProps {
     onUsingAIInterviewChange: (value: boolean) => void;
     onUsingManualInterviewChange: (value: boolean) => void;
     onCheckEmailAvailability: (email: string) => Promise<void>;
-    onSubmit: () => void;
+    onSubmit: () => Promise<string | null>;
 }
 
 export default function MobileFormScreen({

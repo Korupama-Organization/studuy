@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CredentialInput from '../../login/components/CredentialInput';
 
@@ -59,8 +59,17 @@ interface RegisterFormCardProps {
     onUsingAIInterviewChange: (value: boolean) => void;
     onUsingManualInterviewChange: (value: boolean) => void;
     onCheckEmailAvailability: (email: string) => Promise<void>;
-    onSubmit: () => void;
+    onSubmit: () => Promise<string | null>;
 }
+
+const isEmailConflictError = (message: string) => {
+    const normalizedError = message.trim().toLowerCase();
+
+    return (
+        normalizedError.includes('email is already registered') ||
+        normalizedError.includes('email đã tồn tại')
+    );
+};
 
 export default function RegisterFormCard({
     fullName,
@@ -149,22 +158,6 @@ export default function RegisterFormCard({
 
     const progressPercent = Math.round((currentStep / steps.length) * 100);
     const currentStepConfig = steps[currentStep - 1];
-
-    useEffect(() => {
-        const normalizedError = errorMessage.trim().toLowerCase();
-        if (!normalizedError) {
-            return;
-        }
-
-        const isEmailConflictError =
-            normalizedError.includes('email is already registered') ||
-            normalizedError.includes('email đã tồn tại');
-
-        if (isEmailConflictError && currentStep !== 1) {
-            setCurrentStep(1);
-            setStepError('');
-        }
-    }, [errorMessage, currentStep]);
 
     const goToPreviousStep = () => {
         setStepError('');
@@ -255,7 +248,11 @@ export default function RegisterFormCard({
         }
 
         setStepError('');
-        onSubmit();
+        const submitError = await onSubmit();
+
+        if (submitError && isEmailConflictError(submitError)) {
+            setCurrentStep(1);
+        }
     };
 
     return (

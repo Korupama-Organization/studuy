@@ -132,7 +132,6 @@ export default function LoginPage() {
                         onIdentifierChange={setIdentifier}
                         onPasswordChange={setPassword}
                         onSubmit={handleSubmit}
-                        onBack={() => setMobileStep('intro')}
                     />
                 )}
             </MobileViewportScaler>

@@ -1,0 +1,124 @@
+.pain-section {
+  min-height: calc(100vh - 80px);
+  padding: clamp(4rem, 6vw, 6rem) 24px;
+  background: linear-gradient(135deg, #f9fafb 0%, #fff 100%);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  display: flex;
+  align-items: center;
+}
+
+.pain-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  transform: translateY(clamp(56px, 8vh, 100px));
+}
+
+.pain-title {
+  font-size: clamp(2rem, 4.5vw, 3.75rem);
+  font-weight: 800;
+  color: #101828;
+  line-height: 1.15;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.pain-highlight {
+  display: block;
+  color: #e484eb;
+  margin-top: 12px;
+}
+
+.pain-divider {
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #e484eb, #7c5cfc);
+  border-radius: 2px;
+  margin: 36px auto;
+}
+
+.pain-subtitle {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  color: #6a7282;
+  font-weight: 400;
+  line-height: 1.7;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.pain-btn {
+  margin-top: 44px;
+  background: #101828;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.2);
+}
+
+.pain-btn:hover {
+  transform: translateY(-2px);
+  background: #3F46B0;
+  box-shadow: 0 10px 25px rgba(63, 70, 176, 0.4);
+}
+
+.pain-bg-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  z-index: 1;
+}
+
+.pain-orb-1 {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: #4d55cc;
+  filter: blur(100px);
+  left: -100px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.pain-orb-2 {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: #e484eb;
+  filter: blur(100px);
+  right: -100px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 768px) {
+  .pain-section {
+    padding: 3rem 20px;
+  }
+  
+  .pain-container {
+    transform: translateY(12px);
+  }
+  
+  .pain-title {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+  
+  .pain-subtitle {
+    font-size: 0.95rem;
+  }
+}

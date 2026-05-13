@@ -1,0 +1,130 @@
+.ai-analysis-section {
+  padding: clamp(4rem, 6vw, 6rem) 0;
+  background-color: white;
+  overflow: hidden;
+}
+
+.ai-analysis-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 80px;
+}
+
+.ai-analysis-content {
+  flex: 1;
+  max-width: 480px;
+}
+
+.ai-tag {
+  color: #E484EB;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.ai-analysis-title {
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+  font-weight: 800;
+  color: #101828;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.ai-analysis-title span {
+  display: block;
+}
+
+.ai-analysis-desc {
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  color: #4A5565;
+  line-height: 1.7;
+}
+
+.ai-analysis-grid {
+  flex: 1.2;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.ai-card {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #F2F4F7;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.ai-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+  border-color: #E0E7FF;
+}
+
+.ai-card-icon {
+  width: 48px;
+  height: 48px;
+  background: #F5F7FF;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: #6366F1;
+}
+
+.ai-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #101828;
+  margin-bottom: 12px;
+}
+
+.ai-card-desc {
+  font-size: 0.9rem;
+  color: #667085;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .ai-analysis-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 60px;
+  }
+  
+  .ai-analysis-content {
+    max-width: 100%;
+  }
+  
+  .ai-analysis-title {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .ai-analysis-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .ai-analysis-title {
+    font-size: 1.75rem;
+  }
+  
+  .ai-analysis-desc {
+    font-size: 0.9rem;
+  }
+  
+  .ai-card {
+    padding: 24px;
+  }
+}
