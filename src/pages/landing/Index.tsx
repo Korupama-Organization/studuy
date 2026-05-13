@@ -19,7 +19,7 @@ import { useSlideNavigation } from '../../hooks/useSlideNavigation';
 
 import { NavigationContext } from '../../contexts/NavigationContext';
 
-// Slide labels for indicator tooltips
+// Slide labels for indicator tooltips (no footer here)
 const SLIDE_LABELS = [
   'Hero',
   'Vấn đề',
@@ -33,7 +33,6 @@ const SLIDE_LABELS = [
   'Demo',
   'Bắt đầu',
   'FAQ',
-  'Footer',
 ];
 
 const SECTION_COMPONENTS = [
@@ -49,7 +48,6 @@ const SECTION_COMPONENTS = [
   DemoSection,
   CTASection,
   FAQSection,
-  FooterSection,
 ];
 
 const LandingPage: React.FC = () => {
@@ -65,7 +63,7 @@ const LandingPage: React.FC = () => {
   const slideTrackRef = useRef<HTMLDivElement>(null);
   const mobileMainRef = useRef<HTMLDivElement>(null);
 
-  const { currentSlide, totalSlides, goToSlide, isSlideMode } = useSlideNavigation(slideTrackRef);
+  const { currentSlide, totalSlides, goToSlide, isSlideMode, isAtEnd } = useSlideNavigation(slideTrackRef);
 
   // ── Dark mode ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -77,16 +75,6 @@ const LandingPage: React.FC = () => {
       localStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
-
-  // ── Add/remove slide-mode class on <html> ───────────────────────────
-  useEffect(() => {
-    if (isSlideMode) {
-      document.documentElement.classList.add('slide-mode');
-    } else {
-      document.documentElement.classList.remove('slide-mode');
-    }
-    return () => document.documentElement.classList.remove('slide-mode');
-  }, [isSlideMode]);
 
   // ── Mobile: IntersectionObserver for reveal animations ──────────────
   useEffect(() => {
@@ -116,25 +104,42 @@ const LandingPage: React.FC = () => {
     return () => observer.disconnect();
   }, [isSlideMode]);
 
-  const progressWidth = totalSlides > 1 ? `${((currentSlide + 1) / totalSlides) * 100}%` : '8%';
-  const totalDots = totalSlides || SECTION_COMPONENTS.length;
+  const contentSlideCount = SECTION_COMPONENTS.length;
+  // When past the last content slide, we're at the footer (progress = 100%)
+  const effectiveSlide = Math.min(currentSlide, contentSlideCount - 1);
+  const progressWidth = totalSlides > 1 ? `${((effectiveSlide + 1) / contentSlideCount) * 100}%` : '8%';
 
   const contextValue = { goToSlide, isSlideMode };
+
+  // ── Manage html class for footer mode ─────────────────────────────
+  // When at end, remove overflow:hidden so footer flows naturally
+  useEffect(() => {
+    const html = document.documentElement;
+    if (isSlideMode && isAtEnd) {
+      html.classList.remove('slide-mode');
+      html.classList.add('footer-mode');
+    } else if (isSlideMode) {
+      html.classList.add('slide-mode');
+      html.classList.remove('footer-mode');
+    } else {
+      html.classList.remove('slide-mode', 'footer-mode');
+    }
+    return () => html.classList.remove('slide-mode', 'footer-mode');
+  }, [isSlideMode, isAtEnd]);
 
   // ── Desktop slide mode ──────────────────────────────────────────────
   if (isSlideMode) {
     return (
       <NavigationContext.Provider value={contextValue}>
-        <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
-          {/* Top progress bar */}
-          <div className="slide-progress" style={{ width: progressWidth }} />
+        <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 relative min-h-screen">
+          {/* Top progress bar — hidden when at end */}
+          {!isAtEnd && <div className="slide-progress" style={{ width: progressWidth }} />}
 
-          {/* Fixed Navbar — z-index above slide container */}
+          {/* Fixed Navbar */}
           <LandingNavbar />
 
-          {/* Fixed slide container — starts below navbar (top: 80px set in CSS) */}
-          <div className="slide-container">
-            {/* Track: translated by the hook to show the current slide */}
+          {/* Slide container — released from fixed when at end so footer flows naturally */}
+          <div className={`slide-container${isAtEnd ? ' slide-container--released' : ''}`}>
             <div ref={slideTrackRef} className="slide-track">
               {SECTION_COMPONENTS.map((SectionComponent, i) => (
                 <div
@@ -148,19 +153,24 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Dot indicators — fixed to the right edge */}
-          <nav className="slide-indicators" aria-label="Slide navigation">
-            {Array.from({ length: totalDots }).map((_, i) => (
-              <button
-                key={i}
-                className={`slide-dot${currentSlide === i ? ' active' : ''}`}
-                onClick={() => goToSlide(i)}
-                title={SLIDE_LABELS[i] ?? `Slide ${i + 1}`}
-                aria-label={SLIDE_LABELS[i] ?? `Slide ${i + 1}`}
-                aria-current={currentSlide === i ? 'true' : undefined}
-              />
-            ))}
-          </nav>
+          {/* Footer — always in DOM, flows naturally below slide-container when released */}
+          <FooterSection />
+
+          {/* Dot indicators — only for content slides, hidden at end */}
+          {!isAtEnd && (
+            <nav className="slide-indicators" aria-label="Slide navigation">
+              {Array.from({ length: contentSlideCount }).map((_, i) => (
+                <button
+                  key={i}
+                  className={`slide-dot${currentSlide === i ? ' active' : ''}`}
+                  onClick={() => goToSlide(i)}
+                  title={SLIDE_LABELS[i] ?? `Slide ${i + 1}`}
+                  aria-label={SLIDE_LABELS[i] ?? `Slide ${i + 1}`}
+                  aria-current={currentSlide === i ? 'true' : undefined}
+                />
+              ))}
+            </nav>
+          )}
         </div>
       </NavigationContext.Provider>
     );
@@ -171,13 +181,15 @@ const LandingPage: React.FC = () => {
     <NavigationContext.Provider value={contextValue}>
       <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
         <LandingNavbar />
-        <main ref={mobileMainRef} className="flex flex-col w-full">
+        <main ref={mobileMainRef} className="flex flex-col w-full pt-16 md:pt-20">
           {SECTION_COMPONENTS.map((SectionComponent, i) => (
             <div key={i} data-slide={i}>
               <SectionComponent />
             </div>
           ))}
         </main>
+        {/* Footer renders naturally after content sections */}
+        <FooterSection />
       </div>
     </NavigationContext.Provider>
   );

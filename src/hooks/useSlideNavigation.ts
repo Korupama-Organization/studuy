@@ -10,6 +10,7 @@ export interface UseSlideNavigationReturn {
   totalSlides: number;
   goToSlide: (index: number) => void;
   isSlideMode: boolean;
+  isAtEnd: boolean;
 }
 
 /**
@@ -75,11 +76,14 @@ export function useSlideNavigation(
       const slides = getSlides();
       if (!slides.length) return;
 
-      const clamped = Math.max(0, Math.min(index, slides.length - 1));
+      // Allow one extra position past the last slide (for footer)
+      const maxIndex = slides.length;
+      const clamped = Math.max(0, Math.min(index, maxIndex));
       
       // Mobile Mode (no transform, just smooth scroll)
       if (!isSlideMode) {
-        slides[clamped].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const targetIndex = Math.min(clamped, slides.length - 1);
+        slides[targetIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
 
@@ -90,14 +94,19 @@ export function useSlideNavigation(
       setCurrentSlide(clamped);
       currentSlideRef.current = clamped;
 
-      // Move track to the target slide via CSS transform
-      applyTransform(clamped);
-
-      // After the slide transition finishes, replay animations for the new slide
-      setTimeout(() => {
-        replayRevealAnimations(slides[clamped]);
+      // Only apply transform if we're within the actual slide range
+      if (clamped < slides.length) {
+        applyTransform(clamped);
+        
+        // After the slide transition finishes, replay animations for the new slide
+        setTimeout(() => {
+          replayRevealAnimations(slides[clamped]);
+          isTransitioning.current = false;
+        }, TRANSITION_MS);
+      } else {
+        // Footer position — keep FAQ slide visible, no transform
         isTransitioning.current = false;
-      }, TRANSITION_MS);
+      }
     },
     [getSlides, applyTransform]
   );
@@ -133,15 +142,31 @@ export function useSlideNavigation(
     return () => clearTimeout(t);
   }, [isSlideMode, trackRef, applyTransform]);
 
+  const isAtEnd = currentSlide >= totalSlides;
+
   // ── Keyboard navigation ─────────────────────────────────────────────
   useEffect(() => {
     if (!isSlideMode) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key)) {
+      const atEnd = currentSlideRef.current >= totalSlidesRef.current;
+      const isDown = ['ArrowDown', 'ArrowRight', 'PageDown', ' '].includes(e.key);
+      const isUp = ['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key);
+
+      if (atEnd) {
+        // At footer: ArrowUp goes back to sections
+        if (isUp) {
+          e.preventDefault();
+          navigateTo(totalSlidesRef.current - 1);
+        }
+        return;
+      }
+
+      // Normal slide navigation
+      if (isDown) {
         e.preventDefault();
         navigateTo(currentSlideRef.current + 1);
-      } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+      } else if (isUp) {
         e.preventDefault();
         navigateTo(currentSlideRef.current - 1);
       }
@@ -160,6 +185,20 @@ export function useSlideNavigation(
     let resetTimer: number;
 
     const handleWheel = (e: WheelEvent) => {
+      const atEnd = currentSlideRef.current >= totalSlidesRef.current;
+      const scrollingDown = e.deltaY > 0;
+
+      if (atEnd) {
+        // When at end and scrolling UP at top of page → go back to sections
+        if (!scrollingDown && window.scrollY <= 0) {
+          e.preventDefault();
+          navigateTo(totalSlidesRef.current - 1);
+        }
+        // Otherwise let native scroll handle it (browse footer content)
+        return;
+      }
+
+      // Normal slide mode
       e.preventDefault();
       if (isTransitioning.current) return;
 
@@ -182,5 +221,5 @@ export function useSlideNavigation(
     };
   }, [isSlideMode, navigateTo]);
 
-  return { currentSlide, totalSlides, goToSlide: navigateTo, isSlideMode };
+  return { currentSlide, totalSlides, goToSlide: navigateTo, isSlideMode, isAtEnd };
 }

@@ -1,7 +1,7 @@
 /* ── Problem Section ────────────────────────────────────── */
 .problem-section {
   min-height: calc(100vh - 80px);
-  padding: 96px 24px;
+  padding: clamp(4rem, 6vw, 6rem) 24px;
   background: #fff;
   overflow: hidden;
   position: relative;
@@ -171,17 +171,19 @@
 }
 
 .problem-heading {
-  font-size: clamp(40px, 4vw, 64px);
-  font-weight: 700;
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
+  font-weight: 800;
   color: #101828;
-  line-height: 1.2;
-  margin-bottom: 32px;
+  line-height: 1.15;
+  margin-bottom: 28px;
+  max-width: 700px;
 }
 
 .problem-description {
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
   color: #4a5565;
-  line-height: 1.6;
+  line-height: 1.7;
+  max-width: 600px;
 }
 
 /* ── Responsive ─────────────────────────────────────────── */
@@ -199,14 +201,14 @@
 
 @media (max-width: 768px) {
   .problem-section {
-    padding: 80px 20px;
+    padding: 3rem 20px;
   }
   
   .problem-heading {
-    font-size: 36px;
+    font-size: clamp(1.5rem, 5vw, 2rem);
   }
   
   .problem-confused-img {
-    width: 200px;
+    width: 180px;
   }
 }
