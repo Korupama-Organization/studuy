@@ -49,12 +49,6 @@ export interface UpdateProfilePayload {
   membershipRole?: string;
 }
 
-const API_BASE_URL =
-  (
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    (typeof window !== "undefined" ? window.location.origin : "")
-  ).replace(/\/+$/, "");
-
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
   if (!token) {
@@ -66,11 +60,26 @@ const getAuthHeaders = (): HeadersInit => {
   };
 };
 
+const readJsonResponse = async (response: Response): Promise<unknown> => {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (!contentType.includes("application/json")) {
+    throw new Error("Không thể tải danh sách recruiter.");
+  }
+
+  return response.json() as Promise<unknown>;
+};
+
 const getResponseErrorMessage = async (
   response: Response,
   fallback: string,
 ): Promise<string> => {
   try {
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return fallback;
+    }
+
     const payload = (await response.json()) as {
       message?: string;
       error?: string;
@@ -238,23 +247,26 @@ export default function RecruiterManagementPage() {
       setIsLoading(true);
       setError("");
       try {
-        const url = new URL(`${API_BASE_URL}/api/company-members`);
-        url.searchParams.set("sort", sort);
-        url.searchParams.set("limit", "100");
-        const response = await fetch(url.toString(), {
+        const params = new URLSearchParams({ sort, limit: "100" });
+        const response = await fetch(`/api/company-members?${params.toString()}`, {
           method: "GET",
           headers: getAuthHeaders(),
         });
-        const payload = (await response.json()) as unknown;
         if (!response.ok) {
-          throw new Error("Khong the tai danh sach recruiter.");
+          throw new Error(
+            await getResponseErrorMessage(
+              response,
+              "Không thể tải danh sách recruiter.",
+            ),
+          );
         }
+        const payload = await readJsonResponse(response);
         setRecruiters(extractRecruiters(payload).map(normalizeRecruiter));
       } catch (loadError) {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : "Khong the tai danh sach recruiter.",
+            : "Không thể tải danh sách recruiter.",
         );
         setRecruiters([]);
       } finally {
@@ -265,7 +277,11 @@ export default function RecruiterManagementPage() {
   );
 
   useEffect(() => {
-    void loadRecruiters();
+    const timer = window.setTimeout(() => {
+      void loadRecruiters();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [loadRecruiters]);
 
   const filteredRecruiters = useMemo(() => {
@@ -283,7 +299,7 @@ export default function RecruiterManagementPage() {
   const handleCreateRecruiter = useCallback(
     async (payload: CreateRecruiterPayload) => {
       const response = await fetch(
-        `${API_BASE_URL}/api/company-members/create-member`,
+        "/api/company-members/create-member",
         {
           method: "POST",
           headers: getAuthHeaders(),
@@ -303,7 +319,7 @@ export default function RecruiterManagementPage() {
   const handleUpdateRecruiter = useCallback(
     async (payload: UpdateProfilePayload) => {
       const response = await fetch(
-        `${API_BASE_URL}/api/company-members/profile`,
+        "/api/company-members/profile",
         {
           method: "PUT",
           headers: getAuthHeaders(),
@@ -326,7 +342,7 @@ export default function RecruiterManagementPage() {
   const handleDeleteRecruiter = useCallback(
     async (id: string) => {
       const response = await fetch(
-        `${API_BASE_URL}/api/company-members/${encodeURIComponent(id)}`,
+        `/api/company-members/${encodeURIComponent(id)}`,
         {
           method: "DELETE",
           headers: getAuthHeaders(),
