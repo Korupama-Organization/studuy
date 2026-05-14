@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import "./dashboard.css";
 
-import Header from "./components/Header";
+import GlobalHeader from "../../components/GlobalHeader";
 import WelcomeSection from "./components/WelcomeSection";
 import JobMatchesSection from "./components/JobMatchesSection";
 import AIReportsSection from "./components/AIReportsSection";
@@ -106,7 +106,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <Header userName={data?.profile?.fullName || "Candidate"} />
+      <GlobalHeader userName={data?.profile?.fullName || "Candidate"} />
       
       <main className="dashboard-main">
         <div className="dashboard-content-wrapper">
