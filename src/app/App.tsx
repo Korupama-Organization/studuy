@@ -2,6 +2,7 @@ import LandingPage from '../pages/landing/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import DashboardPage from '../pages/dashboard/Index';
+import CandidateJobsPage from '../pages/candidate_jobs/Index';
 import UpdateProfile from '../pages/profile/UpdateProfile';
 import UpdateProfileStep2 from '../pages/profile/UpdateProfileStep2';
 import UpdateProfileStep3 from '../pages/profile/UpdateProfileStep3';
