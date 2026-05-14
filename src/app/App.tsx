@@ -9,6 +9,7 @@ import UpdateProfileStep4 from '../pages/profile/UpdateProfileStep4';
 
 import NotFound from '../pages/not-found/Index';
 
+import RecruiterDashboard from '../pages/recruiter_dashboard/RecruiterDashboard';
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -32,6 +33,8 @@ function App() {
           <Route path="/candidate/profile/update/step4" element={<UpdateProfileStep4 />} />
 
 
+
+          <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
           <Route path="/recruiter/jobs" element={<RecruiterJobsPage />} />
           <Route path="/recruiter/management" element={<RecruiterManagementPage />} />
 
