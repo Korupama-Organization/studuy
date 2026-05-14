@@ -2,7 +2,6 @@ import LandingPage from '../pages/landing/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import DashboardPage from '../pages/dashboard/Index';
-import CompanyPage from '../pages/company/Index';
 import UpdateProfile from '../pages/profile/UpdateProfile';
 import UpdateProfileStep2 from '../pages/profile/UpdateProfileStep2';
 import UpdateProfileStep3 from '../pages/profile/UpdateProfileStep3';
@@ -10,6 +9,7 @@ import UpdateProfileStep4 from '../pages/profile/UpdateProfileStep4';
 
 import NotFound from '../pages/not-found/Index';
 
+import CompanyPage from '../pages/company/Index';
 import RecruiterDashboard from '../pages/recruiter_dashboard/RecruiterDashboard';
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';

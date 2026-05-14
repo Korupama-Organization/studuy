@@ -8,11 +8,11 @@ export const jobRows = Array.from({ length: 6 }).map((_, index) => ({
 }));
 
 export const navItems = [
-  { label: "Dashboard", icon: "grid_view", path: "/dashboard" },
-  { label: "Nhân viên", icon: "badge", path: "/recruiters" },
+  { label: "Bảng điều khiển", icon: "grid_view", path: "/recruiter/dashboard" },
+  { label: "Nhân viên", icon: "badge", path: "/recruiter/management" },
   { label: "Thông tin công ty", icon: "business", path: "/company" },
-  { label: "Bài tuyển dụng", icon: "work", path: "/jobs" },
-  { label: "Phỏng vấn", icon: "forum", path: "/interview" },
+  { label: "Việc làm", icon: "work", path: "/recruiter/jobs" },
+  { label: "Ứng viên", icon: "group", path: "#" },
 ];
 
 export const columns = [

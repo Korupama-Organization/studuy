@@ -10,7 +10,7 @@ export default function Sidebar({ variant = "card" }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isActive = (path: string) => location.pathname.startsWith(path);
+  const isActive = (path: string) => path !== "#" && location.pathname.startsWith(path);
   const sidebarClass =
     variant === "flush"
       ? "hidden w-[280px] flex-shrink-0 bg-white px-7 py-8 lg:flex lg:min-h-dvh lg:flex-col lg:border-r lg:border-slate-200"
@@ -45,11 +45,18 @@ export default function Sidebar({ variant = "card" }: SidebarProps) {
         {navItems.map((item) => (
           <button
             key={item.path}
-            onClick={() => navigate(item.path)}
+            onClick={() => {
+              if (item.path !== "#") {
+                navigate(item.path);
+              }
+            }}
+            disabled={item.path === "#"}
             className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
               isActive(item.path)
                 ? "bg-[#EEF0FF] text-[#5B5BF6] shadow-[0_8px_20px_rgba(91,91,246,0.12)]"
-                : "text-slate-500 hover:bg-slate-100"
+                : item.path === "#"
+                  ? "text-slate-400 cursor-default"
+                  : "text-slate-500 hover:bg-slate-100"
             }`}
             type="button"
           >
