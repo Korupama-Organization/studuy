@@ -2,6 +2,7 @@ import LandingPage from '../pages/landing/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import DashboardPage from '../pages/dashboard/Index';
+import CandidateJobsPage from '../pages/candidate_jobs/Index';
 import UpdateProfile from '../pages/profile/UpdateProfile';
 import UpdateProfileStep2 from '../pages/profile/UpdateProfileStep2';
 import UpdateProfileStep3 from '../pages/profile/UpdateProfileStep3';
@@ -29,6 +30,7 @@ function App() {
           <Route path="/login/*" element={<LoginPage />} />
           <Route path="/register/*" element={<RegisterPage />} />
           <Route path="/candidate/dashboard" element={<DashboardPage />} />
+          <Route path="/candidate/jobs" element={<CandidateJobsPage />} />
           <Route path="/candidate/profile/update" element={<UpdateProfile />} />
           <Route path="/candidate/profile/update/step2" element={<UpdateProfileStep2 />} />
           <Route path="/candidate/profile/update/step3" element={<UpdateProfileStep3 />} />
