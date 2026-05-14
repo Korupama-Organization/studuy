@@ -8,20 +8,34 @@ import {
 } from "./candidateApplications";
 import "./candidateJobs.css";
 
-const API_BASE_URL =
-  (
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    (typeof window !== "undefined" ? window.location.origin : "")
-  ).replace(/\/+$/, "");
-
-const buildApiUrl = (path: string): string => {
-  return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
-};
-
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
 
   return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const getResponseErrorMessage = async (response: Response): Promise<string> => {
+  try {
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return "Không thể tải danh sách ứng tuyển.";
+    }
+
+    const payload = (await response.json()) as { message?: string; error?: string };
+    return payload.message || payload.error || "Không thể tải danh sách ứng tuyển.";
+  } catch {
+    return "Không thể tải danh sách ứng tuyển.";
+  }
+};
+
+const readJsonResponse = async (response: Response): Promise<unknown> => {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (!contentType.includes("application/json")) {
+    throw new Error("Không thể tải danh sách ứng tuyển.");
+  }
+
+  return response.json() as Promise<unknown>;
 };
 
 function ProcessBars({ application }: { application: CandidateApplicationCard }) {
@@ -102,16 +116,16 @@ export default function CandidateJobsPage() {
   const { data, error, isLoading } = useQuery({
     queryKey: ["candidate-applications"],
     queryFn: async () => {
-      const response = await fetch(buildApiUrl("/api/applications"), {
+      const response = await fetch("/api/applications", {
         method: "GET",
         headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
-        throw new Error("Không thể tải danh sách ứng tuyển.");
+        throw new Error(await getResponseErrorMessage(response));
       }
 
-      const payload = (await response.json()) as unknown;
+      const payload = await readJsonResponse(response);
       return extractCandidateApplications(payload).map(normalizeCandidateApplication);
     },
   });

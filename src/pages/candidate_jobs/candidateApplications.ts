@@ -127,12 +127,14 @@ export const extractCandidateApplications = (payload: unknown): Record<string, u
 };
 
 export const normalizeCandidateApplication = (raw: Record<string, unknown>): CandidateApplicationCard => {
-  const job = getNestedRecord(raw, "job");
+  const jobInfo = getNestedRecord(raw, "jobInfo");
+  const job = Object.keys(jobInfo).length > 0 ? jobInfo : getNestedRecord(raw, "job");
   const basicInfo = getNestedRecord(job, "basicInfo");
   const company = getNestedRecord(raw, "company");
-  const jobCompany = getNestedRecord(job, "company");
+  const companyId = getNestedRecord(job, "companyId");
+  const jobCompany = Object.keys(companyId).length > 0 ? companyId : getNestedRecord(job, "company");
   const requirements = getNestedRecord(job, "requirements");
-  const status = getString(raw.status, raw.stage, raw.process, "Ứng tuyển");
+  const status = getString(raw.applicationStatus, raw.status, raw.stage, raw.process, "Ứng tuyển");
   const summary = getString(
     raw.summary,
     job.summary,
@@ -143,9 +145,17 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
   );
 
   return {
-    id: getString(raw._id, raw.id, raw.applicationId, crypto.randomUUID()),
+    id: getString(raw.applicationId, raw._id, raw.id, raw.jobId, job.slug, crypto.randomUUID()),
     companyName: getString(company.name, jobCompany.name, raw.companyName, job.companyName, "Tên công ty"),
-    companyDetail: getString(company.description, jobCompany.description, company.industry, jobCompany.industry, "Thông tin chi tiết"),
+    companyDetail: getString(
+      company.description,
+      jobCompany.description,
+      company.industry,
+      jobCompany.industry,
+      basicInfo.roleType,
+      basicInfo.workModel,
+      "Thông tin chi tiết",
+    ),
     jobTitle: getString(job.title, basicInfo.title, raw.jobTitle, raw.title, "Vị trí tuyển dụng"),
     location: getLocation(job, basicInfo) || "Vị trí",
     logoUrl: getString(company.logoUrl, company.logo, jobCompany.logoUrl, jobCompany.logo) || undefined,
@@ -157,6 +167,7 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
       requirements.requiredEducation,
       requirements.description,
       basicInfo.requirements,
+      basicInfo.jobDescription,
       "Yêu cầu công việc sẽ được cập nhật sau.",
     ),
     processLabels: PROCESS_LABELS,
