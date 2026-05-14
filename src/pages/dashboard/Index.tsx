@@ -9,6 +9,17 @@ import AIReportsSection from "./components/AIReportsSection";
 import RecentMockSection from "./components/RecentMockSection";
 import Footer from "./components/Footer";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+  (typeof window !== "undefined" ? window.location.origin : "");
+
+const buildApiUrl = (path: string): string => {
+  return new URL(
+    path,
+    API_BASE_URL.endsWith("/") ? API_BASE_URL : `${API_BASE_URL}/`,
+  ).toString();
+};
+
 const Dashboard: React.FC = () => {
   // Fetch dashboard data
   // Note: We use useQuery to fetch from the API. We mock the base URL depending on your setup.
@@ -19,7 +30,7 @@ const Dashboard: React.FC = () => {
     // For this UI demo, we will check if there's a token or just mock the request if it fails.
     const token = localStorage.getItem("token") || ""; // Adjust based on your auth implementation
     
-    const response = await fetch("http://localhost:3000/api/candidate-profiles/me/dashboard", {
+    const response = await fetch(buildApiUrl("api/candidate-profiles/me/dashboard"), {
       headers: {
         "Authorization": `Bearer ${token}`
       }

@@ -12,7 +12,10 @@ import { getStoredAccessToken } from './auth';
 // ══════════════════════════════════════════════════════════════
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.toString().trim().replace(/\/+$/, '') || 'http://localhost:3000';
+  (
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    (typeof window !== 'undefined' ? window.location.origin : '')
+  ).replace(/\/+$/, '');
 
 // ══════════════════════════════════════════════════════════════
 // Interfaces — shapes used by the Dashboard component
