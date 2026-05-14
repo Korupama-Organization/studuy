@@ -227,7 +227,7 @@
 
 .candidate-job-card__main {
   display: grid;
-  grid-template-columns: 210px 170px minmax(260px, 1fr);
+  grid-template-columns: 210px 190px minmax(260px, 1fr);
   gap: 34px;
   align-items: center;
   padding: 24px;
@@ -295,14 +295,14 @@
   position: relative;
   display: flex;
   align-items: center;
-  width: 132px;
+  width: 168px;
   min-height: 39px;
   padding: 0 14px;
   overflow: visible;
   border: 1px solid #7068ec;
   border-radius: 9px;
   background: #f3f6fb;
-  color: transparent;
+  color: #5f58d8;
   box-shadow: 0 3px 7px rgba(36, 25, 90, 0.28);
   transition: width 180ms ease, background 180ms ease, color 180ms ease;
 }
@@ -320,7 +320,7 @@
 
 .candidate-job-process__bar--active {
   z-index: 2;
-  width: 220px;
+  width: 245px;
   background: linear-gradient(90deg, #9c95ef 0%, #e9afe9 100%);
   color: #ffffff;
 }
@@ -416,7 +416,7 @@
   }
 
   .candidate-job-card__main {
-    grid-template-columns: 210px 170px minmax(260px, 1fr);
+    grid-template-columns: 210px 190px minmax(260px, 1fr);
   }
 }
 
