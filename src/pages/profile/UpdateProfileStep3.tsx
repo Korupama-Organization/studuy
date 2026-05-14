@@ -202,7 +202,7 @@ export default function UpdateProfileStep3() {
 
                                 {/* Action Buttons */}
                                 <div className="form-actions" style={{ background: '#FFF', padding: '1.25rem', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <button className="btn-back" onClick={() => navigate('/profile/update/step2')}>
+                                    <button className="btn-back" onClick={() => navigate('candidate/profile/update/step2')}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
@@ -212,7 +212,7 @@ export default function UpdateProfileStep3() {
                                         <button className="btn-save" onClick={saveStep3} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
                                         <button className="btn-next" disabled={saving} onClick={async () => {
                                             const success = await saveStep3();
-                                            if (success) navigate('/profile/update/step4');
+                                            if (success) navigate('candidate/profile/update/step4');
                                         }}>
                                             Tiếp
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

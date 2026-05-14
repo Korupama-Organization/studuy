@@ -36,7 +36,7 @@ export default function LoginPage() {
             const user = getStoredUser();
 
             if (user?.role === "candidate") {
-                navigate("/profile/update", { replace: true });
+                navigate("/candidate/dashboard", { replace: true });
             } else if (user?.role === "recruiter") {
                 navigate("/dashboard", { replace: true });
             } else {
