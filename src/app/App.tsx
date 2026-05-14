@@ -2,6 +2,7 @@ import LandingPage from '../pages/landing/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import DashboardPage from '../pages/dashboard/Index';
+import NotFound from '../pages/not-found/Index';
 
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';
@@ -24,6 +25,8 @@ function App() {
 
           <Route path="/recruiter/jobs" element={<RecruiterJobsPage />} />
           <Route path="/recruiter/management" element={<RecruiterManagementPage />} />
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
