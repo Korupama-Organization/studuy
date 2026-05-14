@@ -187,7 +187,7 @@ export interface GetProfileResponse {
 }
 
 export const getCandidateProfile = async (): Promise<GetProfileResponse> => {
-    const response = await fetch(`${API_BASE_URL}api/candidate-profiles/me`, {
+    const response = await fetch(buildApiUrl('api/candidate-profiles/me'), {
         method: 'GET',
         headers: authHeaders(),
     });
@@ -211,7 +211,7 @@ export const getCandidateProfile = async (): Promise<GetProfileResponse> => {
 export const updateCandidateProfile = async (
     payload: UpdateCandidateProfilePayload,
 ): Promise<UpdateProfileResponse> => {
-    const response = await fetch(`${API_BASE_URL}api/candidate-profiles/me`, {
+    const response = await fetch(buildApiUrl('api/candidate-profiles/me'), {
         method: 'PATCH',
         headers: authHeaders(),
         body: JSON.stringify(payload),
