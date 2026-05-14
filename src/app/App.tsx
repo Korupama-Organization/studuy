@@ -7,6 +7,7 @@ import UpdateProfileStep2 from '../pages/profile/UpdateProfileStep2';
 import UpdateProfileStep3 from '../pages/profile/UpdateProfileStep3';
 import UpdateProfileStep4 from '../pages/profile/UpdateProfileStep4';
 
+import NotFound from '../pages/not-found/Index';
 
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';
@@ -33,6 +34,8 @@ function App() {
 
           <Route path="/recruiter/jobs" element={<RecruiterJobsPage />} />
           <Route path="/recruiter/management" element={<RecruiterManagementPage />} />
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
