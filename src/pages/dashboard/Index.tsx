@@ -26,13 +26,17 @@ const Dashboard: React.FC = () => {
   // The endpoint is /api/candidate-profiles/me/dashboard
   
   const fetchDashboardData = async () => {
-    // In a real app, you would have an interceptor to add the Bearer token.
-    // For this UI demo, we will check if there's a token or just mock the request if it fails.
-    const token = localStorage.getItem("token") || ""; // Adjust based on your auth implementation
+    // Fetch dashboard data from the real API with Bearer token authentication
+    const token = localStorage.getItem("accessToken") || "";
+    
+    if (!token) {
+      throw new Error("No access token found");
+    }
     
     const response = await fetch(buildApiUrl("api/candidate-profiles/me/dashboard"), {
       headers: {
-        "Authorization": `Bearer ${token}`
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
       }
     });
 
@@ -47,60 +51,23 @@ const Dashboard: React.FC = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['candidate-dashboard'],
     queryFn: fetchDashboardData,
-    // Add some fallback data if the API is not ready or user is not logged in properly during UI review
     initialData: {
       profile: {
-        fullName: "Nguyễn Văn A",
+        id: "",
+        fullName: "Candidate",
         avatarUrl: null,
-        completionPercentage: 45,
+        role: "candidate",
+        hasProfile: false,
+        completionPercentage: 0,
+        status: "incomplete",
+        nextRecommendedFields: []
       },
       quickStats: {
-        appliedJobs: 10,
-        matchedJobs: 3,
-        profileCompletion: 45,
-        interviews: 2,
-        savedJobs: 5
+        appliedJobs: 0,
+        matchedJobs: 0,
+        profileCompletion: 0
       },
-      jobMatches: [
-        {
-          jobId: "1",
-          title: "Senior Backend Engineer (Python)",
-          company: { name: "CodeQuest Solutions", logoUrl: null },
-          location: "Hanoi, Vietnam",
-          matchScore: 85
-        },
-        {
-          jobId: "2",
-          title: "Full Stack Developer",
-          company: { name: "TechVision Inc.", logoUrl: null },
-          location: "Ho Chi Minh City, Vietnam",
-          matchScore: 78
-        },
-        {
-          jobId: "3",
-          title: "DevOps Engineer",
-          company: { name: "CloudNine Systems", logoUrl: null },
-          location: "Da Nang, Vietnam",
-          matchScore: 72
-        }
-      ],
-      aiInterviewReports: [
-        { id: "APP-2024-001", comment: "Excellent problem-solving skills and strong technical knowledge.", status: "Passed", videoUrl: null },
-        { id: "APP-2024-002", comment: "Demonstrates potential but lacks depth in advanced algorithms.", status: "Pending", videoUrl: null }
-      ],
-      recentMockInterview: {
-        id: "mock-1",
-        overallScore: 84,
-        scores: {
-          "Experience": 8.5,
-          "Technical": 9.0,
-          "Domain": 7.5,
-          "Problem solving": 8.0,
-          "Communication": 7.0,
-          "Motivation": 9.0
-        },
-        summary: "The candidate demonstrates strong technical proficiency and exceptional motivation for the role."
-      }
+      jobMatches: []
     }
   });
 
