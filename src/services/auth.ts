@@ -122,7 +122,7 @@ export const loginNormalAuth = async (
     identifier: string,
     password: string,
 ): Promise<LoginResponse> => {
-    const response = await fetch(buildApiUrl('/api/auth/login'), {
+    const response = await fetch(buildApiUrl('api/auth/login'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export const loginWithUIT = async (identifier: string, password: string): Promis
         throw new Error('VITE_UIT_AUTH_SECRET is not defined in environment variables.');
     }
     const encryptedPassword = await encryptPassword(password, UIT_AUTH_SECRET);
-    const response = await fetch(buildApiUrl('/api/auth/login'), {
+    const response = await fetch(buildApiUrl('api/auth/login'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ export const loginWithUIT = async (identifier: string, password: string): Promis
 export const registerHrUser = async (
     payload: RegisterHrPayload,
 ): Promise<RegisterHrResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/register/hr`, {
+    const response = await fetch(`${API_BASE_URL}api/auth/register/hr`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ export const registerHrUser = async (
 export const checkHrEmailAvailability = async (email: string): Promise<void> => {
     const normalizedEmail = email.trim();
     const response = await fetch(
-        `${API_BASE_URL}/api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`,
+        `${API_BASE_URL}api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`,
         {
             method: 'GET',
             headers: {
@@ -224,7 +224,7 @@ export const createCompany = async (
     token: string,
     payload: Record<string, any>
 ): Promise<any> => {
-    const response = await fetch(buildApiUrl('/api/companies'), {
+    const response = await fetch(buildApiUrl('api/companies'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
