@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Sidebar from "./components/Sidebar";
+import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
 import TopHeader from "./components/TopHeader";
 import JobsTable from "./components/JobsTable";
 import Pagination from "./components/Pagination";
@@ -460,10 +460,10 @@ export default function RecruiterJobsPage() {
         <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-[#EDEEFF] blur-[120px]"></div>
       </div>
 
-      <div className="relative mx-auto flex min-h-dvh w-full max-w-[1280px] gap-5 px-4 py-6 lg:px-6">
-        <Sidebar />
+      <div className="relative flex min-h-dvh w-full gap-5 pr-4 lg:pr-6">
+        <RecruiterSidebar activePath="/recruiter/jobs" />
 
-        <main className="flex flex-1 flex-col gap-6">
+        <main className="flex flex-1 flex-col gap-6 pt-6">
           <TopHeader onCreateJob={handleCreateJob} onSortChange={handleSortChange} />
           {error ? <p className="text-sm text-red-500">{error}</p> : null}
           <JobsTable

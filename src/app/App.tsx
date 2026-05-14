@@ -13,6 +13,7 @@ import NotFound from '../pages/not-found/Index';
 import RecruiterDashboard from '../pages/recruiter_dashboard/RecruiterDashboard';
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';
+import RecruiterCandidatesPage from '../pages/recruiter_candidates/Index';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -34,10 +35,11 @@ function App() {
           <Route path="/candidate/profile/update/step4" element={<UpdateProfileStep4 />} />
 
 
-          <Route path="/company" element={<CompanyPage />} />
+          <Route path="/recruiter/company" element={<CompanyPage />} />
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
           <Route path="/recruiter/jobs" element={<RecruiterJobsPage />} />
           <Route path="/recruiter/management" element={<RecruiterManagementPage />} />
+          <Route path="/recruiter/candidates" element={<RecruiterCandidatesPage />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
