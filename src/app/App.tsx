@@ -2,6 +2,7 @@ import LandingPage from '../pages/landing/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import DashboardPage from '../pages/dashboard/Index';
+import CompanyPage from '../pages/company/Index';
 import UpdateProfile from '../pages/profile/UpdateProfile';
 import UpdateProfileStep2 from '../pages/profile/UpdateProfileStep2';
 import UpdateProfileStep3 from '../pages/profile/UpdateProfileStep3';
@@ -33,7 +34,7 @@ function App() {
           <Route path="/candidate/profile/update/step4" element={<UpdateProfileStep4 />} />
 
 
-
+          <Route path="/company" element={<CompanyPage />} />
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
           <Route path="/recruiter/jobs" element={<RecruiterJobsPage />} />
           <Route path="/recruiter/management" element={<RecruiterManagementPage />} />
