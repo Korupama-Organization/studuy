@@ -1,0 +1,175 @@
+.how-section {
+  padding: clamp(4rem, 6vw, 6rem) 20px;
+  background-color: #F4F7FB;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.how-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.how-header {
+  margin-bottom: 48px;
+}
+
+.how-title {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 800;
+  color: #101828;
+  margin-bottom: 14px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.how-subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  color: #4A5565;
+  font-weight: 500;
+}
+
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px; /* Tăng gap từ 30px lên 40px */
+  position: relative;
+}
+
+.step-card {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  text-align: left;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 220px;
+}
+
+.step-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.step-number {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  width: 36px;
+  height: 36px;
+  background: #6366F1;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+  z-index: 2;
+}
+
+.step-icon-wrapper {
+  width: 50px;
+  height: 50px;
+  background: #F4F7FB;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+
+.step-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #101828;
+  margin-bottom: 12px;
+}
+
+.step-desc {
+  font-size: 1rem;
+  color: #4A5565;
+  line-height: 1.6;
+}
+
+/* Base style cho tất cả mũi tên */
+.step-arrow {
+  position: absolute;
+  color: #6366F1;
+  opacity: 0.4;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.step-arrow svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* Mũi tên ngang (Trỏ sang phải) */
+.arrow-right {
+  top: 50%;
+  right: -35px; /* Căn giữa khoảng gap */
+  transform: translateY(-50%);
+}
+
+/* Mũi tên dọc (Trỏ xuống từ card số 3) */
+.arrow-down {
+  bottom: -45px;
+  left: 50%;
+  transform: translateX(-50%) rotate(90deg);
+}
+
+/* Mũi tên ngang (Trỏ sang trái) */
+.arrow-left {
+  top: 50%;
+  left: -35px; /* Căn giữa khoảng gap bên trái */
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Hiệu ứng nhẹ khi hover vào card thì mũi tên rõ hơn */
+.step-card:hover .step-arrow {
+  opacity: 0.8;
+  color: #4f46e5;
+}
+
+.how-footer {
+  margin-top: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #6366F1;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.lightning-icon {
+  color: #FBBF24;
+}
+
+/* Responsive: Ẩn mũi tên khi màn hình nhỏ */
+@media (max-width: 1024px) {
+  .how-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+  .step-arrow {
+    display: none; /* Ẩn đi vì flow grid đã thay đổi */
+  }
+}
+
+@media (max-width: 640px) {
+  .how-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .how-title {
+    font-size: 1.75rem;
+  }
+}

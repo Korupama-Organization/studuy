@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CredentialInput from '../../login/components/CredentialInput';
 
@@ -34,9 +34,42 @@ interface RegisterFormCardProps {
     onLinkedinUrlChange: (value: string) => void;
     onGithubUrlChange: (value: string) => void;
     onFacebookUrlChange: (value: string) => void;
+    companyName: string;
+    companyShortName: string;
+    companyLogoUrl: string;
+    companyWebsite: string;
+    companyAddress: string;
+    companyDescription: string;
+    companyType: 'On-site' | 'Remote' | 'Hybrid';
+    companyTechStack: string;
+    companyBenefits: string;
+    companyTargetRoles: string;
+    usingAIInterview: boolean;
+    usingManualInterview: boolean;
+    onCompanyNameChange: (value: string) => void;
+    onCompanyShortNameChange: (value: string) => void;
+    onCompanyLogoUrlChange: (value: string) => void;
+    onCompanyWebsiteChange: (value: string) => void;
+    onCompanyAddressChange: (value: string) => void;
+    onCompanyDescriptionChange: (value: string) => void;
+    onCompanyTypeChange: (value: 'On-site' | 'Remote' | 'Hybrid') => void;
+    onCompanyTechStackChange: (value: string) => void;
+    onCompanyBenefitsChange: (value: string) => void;
+    onCompanyTargetRolesChange: (value: string) => void;
+    onUsingAIInterviewChange: (value: boolean) => void;
+    onUsingManualInterviewChange: (value: boolean) => void;
     onCheckEmailAvailability: (email: string) => Promise<void>;
-    onSubmit: () => void;
+    onSubmit: () => Promise<string | null>;
 }
+
+const isEmailConflictError = (message: string) => {
+    const normalizedError = message.trim().toLowerCase();
+
+    return (
+        normalizedError.includes('email is already registered') ||
+        normalizedError.includes('email đã tồn tại')
+    );
+};
 
 export default function RegisterFormCard({
     fullName,
@@ -62,6 +95,30 @@ export default function RegisterFormCard({
     onLinkedinUrlChange,
     onGithubUrlChange,
     onFacebookUrlChange,
+    companyName,
+    companyShortName,
+    companyLogoUrl,
+    companyWebsite,
+    companyAddress,
+    companyDescription,
+    companyType,
+    companyTechStack,
+    companyBenefits,
+    companyTargetRoles,
+    usingAIInterview,
+    usingManualInterview,
+    onCompanyNameChange,
+    onCompanyShortNameChange,
+    onCompanyLogoUrlChange,
+    onCompanyWebsiteChange,
+    onCompanyAddressChange,
+    onCompanyDescriptionChange,
+    onCompanyTypeChange,
+    onCompanyTechStackChange,
+    onCompanyBenefitsChange,
+    onCompanyTargetRolesChange,
+    onUsingAIInterviewChange,
+    onUsingManualInterviewChange,
     onCheckEmailAvailability,
     onSubmit,
 }: RegisterFormCardProps) {
@@ -89,28 +146,18 @@ export default function RegisterFormCard({
                 subtitle: 'Avatar và mạng xã hội',
                 sectionTitle: 'Hồ sơ chuyên nghiệp',
             },
+            {
+                id: 4,
+                title: 'Công ty',
+                subtitle: 'Thông tin & Văn hóa',
+                sectionTitle: 'Thông tin công ty',
+            },
         ],
         [],
     );
 
     const progressPercent = Math.round((currentStep / steps.length) * 100);
     const currentStepConfig = steps[currentStep - 1];
-
-    useEffect(() => {
-        const normalizedError = errorMessage.trim().toLowerCase();
-        if (!normalizedError) {
-            return;
-        }
-
-        const isEmailConflictError =
-            normalizedError.includes('email is already registered') ||
-            normalizedError.includes('email đã tồn tại');
-
-        if (isEmailConflictError && currentStep !== 1) {
-            setCurrentStep(1);
-            setStepError('');
-        }
-    }, [errorMessage, currentStep]);
 
     const goToPreviousStep = () => {
         setStepError('');
@@ -152,6 +199,19 @@ export default function RegisterFormCard({
             }
         }
 
+        if (step === 3) {
+            // Optional fields, no validation needed
+        }
+
+        if (step === 4) {
+            if (!companyName.trim() || !companyWebsite.trim() || !companyAddress.trim()) {
+                return 'Vui lòng nhập đầy đủ thông tin công ty.';
+            }
+            if (!companyWebsite.includes('http')) {
+                return 'Website phải bắt đầu bằng http:// hoặc https://';
+            }
+        }
+
         return '';
     };
 
@@ -177,7 +237,7 @@ export default function RegisterFormCard({
         }
 
         setStepError('');
-        setCurrentStep((step) => Math.min(step + 1, 3));
+        setCurrentStep((step) => Math.min(step + 1, 4));
     };
 
     const handleFinalSubmit = async () => {
@@ -188,7 +248,11 @@ export default function RegisterFormCard({
         }
 
         setStepError('');
-        onSubmit();
+        const submitError = await onSubmit();
+
+        if (submitError && isEmailConflictError(submitError)) {
+            setCurrentStep(1);
+        }
     };
 
     return (
@@ -203,7 +267,7 @@ export default function RegisterFormCard({
             </h1>
 
             <div className="mb-2 sm:mb-3 rounded-[18px] border border-[#E1E4F0] bg-[#F8F9FF] px-3 py-2.5 shadow-[0_6px_14px_rgba(26,28,73,0.1)]">
-                <div className="grid grid-cols-3 gap-2 pb-1.5">
+                <div className="grid grid-cols-4 gap-1.5 pb-1.5">
                     {steps.map((step) => {
                         const isActive = currentStep === step.id;
                         const isCompleted = currentStep > step.id;
@@ -425,6 +489,116 @@ export default function RegisterFormCard({
                                 />
                             </>
                         ) : null}
+
+                        {currentStep === 4 ? (
+                            <>
+                                <CredentialInput
+                                    label="Tên công ty"
+                                    type="text"
+                                    value={companyName}
+                                    onChange={onCompanyNameChange}
+                                    placeholder="Nhập tên doanh nghiệp"
+                                    iconUrl={USER_ICON_CDN}
+                                    iconAlt="company name icon"
+                                    compact
+                                />
+
+                                <CredentialInput
+                                    label="Website công ty"
+                                    type="text"
+                                    value={companyWebsite}
+                                    onChange={onCompanyWebsiteChange}
+                                    placeholder="https://..."
+                                    iconUrl={LINK_ICON_CDN}
+                                    iconAlt="company website icon"
+                                    compact
+                                />
+
+                                <CredentialInput
+                                    label="Tên viết tắt"
+                                    type="text"
+                                    value={companyShortName}
+                                    onChange={onCompanyShortNameChange}
+                                    placeholder="Ví dụ: SEeds"
+                                    iconUrl={USER_ICON_CDN}
+                                    iconAlt="short name icon"
+                                    compact
+                                />
+
+                                <CredentialInput
+                                    label="Địa chỉ công ty"
+                                    type="text"
+                                    value={companyAddress}
+                                    onChange={onCompanyAddressChange}
+                                    placeholder="Nhập địa chỉ trụ sở"
+                                    iconUrl={LINK_ICON_CDN}
+                                    iconAlt="company address icon"
+                                    compact
+                                />
+
+                                <CredentialInput
+                                    label="Mô tả ngắn"
+                                    type="text"
+                                    value={companyDescription}
+                                    onChange={onCompanyDescriptionChange}
+                                    placeholder="Giới thiệu về công ty..."
+                                    iconUrl={USER_ICON_CDN}
+                                    iconAlt="description icon"
+                                    compact
+                                />
+
+                                <div className="flex flex-col gap-2 pb-1">
+                                    <label className="text-[#0A0A0A] font-inter font-light" style={{ fontSize: 'clamp(0.82rem, 2.1vw, 0.95rem)' }}>Hình thức làm việc</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {(['On-site', 'Remote', 'Hybrid'] as const).map((type) => (
+                                            <button
+                                                key={type}
+                                                type="button"
+                                                onClick={() => onCompanyTypeChange(type)}
+                                                className={`h-[38px] rounded-full border text-center transition-colors ${companyType === type ? 'border-[#5E52D9] bg-[#E9E8FE] text-[#3D30B9]' : 'border-[#D5D8E8] bg-white text-[#6C728C]'}`}
+                                                style={{ fontSize: 'clamp(0.75rem, 2vw, 0.85rem)' }}
+                                            >
+                                                {type}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <CredentialInput
+                                    label="Tech Stack (cách nhau bởi dấu phẩy)"
+                                    type="text"
+                                    value={companyTechStack}
+                                    onChange={onCompanyTechStackChange}
+                                    placeholder="Node.js, TypeScript, ..."
+                                    iconUrl={LINK_ICON_CDN}
+                                    iconAlt="tech stack icon"
+                                    compact
+                                />
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex items-center gap-2 px-3 h-[44px] bg-white border border-[#D5D8E8] rounded-xl">
+                                        <input
+                                            type="checkbox"
+                                            checked={usingAIInterview}
+                                            onChange={(e) => onUsingAIInterviewChange(e.target.checked)}
+                                            id="ai-interview"
+                                            className="w-4 h-4"
+                                        />
+                                        <label htmlFor="ai-interview" className="text-[#6C728C] text-xs font-medium cursor-pointer">Phỏng vấn AI</label>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-3 h-[44px] bg-white border border-[#D5D8E8] rounded-xl">
+                                        <input
+                                            type="checkbox"
+                                            checked={usingManualInterview}
+                                            onChange={(e) => onUsingManualInterviewChange(e.target.checked)}
+                                            id="manual-interview"
+                                            className="w-4 h-4"
+                                        />
+                                        <label htmlFor="manual-interview" className="text-[#6C728C] text-xs font-medium cursor-pointer">Phỏng vấn trực tiếp</label>
+                                    </div>
+                                </div>
+                            </>
+                        ) : null}
                     </div>
                 </div>
 
@@ -439,7 +613,7 @@ export default function RegisterFormCard({
                         Quay lại
                     </button>
 
-                    {currentStep < 3 ? (
+                    {currentStep < 4 ? (
                         <button
                             type="button"
                             onClick={() => {

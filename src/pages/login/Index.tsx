@@ -14,7 +14,7 @@ import MobileFormScreen from "./components/MobileFormScreen";
 import MobileIntroScreen from "./components/MobileIntroScreen";
 import MobileViewportScaler from "./components/MobileViewportScaler";
 
-type MobileStep = 'intro' | 'form';
+type MobileStep = "intro" | "form";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -23,43 +23,46 @@ export default function LoginPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [isDesktop, setIsDesktop] = useState<boolean>(() => {
-        if (typeof window === 'undefined') {
+        if (typeof window === "undefined") {
             return false;
         }
 
-        return window.matchMedia('(min-width: 1024px)').matches;
+        return window.matchMedia("(min-width: 1024px)").matches;
     });
-    const [mobileStep, setMobileStep] = useState<MobileStep>('intro');
+    const [mobileStep, setMobileStep] = useState<MobileStep>("intro");
 
     useEffect(() => {
         if (hasValidStoredAccessToken()) {
             const user = getStoredUser();
-            if (user?.role === 'candidate') {
+
+            if (user?.role === "candidate") {
                 navigate("/profile/update", { replace: true });
-            } else {
+            } else if (user?.role === "recruiter") {
                 navigate("/dashboard", { replace: true });
+            } else {
+                navigate("/", { replace: true });
             }
         }
     }, [navigate]);
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia('(min-width: 1024px)');
+        const mediaQuery = window.matchMedia("(min-width: 1024px)");
 
         const onMediaChange = (event: MediaQueryListEvent) => {
             setIsDesktop(event.matches);
         };
 
         setIsDesktop(mediaQuery.matches);
-        mediaQuery.addEventListener('change', onMediaChange);
+        mediaQuery.addEventListener("change", onMediaChange);
 
         return () => {
-            mediaQuery.removeEventListener('change', onMediaChange);
+            mediaQuery.removeEventListener("change", onMediaChange);
         };
     }, []);
 
     useEffect(() => {
         if (isDesktop) {
-            setMobileStep('form');
+            setMobileStep("form");
         }
     }, [isDesktop]);
 
@@ -79,18 +82,22 @@ export default function LoginPage() {
         try {
             setIsSubmitting(true);
 
-            // handle UIT authentication first with checking identifier is not an email
-            if (normalizedIdentifier.includes('@')) {
-                var result = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
-            }
-            else {
-                var result = await loginWithUIT(normalizedIdentifier, normalizedPassword);
-            }
+            const isEmailLogin = normalizedIdentifier.includes("@");
+
+            const result = isEmailLogin
+                ? await loginNormalAuth(normalizedIdentifier, normalizedPassword)
+                : await loginWithUIT(normalizedIdentifier, normalizedPassword);
+
             storeAuthSession(result);
-            if (result.user?.role === 'candidate') {
+
+            const userRole = result.user?.role;
+
+            if (userRole === "candidate") {
                 navigate("/profile/update", { replace: true });
-            } else {
+            } else if (userRole === "recruiter" || isEmailLogin) {
                 navigate("/dashboard", { replace: true });
+            } else {
+                navigate("/", { replace: true });
             }
         } catch (error) {
             const fallbackMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
@@ -107,8 +114,8 @@ export default function LoginPage() {
     if (!isDesktop) {
         return (
             <MobileViewportScaler>
-                {mobileStep === 'intro' ? (
-                    <MobileIntroScreen onContinue={() => setMobileStep('form')} />
+                {mobileStep === "intro" ? (
+                    <MobileIntroScreen onContinue={() => setMobileStep("form")} />
                 ) : (
                     <MobileFormScreen
                         identifier={identifier}
@@ -118,7 +125,7 @@ export default function LoginPage() {
                         onIdentifierChange={setIdentifier}
                         onPasswordChange={setPassword}
                         onSubmit={handleSubmit}
-                        onBack={() => setMobileStep('intro')}
+                        onBack={() => setMobileStep("intro")}
                     />
                 )}
             </MobileViewportScaler>

@@ -35,15 +35,25 @@ export interface RegisterHrPayload {
     linkedinUrl?: string;
     githubUrl?: string;
     facebookUrl?: string;
+    companyName?: string;
+    companyWebsite?: string;
+    companyAddress?: string;
 }
 
 interface ApiErrorShape {
-    message?: string;
-    error?: string;
+    message?: string | string[];
+    error?: string | string[];
+    statusCode?: number;
+    status?: number;
 }
 
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() || 'http://localhost:3000';
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    (typeof window !== 'undefined' ? window.location.origin : '');
+
+const buildApiUrl = (path: string): string => {
+    return new URL(path, API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`).toString();
+};
 
 const UIT_AUTH_SECRET =
     import.meta.env.VITE_UIT_AUTH_SECRET?.toString().trim();
@@ -59,22 +69,61 @@ const toErrorMessage = (fallback: string, payload?: ApiErrorShape): string => {
         return fallback;
     }
 
-    if (typeof payload.message === 'string' && payload.message.trim()) {
-        return payload.message;
+    const messageValue = Array.isArray(payload.message)
+        ? payload.message.find((item) => typeof item === 'string' && item.trim())
+        : payload.message;
+
+    if (typeof messageValue === 'string' && messageValue.trim()) {
+        return messageValue;
     }
 
-    if (typeof payload.error === 'string' && payload.error.trim()) {
-        return payload.error;
+    const errorValue = Array.isArray(payload.error)
+        ? payload.error.find((item) => typeof item === 'string' && item.trim())
+        : payload.error;
+
+    if (typeof errorValue === 'string' && errorValue.trim()) {
+        return errorValue;
     }
 
     return fallback;
+};
+
+const extractResponseText = async (response: Response): Promise<string> => {
+    try {
+        return (await response.text()).trim();
+    } catch {
+        return '';
+    }
+};
+
+const extractApiErrorMessage = (rawBody: string): string => {
+    if (!rawBody) {
+        return '';
+    }
+
+    try {
+        const parsedBody = JSON.parse(rawBody) as ApiErrorShape;
+        return toErrorMessage('', parsedBody).trim();
+    } catch {
+        return rawBody;
+    }
+};
+
+const formatAuthFailureMessage = (response: Response, fallback: string, rawBody: string): string => {
+    const extractedMessage = extractApiErrorMessage(rawBody);
+    if (extractedMessage) {
+        return extractedMessage;
+    }
+
+    const statusPart = response.status ? ` (${response.status}${response.statusText ? ` ${response.statusText}` : ''})` : '';
+    return `${fallback}${statusPart}`;
 };
 
 export const loginNormalAuth = async (
     identifier: string,
     password: string,
 ): Promise<LoginResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    const response = await fetch(buildApiUrl('api/auth/login'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -85,26 +134,23 @@ export const loginNormalAuth = async (
         }),
     });
 
-    let payload: LoginResponse | ApiErrorShape | null = null;
-    try {
-        payload = (await response.json()) as LoginResponse | ApiErrorShape;
-    } catch {
-        payload = null;
-    }
+    const rawBody = await extractResponseText(response);
 
     if (!response.ok) {
-        throw new Error(toErrorMessage('Dang nhap that bai.', payload as ApiErrorShape));
+        const message = formatAuthFailureMessage(response, 'Đăng nhập thất bại.', rawBody);
+
+        throw new Error(message || 'Đăng nhập thất bại.');
     }
 
-    return payload as LoginResponse;
+    return JSON.parse(rawBody) as LoginResponse;
 };
 
 export const loginWithUIT = async (identifier: string, password: string): Promise<LoginResponse> => {
     if (!UIT_AUTH_SECRET) {
-        throw new Error('UIT_AUTH_SECRET is not defined in environment variables.');
+        throw new Error('VITE_UIT_AUTH_SECRET is not defined in environment variables.');
     }
     const encryptedPassword = await encryptPassword(password, UIT_AUTH_SECRET);
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    const response = await fetch(buildApiUrl('api/auth/login'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -115,25 +161,21 @@ export const loginWithUIT = async (identifier: string, password: string): Promis
         }),
     });
 
-    let payload: LoginResponse | ApiErrorShape | null = null;
-    try {
-        payload = (await response.json()) as LoginResponse | ApiErrorShape;
-    }
-    catch {
-        payload = null;
-    }
+    const rawBody = await extractResponseText(response);
 
     if (!response.ok) {
-        throw new Error(toErrorMessage('Dang nhap that bai.', payload as ApiErrorShape));
+        const message = formatAuthFailureMessage(response, 'Đăng nhập thất bại.', rawBody);
+
+        throw new Error(message || 'Đăng nhập thất bại.');
     }
 
-    return payload as LoginResponse;
+    return JSON.parse(rawBody) as LoginResponse;
 };
 
 export const registerHrUser = async (
     payload: RegisterHrPayload,
 ): Promise<RegisterHrResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/register/hr`, {
+    const response = await fetch(buildApiUrl('api/auth/register/hr'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -158,7 +200,7 @@ export const registerHrUser = async (
 export const checkHrEmailAvailability = async (email: string): Promise<void> => {
     const normalizedEmail = email.trim();
     const response = await fetch(
-        `${API_BASE_URL}/api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`,
+        buildApiUrl(`api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`),
         {
             method: 'GET',
             headers: {
@@ -177,6 +219,29 @@ export const checkHrEmailAvailability = async (email: string): Promise<void> => 
     if (!response.ok) {
         throw new Error(toErrorMessage('Khong the kiem tra email.', payload as ApiErrorShape));
     }
+};
+
+export const createCompany = async (
+    token: string,
+    payload: Record<string, any>
+): Promise<any> => {
+    const response = await fetch(buildApiUrl('api/companies'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
+    });
+
+    const rawBody = await extractResponseText(response);
+
+    if (!response.ok) {
+        const message = extractApiErrorMessage(rawBody);
+        throw new Error(message || 'Tạo công ty thất bại.');
+    }
+
+    return JSON.parse(rawBody);
 };
 
 export const storeAuthSession = (result: LoginResponse): void => {
@@ -274,6 +339,17 @@ export const hasValidStoredAccessToken = (): boolean => {
     }
 
     return isTokenValid;
+};
+
+export const getStoredUserRole = (): string | null => {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.currentUser);
+        if (!raw) return null;
+        const user = JSON.parse(raw) as AuthUser;
+        return user.role ?? null;
+    } catch {
+        return null;
+    }
 };
 
 export const clearAuthSession = (): void => {

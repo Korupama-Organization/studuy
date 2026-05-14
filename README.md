@@ -45,6 +45,15 @@ npm run dev
 
 The app will be available at **http://localhost:5173** (Vite default port).
 
+### 4. Configure environment variables
+
+Vite only exposes client env vars that start with `VITE_`. For UIT login, define:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000/
+VITE_UIT_AUTH_SECRET=your-secret-here
+```
+
 ---
 
 ## Available Scripts

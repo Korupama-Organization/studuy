@@ -1,0 +1,15 @@
+export { default as LandingNavbar } from './navigation/LandingNavbar';
+export { default as HeroSection } from './sections/hero/HeroSection';
+export { default as ProblemSection } from './sections/problem/ProblemSection';
+export { default as PainSection } from './sections/pain/PainSection';
+export { default as SolutionSection } from './sections/solution/SolutionSection';
+export { default as HowItWorksSection } from './sections/how-it-works/HowItWorksSection';
+export { default as AIAnalysisSection } from './sections/ai-analysis/AIAnalysisSection';
+export { default as ValueSection } from './sections/value/ValueSection';
+export { default as JobConnectionSection } from './sections/job-connection/JobConnectionSection';
+export { default as RecruiterSection } from './sections/recruiter/RecruiterSection';
+export { default as DemoSection } from './sections/demo/DemoSection';
+export { default as CTASection } from './sections/cta/CTASection';
+export { default as FAQSection } from './sections/faq/FAQSection';
+export { default as FooterSection } from './sections/footer/FooterSection';
+export { default as TestimonialsSection } from './sections/testimonials/TestimonialsSection';

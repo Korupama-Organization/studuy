@@ -157,7 +157,12 @@ interface ApiErrorShape {
 }
 
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() || 'http://localhost:3000';
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    (typeof window !== 'undefined' ? window.location.origin : '');
+
+const buildApiUrl = (path: string): string => {
+    return new URL(path, API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`).toString();
+};
 
 const toErrorMessage = (fallback: string, payload?: ApiErrorShape): string => {
     if (!payload) return fallback;
@@ -229,7 +234,7 @@ export const updateCandidateProfile = async (
 };
 
 export const getProfileCompletion = async (): Promise<CompletionResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/candidate-profiles/me/completion`, {
+    const response = await fetch(buildApiUrl('/api/candidate-profiles/me/completion'), {
         method: 'GET',
         headers: authHeaders(),
     });
@@ -251,7 +256,7 @@ export const getProfileCompletion = async (): Promise<CompletionResponse> => {
 };
 
 export const getCandidateDashboard = async (): Promise<DashboardResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/candidate-profiles/me/dashboard`, {
+    const response = await fetch(buildApiUrl('/api/candidate-profiles/me/dashboard'), {
         method: 'GET',
         headers: authHeaders(),
     });
