@@ -2,6 +2,11 @@ import LandingPage from '../pages/landing/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import DashboardPage from '../pages/dashboard/Index';
+import UpdateProfile from '../pages/profile/UpdateProfile';
+import UpdateProfileStep2 from '../pages/profile/UpdateProfileStep2';
+import UpdateProfileStep3 from '../pages/profile/UpdateProfileStep3';
+import UpdateProfileStep4 from '../pages/profile/UpdateProfileStep4';
+
 
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';
@@ -20,6 +25,10 @@ function App() {
           <Route path="/login/*" element={<LoginPage />} />
           <Route path="/register/*" element={<RegisterPage />} />
           <Route path="/candidate/dashboard" element={<DashboardPage />} />
+          <Route path="/candidate/profile/update" element={<UpdateProfile />} />
+          <Route path="/candidate/profile/update/step2" element={<UpdateProfileStep2 />} />
+          <Route path="/candidate/profile/update/step3" element={<UpdateProfileStep3 />} />
+          <Route path="/candidate/profile/update/step4" element={<UpdateProfileStep4 />} />
 
 
           <Route path="/recruiter/jobs" element={<RecruiterJobsPage />} />
