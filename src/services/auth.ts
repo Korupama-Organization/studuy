@@ -174,7 +174,7 @@ export const loginWithUIT = async (identifier: string, password: string): Promis
 export const registerHrUser = async (
     payload: RegisterHrPayload,
 ): Promise<RegisterHrResponse> => {
-    const response = await fetch(`${API_BASE_URL}api/auth/register/hr`, {
+    const response = await fetch(buildApiUrl('api/auth/register/hr'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ export const registerHrUser = async (
 export const checkHrEmailAvailability = async (email: string): Promise<void> => {
     const normalizedEmail = email.trim();
     const response = await fetch(
-        `${API_BASE_URL}api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`,
+        buildApiUrl(`api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`),
         {
             method: 'GET',
             headers: {
