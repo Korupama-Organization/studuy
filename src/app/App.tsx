@@ -35,7 +35,7 @@ function App() {
           <Route path="/candidate/profile/update/step2" element={<ProfileFormProvider><UpdateProfileStep2 /></ProfileFormProvider>} />
           <Route path="/candidate/profile/update/step3" element={<ProfileFormProvider><UpdateProfileStep3 /></ProfileFormProvider>} />
           <Route path="/candidate/profile/update/step4" element={<ProfileFormProvider><UpdateProfileStep4 /></ProfileFormProvider>} />
-
+          <Route path="/candidate/jobs" element={<CandidateJobsPage />} />
 
           <Route path="/recruiter/company" element={<CompanyPage />} />
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />

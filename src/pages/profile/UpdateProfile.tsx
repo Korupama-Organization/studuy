@@ -224,7 +224,7 @@ export default function UpdateProfile() {
                                         <button className="btn-save" onClick={saveStep2} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
                                         <button className="btn-next" disabled={saving} onClick={async () => {
                                             await saveStep2();
-                                            navigate('candidate/profile/update/step2');
+                                            navigate('/candidate/profile/update/step2');
                                         }}>
                                             Tiếp
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

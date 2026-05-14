@@ -228,7 +228,7 @@ export default function UpdateProfileStep4() {
                                 )}
 
                                 <div className="form-actions" style={{ paddingTop: '1.5rem', marginTop: '2rem', borderTop: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <button className="btn-back" onClick={() => navigate('candidate/profile/update/step3')}>
+                                    <button className="btn-back" onClick={() => navigate('/candidate/profile/update/step3')}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
@@ -241,7 +241,7 @@ export default function UpdateProfileStep4() {
                                             if (success) {
                                                 // Wait 2 seconds for user to see the success toast before redirecting
                                                 setTimeout(() => {
-                                                    navigate('candidate/profile/update/step4'); 
+                                                    navigate('/candidate/profile/update/step4'); 
                                                 }, 2000);
                                             }
                                         }}>

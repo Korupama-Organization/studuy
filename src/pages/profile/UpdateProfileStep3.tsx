@@ -72,7 +72,7 @@ export default function UpdateProfileStep3() {
                                 {/* DỰ ÁN */}
                                 <div className="section-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                     <h3 style={{ fontSize: '18px', fontWeight: 600, margin: 0, color: '#101828' }}>Dự án</h3>
-                                    <button className="btn-add-solid" onClick={() => updateField('projects', [...form.projects, { name: '', description: '', role: '', contribution: '', startDate: '', endDate: '', teamSize: 1, technologies: [], projectUrl: '', reportUrl: '' }])}>
+                                    <button className="btn-add-solid" onClick={() => updateField('projects', [...form.projects, { name: '', description: '', role: '', contribution: '', startDate: '', endDate: '', teamSize: 1, technologies: [], repositoryUrl: '', reportUrl: '' }])}>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                                         Thêm dự án
                                     </button>
@@ -132,7 +132,7 @@ export default function UpdateProfileStep3() {
                                             </div>
                                             <div className="form-field">
                                                 <label className="field-label">Repository URL</label>
-                                                <input type="url" className="field-input" placeholder="https://github.com/username/repo" style={{background: '#FFF'}} value={proj.projectUrl || ''} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], projectUrl: e.target.value }; updateField('projects', updated); }} />
+                                                <input type="url" className="field-input" placeholder="https://github.com/username/repo" style={{background: '#FFF'}} value={proj.repositoryUrl || ''} onChange={(e) => { const updated = [...form.projects]; updated[idx] = { ...updated[idx], repositoryUrl: e.target.value }; updateField('projects', updated); }} />
                                             </div>
                                             <div className="form-field">
                                                 <label className="field-label">Báo cáo URL</label>
@@ -202,7 +202,7 @@ export default function UpdateProfileStep3() {
 
                                 {/* Action Buttons */}
                                 <div className="form-actions" style={{ background: '#FFF', padding: '1.25rem', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <button className="btn-back" onClick={() => navigate('candidate/profile/update/step2')}>
+                                    <button className="btn-back" onClick={() => navigate('/candidate/profile/update/step2')}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
@@ -212,7 +212,7 @@ export default function UpdateProfileStep3() {
                                         <button className="btn-save" onClick={saveStep3} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
                                         <button className="btn-next" disabled={saving} onClick={async () => {
                                             const success = await saveStep3();
-                                            if (success) navigate('candidate/profile/update/step4');
+                                            if (success) navigate('/candidate/profile/update/step4');
                                         }}>
                                             Tiếp
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
