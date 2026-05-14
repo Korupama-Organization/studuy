@@ -7,14 +7,14 @@ import {
     loginNormalAuth,
     storeAuthSession,
     loginWithUIT,
-    getStoredUserRole,
+    getStoredUser,
 } from "../../services/auth";
 import LoginFormCard from "./components/LoginFormCard";
 import MobileFormScreen from "./components/MobileFormScreen";
 import MobileIntroScreen from "./components/MobileIntroScreen";
 import MobileViewportScaler from "./components/MobileViewportScaler";
 
-type MobileStep = 'intro' | 'form';
+type MobileStep = "intro" | "form";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -23,44 +23,46 @@ export default function LoginPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [isDesktop, setIsDesktop] = useState<boolean>(() => {
-        if (typeof window === 'undefined') {
+        if (typeof window === "undefined") {
             return false;
         }
 
-        return window.matchMedia('(min-width: 1024px)').matches;
+        return window.matchMedia("(min-width: 1024px)").matches;
     });
-    const [mobileStep, setMobileStep] = useState<MobileStep>('intro');
+    const [mobileStep, setMobileStep] = useState<MobileStep>("intro");
 
     useEffect(() => {
         if (hasValidStoredAccessToken()) {
-            const role = getStoredUserRole();
-            console.log('[Login] Already authenticated, role:', role);
-            if (role === 'recruiter') {
-                navigate('/dashboard', { replace: true });
+            const user = getStoredUser();
+
+            if (user?.role === "candidate") {
+                navigate("/candidate/dashboard", { replace: true });
+            } else if (user?.role === "recruiter") {
+                navigate("/dashboard", { replace: true });
             } else {
-                navigate('/', { replace: true });
+                navigate("/", { replace: true });
             }
         }
     }, [navigate]);
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia('(min-width: 1024px)');
+        const mediaQuery = window.matchMedia("(min-width: 1024px)");
 
         const onMediaChange = (event: MediaQueryListEvent) => {
             setIsDesktop(event.matches);
         };
 
         setIsDesktop(mediaQuery.matches);
-        mediaQuery.addEventListener('change', onMediaChange);
+        mediaQuery.addEventListener("change", onMediaChange);
 
         return () => {
-            mediaQuery.removeEventListener('change', onMediaChange);
+            mediaQuery.removeEventListener("change", onMediaChange);
         };
     }, []);
 
     useEffect(() => {
         if (isDesktop) {
-            setMobileStep('form');
+            setMobileStep("form");
         }
     }, [isDesktop]);
 
@@ -80,31 +82,22 @@ export default function LoginPage() {
         try {
             setIsSubmitting(true);
 
-            // Recruiter đăng nhập bằng email (chứa @) → normal_auth
-            // Candidate đăng nhập bằng MSSV (không chứa @) → uit_auth
-            const isEmailLogin = normalizedIdentifier.includes('@');
-            let result;
-            if (isEmailLogin) {
-                result = await loginNormalAuth(normalizedIdentifier, normalizedPassword);
-            } else {
-                result = await loginWithUIT(normalizedIdentifier, normalizedPassword);
-            }
+            const isEmailLogin = normalizedIdentifier.includes("@");
+
+            const result = isEmailLogin
+                ? await loginNormalAuth(normalizedIdentifier, normalizedPassword)
+                : await loginWithUIT(normalizedIdentifier, normalizedPassword);
 
             storeAuthSession(result);
 
-            // Debug: xem API trả về role gì
-            console.log('[Login] Login response user:', JSON.stringify(result.user));
-            console.log('[Login] user.role:', result.user?.role);
-            console.log('[Login] isEmailLogin:', isEmailLogin);
-
-            // Điều hướng: recruiter → /dashboard, còn lại → /
             const userRole = result.user?.role;
-            if (userRole === 'recruiter' || (isEmailLogin && userRole !== 'candidate')) {
-                console.log('[Login] Redirecting to /dashboard');
-                navigate('/dashboard', { replace: true });
+
+            if (userRole === "candidate") {
+                navigate("/candidate/dashboard", { replace: true });
+            } else if (userRole === "recruiter" || isEmailLogin) {
+                navigate("/recruiter/dashboard", { replace: true });
             } else {
-                console.log('[Login] Redirecting to /');
-                navigate('/', { replace: true });
+                navigate("/", { replace: true });
             }
         } catch (error) {
             const fallbackMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
@@ -121,8 +114,8 @@ export default function LoginPage() {
     if (!isDesktop) {
         return (
             <MobileViewportScaler>
-                {mobileStep === 'intro' ? (
-                    <MobileIntroScreen onContinue={() => setMobileStep('form')} />
+                {mobileStep === "intro" ? (
+                    <MobileIntroScreen onContinue={() => setMobileStep("form")} />
                 ) : (
                     <MobileFormScreen
                         identifier={identifier}
@@ -132,6 +125,7 @@ export default function LoginPage() {
                         onIdentifierChange={setIdentifier}
                         onPasswordChange={setPassword}
                         onSubmit={handleSubmit}
+                        onBack={() => setMobileStep("intro")}
                     />
                 )}
             </MobileViewportScaler>

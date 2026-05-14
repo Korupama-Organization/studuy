@@ -157,7 +157,8 @@ interface ApiErrorShape {
 }
 
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() || 'http://localhost:3000';
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    (typeof window !== 'undefined' ? window.location.origin : '');
 
 const buildApiUrl = (path: string): string => {
     return new URL(path, API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`).toString();
@@ -180,10 +181,37 @@ const authHeaders = (): HeadersInit => {
 
 // ── API functions ──
 
+export interface GetProfileResponse {
+    message: string;
+    data: CandidateProfileData | null;
+}
+
+export const getCandidateProfile = async (): Promise<GetProfileResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/candidate-profiles/me`, {
+        method: 'GET',
+        headers: authHeaders(),
+    });
+
+    let payload: GetProfileResponse | ApiErrorShape | null = null;
+    try {
+        payload = (await response.json()) as GetProfileResponse | ApiErrorShape;
+    } catch {
+        payload = null;
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            toErrorMessage('Không thể lấy dữ liệu hồ sơ.', payload as ApiErrorShape),
+        );
+    }
+
+    return payload as GetProfileResponse;
+};
+
 export const updateCandidateProfile = async (
     payload: UpdateCandidateProfilePayload,
 ): Promise<UpdateProfileResponse> => {
-    const response = await fetch(buildApiUrl('/api/candidate-profiles/me'), {
+    const response = await fetch(`${API_BASE_URL}/api/candidate-profiles/me`, {
         method: 'PATCH',
         headers: authHeaders(),
         body: JSON.stringify(payload),
