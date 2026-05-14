@@ -48,7 +48,8 @@ interface ApiErrorShape {
 }
 
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() || 'http://localhost:3000';
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    (typeof window !== 'undefined' ? window.location.origin : '');
 
 const buildApiUrl = (path: string): string => {
     return new URL(path, API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`).toString();
@@ -122,7 +123,7 @@ export const loginNormalAuth = async (
     identifier: string,
     password: string,
 ): Promise<LoginResponse> => {
-    const response = await fetch(buildApiUrl('/api/auth/login'), {
+    const response = await fetch(buildApiUrl('api/auth/login'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -149,7 +150,7 @@ export const loginWithUIT = async (identifier: string, password: string): Promis
         throw new Error('VITE_UIT_AUTH_SECRET is not defined in environment variables.');
     }
     const encryptedPassword = await encryptPassword(password, UIT_AUTH_SECRET);
-    const response = await fetch(buildApiUrl('/api/auth/login'), {
+    const response = await fetch(buildApiUrl('api/auth/login'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -174,7 +175,7 @@ export const loginWithUIT = async (identifier: string, password: string): Promis
 export const registerHrUser = async (
     payload: RegisterHrPayload,
 ): Promise<RegisterHrResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/register/hr`, {
+    const response = await fetch(buildApiUrl('api/auth/register/hr'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -199,7 +200,7 @@ export const registerHrUser = async (
 export const checkHrEmailAvailability = async (email: string): Promise<void> => {
     const normalizedEmail = email.trim();
     const response = await fetch(
-        `${API_BASE_URL}/api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`,
+        buildApiUrl(`api/auth/register/hr/check-email?email=${encodeURIComponent(normalizedEmail)}`),
         {
             method: 'GET',
             headers: {
@@ -224,7 +225,7 @@ export const createCompany = async (
     token: string,
     payload: Record<string, any>
 ): Promise<any> => {
-    const response = await fetch(buildApiUrl('/api/companies'), {
+    const response = await fetch(buildApiUrl('api/companies'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -253,6 +254,16 @@ export const getStoredAccessToken = (): string => {
     return localStorage.getItem(STORAGE_KEYS.accessToken) || '';
 };
 
+export const getStoredUser = (): AuthUser | null => {
+    const userStr = localStorage.getItem(STORAGE_KEYS.currentUser);
+    if (!userStr) return null;
+    try {
+        return JSON.parse(userStr) as AuthUser;
+    } catch {
+        return null;
+    }
+};
+
 const parseJwtPayload = (token: string): Record<string, unknown> | null => {
     const parts = token.split('.');
     if (parts.length !== 3) {
@@ -268,8 +279,44 @@ const parseJwtPayload = (token: string): Record<string, unknown> | null => {
     }
 };
 
+export const refreshAuthSession = async (): Promise<boolean> => {
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken);
+    if (!refreshToken) {
+        clearAuthSession();
+        return false;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refreshToken }),
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.accessToken) {
+                localStorage.setItem(STORAGE_KEYS.accessToken, result.accessToken);
+                if (result.refreshToken) {
+                    localStorage.setItem(STORAGE_KEYS.refreshToken, result.refreshToken);
+                }
+                return true;
+            }
+        }
+    } catch {
+        // network error, maybe ignore
+    }
+
+    clearAuthSession();
+    return false;
+};
+
 export const hasValidStoredAccessToken = (): boolean => {
     const token = getStoredAccessToken();
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken);
+    
     if (!token) {
         return false;
     }
@@ -284,7 +331,11 @@ export const hasValidStoredAccessToken = (): boolean => {
     const isTokenValid = payload.exp > nowInSeconds;
 
     if (!isTokenValid) {
-        clearAuthSession();
+        // If we have a refresh token, we don't clear the session yet, we return false
+        // so the caller can attempt to refresh it.
+        if (!refreshToken) {
+            clearAuthSession();
+        }
     }
 
     return isTokenValid;

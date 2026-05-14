@@ -43,7 +43,10 @@ export interface SaveJobPayload {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.toString().trim() || "http://localhost:3000";
+  (
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    (typeof window !== "undefined" ? window.location.origin : "")
+  ).replace(/\/+$/, "");
 
 const PAGE_SIZE = 6;
 
