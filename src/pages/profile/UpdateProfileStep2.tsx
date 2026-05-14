@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfileForm } from './ProfileFormContext';
 import ProfileSidebar from './ProfileSidebar';
+import GlobalHeader from '../../components/GlobalHeader';
 
 const STEPS = [
     { label: "Bước 1", sub: "Thông tin cơ bản" },
@@ -24,7 +25,6 @@ const TECH_CATEGORIES = [
 
 export default function UpdateProfileStep2() {
     const [activeStep] = useState(1);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [newSoftSkill, setNewSoftSkill] = useState('');
     const navigate = useNavigate();
     const { form, updateField, completion, completionLoading, saveStep2, saving } = useProfileForm();
@@ -37,72 +37,7 @@ export default function UpdateProfileStep2() {
 
     return (
         <div className="profile-page">
-            {/* Header */}
-            <header className="profile-header">
-                <div className="header-container">
-                    <a href="/" className="brand-logo">
-                        <div className="brand-icon">S</div>
-                        <span className="brand-name">SEeds</span>
-                    </a>
-
-                    <nav className="header-nav">
-                        <a href="#" className="nav-link">Bảng điều khiển</a>
-                        <a href="#" className="nav-link">Phỏng vấn thử</a>
-                        <a href="#" className="nav-link">Việc làm</a>
-
-                        <div className="user-menu-wrapper">
-                            <button
-                                className="user-menu-trigger"
-                                onClick={() => setDropdownOpen(!dropdownOpen)}
-                            >
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <path d="M15.8242 17.4898V15.8241C15.8242 14.9405 15.4732 14.0932 14.8485 13.4684C14.2237 12.8437 13.3763 12.4927 12.4928 12.4927H7.49571C6.61216 12.4927 5.76481 12.8437 5.14005 13.4684C4.51529 14.0932 4.16431 14.9405 4.16431 15.8241V17.4898" stroke="#364153" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
-                                    <path d="M9.99424 9.16133C11.8341 9.16133 13.3256 7.66982 13.3256 5.82994C13.3256 3.99005 11.8341 2.49854 9.99424 2.49854C8.15436 2.49854 6.66284 3.99005 6.66284 5.82994C6.66284 7.66982 8.15436 9.16133 9.99424 9.16133Z" stroke="#364153" strokeWidth="1.67" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                                <span className="user-name">Nguyễn Văn A</span>
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                    <path d="M11.9959 9.99665L7.99725 5.99798L3.99857 9.99665" stroke="#364153" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                            </button>
-
-                            {dropdownOpen && (
-                                <div className="user-dropdown">
-                                    <a href="#" className="dropdown-item">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <path d="M12.6625 13.9953V12.6624C12.6625 11.9554 12.3817 11.2773 11.8817 10.7774C11.3818 10.2774 10.7037 9.99658 9.99673 9.99658H5.99806C5.29105 9.99658 4.613 10.2774 4.11307 10.7774C3.61313 11.2773 3.33228 11.9554 3.33228 12.6624V13.9953" stroke="#364153" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M7.99733 7.33108C9.4696 7.33108 10.6631 6.13757 10.6631 4.6653C10.6631 3.19302 9.4696 1.99951 7.99733 1.99951C6.52505 1.99951 5.33154 3.19302 5.33154 4.6653C5.33154 6.13757 6.52505 7.33108 7.99733 7.33108Z" stroke="#364153" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        Hồ sơ
-                                    </a>
-                                    <a href="#" className="dropdown-item">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <g clipPath="url(#clip-settings)">
-                                                <path d="M8.1439 1.33301H7.85066C7.49715 1.33301 7.15813 1.47344 6.90816 1.7234C6.6582 1.97337 6.51777 2.31239 6.51777 2.6659V2.78586C6.51753 3.0196 6.45583 3.24917 6.33885 3.45153C6.22188 3.6539 6.05375 3.82194 5.85132 3.93881L5.56475 4.10542C5.36213 4.22241 5.13228 4.284 4.8983 4.284C4.66433 4.284 4.43448 4.22241 4.23186 4.10542L4.13189 4.05211C3.82604 3.87567 3.46267 3.82781 3.12156 3.91902C2.78045 4.01024 2.48947 4.23307 2.31249 4.53861L2.16588 4.79186C1.98944 5.09772 1.94158 5.46108 2.03279 5.80219C2.12401 6.1433 2.34684 6.43428 2.65238 6.61126L2.75235 6.6779C2.9538 6.79421 3.12131 6.9612 3.23822 7.1623C3.35514 7.36339 3.41739 7.59158 3.41879 7.82419V8.16408C3.41973 8.39895 3.35858 8.62989 3.24155 8.83353C3.12452 9.03716 2.95575 9.20626 2.75235 9.32369L2.65238 9.38367C2.34684 9.56065 2.12401 9.85163 2.03279 10.1927C1.94158 10.5339 1.98944 10.8972 2.16588 11.2031L2.31249 11.4563C2.48947 11.7619 2.78045 11.9847 3.12156 12.0759C3.46267 12.1671 3.82604 12.1193 4.13189 11.9428L4.23186 11.8895C4.43448 11.7725 4.66433 11.7109 4.8983 11.7109C5.13228 11.7109 5.36213 11.7725 5.56475 11.8895L5.85132 12.0561C6.05375 12.173 6.22188 12.341 6.33885 12.5434C6.45583 12.7458 6.51753 12.9753 6.51777 13.2091V13.329C6.51777 13.6825 6.6582 14.0216 6.90816 14.2715C7.15813 14.5215 7.49715 14.6619 7.85066 14.6619H8.1439C8.4974 14.6619 8.83643 14.5215 9.08639 14.2715C9.33636 14.0216 9.47679 13.6825 9.47679 13.329V13.2091C9.47703 12.9753 9.53873 12.7458 9.6557 12.5434C9.77268 12.341 9.94081 12.173 10.1432 12.0561L10.4298 11.8895C10.6324 11.7725 10.8623 11.7109 11.0963 11.7109C11.3302 11.7109 11.5601 11.7725 11.7627 11.8895L11.8627 11.9428C12.1685 12.1193 12.5319 12.1671 12.873 12.0759C13.2141 11.9847 13.5051 11.7619 13.6821 11.4563L13.8287 11.1964C14.0051 10.8906 14.053 10.5272 13.9618 10.1861C13.8705 9.84497 13.6477 9.55398 13.3422 9.37701L13.2422 9.32369C13.0388 9.20626 12.87 9.03716 12.753 8.83353C12.636 8.62989 12.5748 8.39895 12.5758 8.16408V7.83085C12.5748 7.59599 12.636 7.36504 12.753 7.1614C12.87 6.95777 13.0388 6.78867 13.2422 6.67124L13.3422 6.61126C13.6477 6.43428 13.8705 6.1433 13.9618 5.80219C14.053 5.46108 14.0051 5.09772 13.8287 4.79186L13.6821 4.53861C13.5051 4.23307 13.2141 4.01024 12.873 3.91902C12.5319 3.82781 12.1685 3.87567 11.8627 4.05211L11.7627 4.10542C11.5601 4.22241 11.3302 4.284 11.0963 4.284C10.8623 4.284 10.6324 4.22241 10.4298 4.10542L10.1432 3.93881C9.94081 3.82194 9.77268 3.6539 9.6557 3.45153C9.53873 3.24917 9.47703 3.0196 9.47679 2.78586V2.6659C9.47679 2.31239 9.33636 1.97337 9.08639 1.7234C8.83643 1.47344 8.4974 1.33301 8.1439 1.33301Z" stroke="#364153" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M7.99738 9.99672C9.10159 9.99672 9.99672 9.10159 9.99672 7.99738C9.99672 6.89318 9.10159 5.99805 7.99738 5.99805C6.89318 5.99805 5.99805 6.89318 5.99805 7.99738C5.99805 9.10159 6.89318 9.99672 7.99738 9.99672Z" stroke="#364153" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </g>
-                                            <defs>
-                                                <clipPath id="clip-settings">
-                                                    <rect width="15.99" height="15.99" fill="white"/>
-                                                </clipPath>
-                                            </defs>
-                                        </svg>
-                                        Quản lý tài khoản
-                                    </a>
-                                    <div className="dropdown-divider" />
-                                    <button className="dropdown-item dropdown-logout">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <path d="M5.99794 13.9955H3.33216C2.97865 13.9955 2.63963 13.8551 2.38966 13.6051C2.1397 13.3552 1.99927 13.0162 1.99927 12.6626V3.3324C1.99927 2.9789 2.1397 2.63987 2.38966 2.38991C2.63963 2.13994 2.97865 1.99951 3.33216 1.99951H5.99794" stroke="#E7000B" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M10.6631 11.3295L13.9953 7.99727L10.6631 4.66504" stroke="#E7000B" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                                            <path d="M13.9954 7.99756H5.99805" stroke="#E7000B" strokeWidth="1.33" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                        Đăng xuất
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </nav>
-                </div>
-            </header>
+            <GlobalHeader />
 
             {/* Page Body */}
             <main className="profile-main">
@@ -312,117 +247,6 @@ export default function UpdateProfileStep2() {
                     background: #F9FAFB;
                     font-family: 'Inter', system-ui, sans-serif;
                 }
-
-                /* ── Header ── */
-                .profile-header {
-                    background: #FFF;
-                    border-bottom: 1px solid #E5E7EB;
-                    box-shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);
-                    position: sticky;
-                    top: 0;
-                    z-index: 50;
-                }
-                .header-container {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 0 2rem;
-                    height: 64px;
-                    max-width: 1400px;
-                    margin: 0 auto;
-                }
-                .brand-logo {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    text-decoration: none;
-                    flex-shrink: 0;
-                }
-                .brand-icon {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    background: linear-gradient(135deg, #4D55CC 0%, #8B4CFF 100%);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: #FFF;
-                    font-weight: 700;
-                    font-size: 16px;
-                    flex-shrink: 0;
-                }
-                .brand-name {
-                    font-size: 24px;
-                    font-weight: 700;
-                    background: linear-gradient(90deg, #4D55CC 0%, #8B4CFF 100%);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                }
-                .header-nav {
-                    display: flex;
-                    align-items: center;
-                    gap: 2rem;
-                }
-                .nav-link {
-                    color: #364153;
-                    font-size: 16px;
-                    font-weight: 500;
-                    text-decoration: none;
-                    white-space: nowrap;
-                }
-                .nav-link:hover { color: #4D55CC; }
-
-                /* User menu */
-                .user-menu-wrapper { position: relative; }
-                .user-menu-trigger {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    padding: 8px 12px;
-                    border-radius: 10px;
-                    color: #364153;
-                    font-size: 16px;
-                    font-weight: 500;
-                    font-family: 'Inter', sans-serif;
-                }
-                .user-menu-trigger:hover { background: #F3F4F6; }
-                .user-name { white-space: nowrap; }
-                .user-dropdown {
-                    position: absolute;
-                    right: 0;
-                    top: calc(100% + 8px);
-                    width: 224px;
-                    background: #FFF;
-                    border: 1px solid #E5E7EB;
-                    border-radius: 10px;
-                    box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
-                    padding: 8px 0;
-                    z-index: 100;
-                }
-                .dropdown-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    padding: 10px 16px;
-                    color: #364153;
-                    font-size: 16px;
-                    font-weight: 400;
-                    text-decoration: none;
-                    width: 100%;
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    font-family: 'Inter', sans-serif;
-                    text-align: left;
-                }
-                .dropdown-item:hover { background: #F9FAFB; }
-                .dropdown-divider { height: 1px; background: #F3F4F6; margin: 4px 0; }
-                .dropdown-logout { color: #E7000B; font-weight: 500; }
-                .dropdown-logout:hover { background: #FFF5F5; }
 
                 /* ── Main ── */
                 .profile-main {
