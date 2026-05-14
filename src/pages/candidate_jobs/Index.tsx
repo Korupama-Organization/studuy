@@ -1,6 +1,6 @@
 ﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import CandidateJobsHeader from "./CandidateJobsHeader";
+import GlobalHeader from "../../components/GlobalHeader";
 import {
   extractCandidateApplications,
   normalizeCandidateApplication,
@@ -135,7 +135,7 @@ export default function CandidateJobsPage() {
 
   return (
     <div className="candidate-jobs-page">
-      <CandidateJobsHeader />
+      <GlobalHeader />
 
       <main className="candidate-jobs-main">
         <div className="candidate-jobs-shell">
