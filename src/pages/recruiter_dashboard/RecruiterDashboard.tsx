@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './dashboard.css';
+import './RecruiterDashboard.css';
 import { motion } from 'framer-motion';
 import { 
   dashboardService, 
@@ -19,7 +19,7 @@ import 'dayjs/locale/vi';
 dayjs.extend(relativeTime);
 dayjs.locale('vi');
 
-const Dashboard: React.FC = () => {
+const RecruiterDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -520,4 +520,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default RecruiterDashboard;

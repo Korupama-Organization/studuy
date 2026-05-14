@@ -318,7 +318,7 @@ const getResponseErrorMessage = async (response: Response, fallback: string): Pr
   return fallback;
 };
 
-export default function JobsPage() {
+export default function RecruiterJobsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
