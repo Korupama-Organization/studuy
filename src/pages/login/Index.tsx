@@ -93,9 +93,9 @@ export default function LoginPage() {
             const userRole = result.user?.role;
 
             if (userRole === "candidate") {
-                navigate("/profile/update", { replace: true });
+                navigate("/candidate/dashboard", { replace: true });
             } else if (userRole === "recruiter" || isEmailLogin) {
-                navigate("/dashboard", { replace: true });
+                navigate("/recruiter/dashboard", { replace: true });
             } else {
                 navigate("/", { replace: true });
             }
