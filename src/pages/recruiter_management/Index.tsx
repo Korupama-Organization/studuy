@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Sidebar from "../jobs/components/Sidebar";
+import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
 import RecruiterTable from "./RecruiterTable";
 import TopHeader from "./TopHeader";
 
@@ -349,10 +349,10 @@ export default function RecruiterManagementPage() {
         <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-[#EDEEFF] blur-[120px]"></div>
       </div>
 
-      <div className="relative mx-auto flex min-h-dvh w-full max-w-[1280px] gap-5 px-4 py-6 lg:px-6">
-        <Sidebar />
+      <div className="relative flex min-h-dvh w-full gap-5 pr-4 lg:pr-6">
+        <RecruiterSidebar activePath="/recruiter/management" />
 
-        <main className="flex flex-1 flex-col gap-6">
+        <main className="flex flex-1 flex-col gap-6 pt-6">
           <div className="overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.08)]">
             <div className="border-b border-slate-100 px-5 py-5 lg:px-6">
               <TopHeader

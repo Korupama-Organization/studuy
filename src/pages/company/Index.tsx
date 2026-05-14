@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../jobs/components/Sidebar";
+import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
 import "./company.css";
 
 const API_BASE_URL =
@@ -256,7 +256,7 @@ export default function CompanyPage() {
       <div className="ambient-blob blob-2" />
 
       <div className="company-layout">
-        <Sidebar variant="flush" />
+        <RecruiterSidebar activePath="/recruiter/company" />
 
         <main className="company-main">
           {/* ── Page header ── */}
