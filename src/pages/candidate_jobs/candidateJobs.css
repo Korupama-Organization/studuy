@@ -119,6 +119,30 @@
   font-weight: 600;
 }
 
+.candidate-jobs-empty {
+  display: grid;
+  gap: 8px;
+  padding: 42px;
+  border: 1px solid rgba(139, 92, 246, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 2px 6px rgba(31, 25, 75, 0.1);
+  text-align: center;
+}
+
+.candidate-jobs-empty h2 {
+  margin: 0;
+  color: #202182;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.candidate-jobs-empty p {
+  margin: 0;
+  color: #746cc5;
+  font-size: 15px;
+}
+
 .candidate-jobs-list {
   display: grid;
   gap: 32px;

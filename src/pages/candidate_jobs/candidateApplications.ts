@@ -23,46 +23,29 @@ const PROCESS_LABELS = [
 
 const STATUS_INDEX: Record<string, number> = {
   applied: 0,
+  ung_tuyen: 0,
+  pending: 0,
   submitted: 0,
   screening: 1,
+  sang_loc: 1,
+  in_review: 1,
   reviewed: 1,
   interview: 2,
   hr_interview: 2,
+  phong_van: 2,
+  phong_van_hr: 2,
   technical_interview: 3,
+  tech_interview: 3,
+  phong_van_ky_thuat: 3,
   offer: 4,
   offered: 4,
+  de_nghi: 4,
   hired: 5,
   accepted: 5,
   completed: 5,
+  hoan_tat: 5,
   rejected: 5,
 };
-
-export const mockCandidateApplications: CandidateApplicationCard[] = [
-  {
-    id: "mock-application-1",
-    companyName: "CodeQuest Solutions",
-    companyDetail: "Công ty công nghệ sản phẩm tại Việt Nam",
-    jobTitle: "Frontend Developer",
-    location: "Thành phố Hồ Chí Minh",
-    status: "Phỏng vấn HR",
-    currentProcessIndex: 2,
-    summary: "Tham gia xây dựng giao diện web cho nền tảng tuyển dụng, làm việc cùng đội sản phẩm và backend để tối ưu trải nghiệm ứng viên.",
-    requirements: "React, TypeScript, tư duy UI tốt và có kinh nghiệm làm việc với REST API.",
-    processLabels: PROCESS_LABELS,
-  },
-  {
-    id: "mock-application-2",
-    companyName: "TechVision Inc.",
-    companyDetail: "Đội ngũ AI tuyển dụng và đánh giá năng lực",
-    jobTitle: "Full Stack Developer",
-    location: "Hà Nội",
-    status: "Sàng lọc",
-    currentProcessIndex: 1,
-    summary: "Phát triển các tính năng quản lý ứng tuyển, dashboard và luồng phỏng vấn thử cho candidate.",
-    requirements: "Node.js, React, MongoDB, khả năng giao tiếp rõ ràng và chủ động xử lý vấn đề.",
-    processLabels: PROCESS_LABELS,
-  },
-];
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -107,7 +90,14 @@ const getProcessIndex = (record: Record<string, unknown>, status: string): numbe
     }
   }
 
-  const normalizedStatus = status.toLowerCase().replace(/[\s-]+/g, "_");
+  const normalizedStatus = status
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
   return STATUS_INDEX[normalizedStatus] ?? 0;
 };
 

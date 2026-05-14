@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import CandidateJobsHeader from "./CandidateJobsHeader";
 import {
   extractCandidateApplications,
-  mockCandidateApplications,
   normalizeCandidateApplication,
   type CandidateApplicationCard,
 } from "./candidateApplications";
@@ -117,13 +116,8 @@ export default function CandidateJobsPage() {
     },
   });
 
-  const applications = data && data.length > 0 ? data : mockCandidateApplications;
-  const notice =
-    error instanceof Error
-      ? `${error.message} Đang hiển thị dữ liệu mẫu.`
-      : data && data.length === 0
-        ? "Chưa có dữ liệu ứng tuyển từ API, đang hiển thị dữ liệu mẫu."
-        : "";
+  const applications = data ?? [];
+  const errorMessage = error instanceof Error ? error.message : "";
 
   return (
     <div className="candidate-jobs-page">
@@ -133,14 +127,23 @@ export default function CandidateJobsPage() {
         <div className="candidate-jobs-shell">
           <h1>Tìm kiếm việc làm</h1>
 
-          {notice ? <p className="candidate-jobs-notice">{notice}</p> : null}
           {isLoading ? <p className="candidate-jobs-loading">Đang tải danh sách ứng tuyển...</p> : null}
+          {errorMessage ? <p className="candidate-jobs-notice">{errorMessage}</p> : null}
 
-          <div className="candidate-jobs-list">
-            {applications.map((application) => (
-              <CandidateJobCard key={application.id} application={application} />
-            ))}
-          </div>
+          {!isLoading && !errorMessage && applications.length === 0 ? (
+            <div className="candidate-jobs-empty">
+              <h2>Chưa có application nào</h2>
+              <p>Khi bạn ứng tuyển, trạng thái application sẽ hiển thị tại đây.</p>
+            </div>
+          ) : null}
+
+          {applications.length > 0 ? (
+            <div className="candidate-jobs-list">
+              {applications.map((application) => (
+                <CandidateJobCard key={application.id} application={application} />
+              ))}
+            </div>
+          ) : null}
         </div>
       </main>
     </div>
