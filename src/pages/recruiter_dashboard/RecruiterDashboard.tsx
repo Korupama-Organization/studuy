@@ -166,7 +166,7 @@ const RecruiterDashboard: React.FC = () => {
           {/* Nav Links */}
           <nav className="flex flex-col gap-2">
             <motion.a 
-              href="#" 
+              href="/recruiter/dashboard" 
               whileHover={{ x: 4 }}
               whileTap={{ scale: 0.98 }}
               className="flex items-center gap-3 bg-indigo-500 text-white px-4 py-3 rounded-xl shadow-sm shadow-indigo-200 font-bold text-sm"
@@ -175,7 +175,7 @@ const RecruiterDashboard: React.FC = () => {
               Main Dashboard
             </motion.a>
             <motion.a 
-              href="#" 
+              href="/recruiter/management" 
               whileHover={{ x: 4, backgroundColor: 'rgba(249, 250, 251, 1)' }}
               whileTap={{ scale: 0.98 }}
               className="flex items-center gap-3 text-gray-500 hover:text-indigo-600 px-4 py-3 rounded-xl font-semibold text-sm transition-colors"
@@ -184,7 +184,7 @@ const RecruiterDashboard: React.FC = () => {
               Nhân viên
             </motion.a>
             <motion.a 
-              href="#" 
+              href="/company" 
               whileHover={{ x: 4, backgroundColor: 'rgba(249, 250, 251, 1)' }}
               whileTap={{ scale: 0.98 }}
               className="flex items-center gap-3 text-gray-500 hover:text-indigo-600 px-4 py-3 rounded-xl font-semibold text-sm transition-colors"
@@ -193,7 +193,7 @@ const RecruiterDashboard: React.FC = () => {
               Thông tin công ty
             </motion.a>
             <motion.a 
-              href="#" 
+              href="/recruiter/jobs" 
               whileHover={{ x: 4, backgroundColor: 'rgba(249, 250, 251, 1)' }}
               whileTap={{ scale: 0.98 }}
               className="flex items-center gap-3 text-gray-500 hover:text-indigo-600 px-4 py-3 rounded-xl font-semibold text-sm transition-colors"
