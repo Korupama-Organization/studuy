@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import LandingPage from '../pages/landing/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
@@ -15,15 +15,30 @@ import RecruiterDashboard from '../pages/recruiter_dashboard/Index';
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';
 import RecruiterCandidatesPage from '../pages/recruiter_candidates/Index';
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   getStoredAccessToken,
+  getStoredAccessTokenExpiry,
   getStoredUserRole,
   hasValidStoredAccessToken,
 } from '../services/auth';
 
 const queryClient = new QueryClient();
+
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password'];
+
+const isPublicPath = (pathname: string): boolean => {
+  return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+};
 
 const getRoleDashboard = (role: string | null): string => {
   switch (role) {
@@ -36,6 +51,39 @@ const getRoleDashboard = (role: string | null): string => {
       return '/';
   }
 };
+
+function AuthSessionGuard() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isPublicPath(location.pathname)) {
+      return;
+    }
+
+    const expiry = getStoredAccessTokenExpiry();
+    if (!expiry) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const remainingMs = expiry * 1000 - Date.now();
+    if (remainingMs <= 0) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      navigate('/login', { replace: true });
+    }, remainingMs);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [location.pathname, navigate]);
+
+  return null;
+}
 
 function ProtectedRoute({
   children,
@@ -73,6 +121,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <AuthSessionGuard />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login/*" element={<LoginPage />} />
