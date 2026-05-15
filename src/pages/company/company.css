@@ -1,0 +1,446 @@
+/* ── Company Page Styles ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.company-page-root {
+  position: relative;
+  min-height: 100dvh;
+  background: #F4F6FB;
+  font-family: 'Inter', sans-serif;
+  color: #0f172a;
+  overflow-x: hidden;
+}
+
+/* Ambient glow blobs */
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.blob-1 {
+  width: 300px;
+  height: 300px;
+  left: -80px;
+  top: 60px;
+  background: #E8E9FF;
+  filter: blur(90px);
+}
+.blob-2 {
+  width: 350px;
+  height: 350px;
+  right: -60px;
+  top: 0;
+  background: #EDEEFF;
+  filter: blur(120px);
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+.company-layout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100dvh;
+  width: 100%;
+  gap: 0;
+  padding: 0;
+}
+
+@media (min-width: 1024px) {
+  .company-layout {
+    padding: 0;
+  }
+}
+
+.company-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 24px 16px 32px;
+}
+
+@media (min-width: 1024px) {
+  .company-main {
+    padding: 28px 40px 36px 32px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .company-main {
+    padding-right: 56px;
+  }
+}
+
+/* ── Page header ─────────────────────────────────────────────────────────── */
+.company-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 4px 0 0;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+.company-card {
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+  transition: box-shadow 0.2s;
+}
+
+.company-card:hover {
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.09);
+}
+
+/* ── Section titles ─────────────────────────────────────────────────────── */
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #5B5BF6;
+  margin: 0 0 20px;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-header-row .section-title {
+  margin-bottom: 0;
+}
+
+/* ── Form layout ────────────────────────────────────────────────────────── */
+.form-row {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.form-row.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+.form-row.one-col {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 640px) {
+  .form-row.two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────── */
+.company-input,
+.company-textarea {
+  width: 100%;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.company-input:focus,
+.company-textarea:focus {
+  border-color: #5B5BF6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(91, 91, 246, 0.12);
+}
+
+.company-textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+/* ── Sub-cards (work locations / social links) ──────────────────────────── */
+.sub-card {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  background: #f8fafc;
+}
+
+.sub-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+/* ── Tag input ──────────────────────────────────────────────────────────── */
+.tag-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #EEF0FF;
+  color: #5B5BF6;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(91, 91, 246, 0.18);
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #5B5BF6;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.tag-remove:hover {
+  opacity: 1;
+}
+
+.tag-add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tag-add-row .company-input {
+  flex: 1;
+}
+
+/* ── Recruitment level row ─────────────────────────────────────────────── */
+.recruitment-level-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+/* ── Toggle switch ─────────────────────────────────────────────────────── */
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle-label input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-track {
+  display: inline-flex;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-label input:checked ~ .toggle-track {
+  background: #5B5BF6;
+}
+
+/* Select the .toggle-track when sibling input is checked */
+.toggle-label input[type="checkbox"]:checked + .toggle-track {
+  background: #5B5BF6;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  transition: left 0.2s;
+}
+
+.toggle-label input[type="checkbox"]:checked + .toggle-track .toggle-thumb {
+  left: 19px;
+}
+
+.toggle-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-section-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  background: #5B5BF6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(91, 91, 246, 0.3);
+  transition: background 0.18s, transform 0.15s;
+}
+.btn-section-add:hover {
+  background: #4747d6;
+  transform: translateY(-1px);
+}
+.btn-section-add:active {
+  transform: translateY(0);
+}
+
+.btn-add-tag {
+  padding: 9px 16px;
+  background: #5B5BF6;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s;
+}
+.btn-add-tag:hover {
+  background: #4747d6;
+}
+
+.btn-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.18s, transform 0.15s;
+  line-height: 1;
+}
+.btn-remove:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+/* ── Action bar ──────────────────────────────────────────────────────────── */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.save-msg {
+  font-size: 13px;
+  font-weight: 600;
+  margin-right: auto;
+}
+.save-msg.success { color: #16a34a; }
+.save-msg.error { color: #dc2626; }
+
+.btn-cancel {
+  padding: 10px 22px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.18s;
+}
+.btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.btn-save {
+  padding: 10px 28px;
+  background: linear-gradient(135deg, #5B5BF6 0%, #7c3aed 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 8px 24px rgba(91, 91, 246, 0.4);
+  transition: opacity 0.18s, transform 0.15s;
+}
+.btn-save:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

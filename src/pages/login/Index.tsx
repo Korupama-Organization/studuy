@@ -7,13 +7,14 @@ import {
     loginNormalAuth,
     storeAuthSession,
     loginWithUIT,
+    getStoredUser,
 } from "../../services/auth";
 import LoginFormCard from "./components/LoginFormCard";
 import MobileFormScreen from "./components/MobileFormScreen";
 import MobileIntroScreen from "./components/MobileIntroScreen";
 import MobileViewportScaler from "./components/MobileViewportScaler";
 
-type MobileStep = 'intro' | 'form';
+type MobileStep = "intro" | "form";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -22,38 +23,46 @@ export default function LoginPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [isDesktop, setIsDesktop] = useState<boolean>(() => {
-        if (typeof window === 'undefined') {
+        if (typeof window === "undefined") {
             return false;
         }
 
-        return window.matchMedia('(min-width: 1024px)').matches;
+        return window.matchMedia("(min-width: 1024px)").matches;
     });
-    const [mobileStep, setMobileStep] = useState<MobileStep>('intro');
+    const [mobileStep, setMobileStep] = useState<MobileStep>("intro");
 
     useEffect(() => {
         if (hasValidStoredAccessToken()) {
-            navigate("/", { replace: true });
+            const user = getStoredUser();
+
+            if (user?.role === "candidate") {
+                navigate("/candidate/dashboard", { replace: true });
+            } else if (user?.role === "recruiter") {
+                navigate("/recruiter/dashboard", { replace: true });
+            } else {
+                navigate("/", { replace: true });
+            }
         }
     }, [navigate]);
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia('(min-width: 1024px)');
+        const mediaQuery = window.matchMedia("(min-width: 1024px)");
 
         const onMediaChange = (event: MediaQueryListEvent) => {
             setIsDesktop(event.matches);
         };
 
         setIsDesktop(mediaQuery.matches);
-        mediaQuery.addEventListener('change', onMediaChange);
+        mediaQuery.addEventListener("change", onMediaChange);
 
         return () => {
-            mediaQuery.removeEventListener('change', onMediaChange);
+            mediaQuery.removeEventListener("change", onMediaChange);
         };
     }, []);
 
     useEffect(() => {
         if (isDesktop) {
-            setMobileStep('form');
+            setMobileStep("form");
         }
     }, [isDesktop]);
 
@@ -66,14 +75,16 @@ export default function LoginPage() {
         setErrorMessage("");
 
         if (!normalizedIdentifier || !normalizedPassword) {
-            setErrorMessage("Please enter your Email and password.");
+            setErrorMessage("Vui lòng nhập email và mật khẩu.");
             return;
         }
 
         try {
             setIsSubmitting(true);
 
-            const result = normalizedIdentifier.includes('@')
+            const isEmailLogin = normalizedIdentifier.includes("@");
+
+            const result = isEmailLogin
                 ? await loginNormalAuth(normalizedIdentifier, normalizedPassword)
                 : await loginWithUIT(normalizedIdentifier, normalizedPassword);
 
@@ -113,6 +124,7 @@ export default function LoginPage() {
                         onIdentifierChange={setIdentifier}
                         onPasswordChange={setPassword}
                         onSubmit={handleSubmit}
+                        onBack={() => setMobileStep("intro")}
                     />
                 )}
             </MobileViewportScaler>

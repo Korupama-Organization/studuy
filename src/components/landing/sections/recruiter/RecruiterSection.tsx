@@ -34,10 +34,10 @@ const RecruiterSection: React.FC = () => {
             Đăng tin tuyển dụng và kết nối với hàng nghìn sinh viên IT
             đã được đào tạo và đánh giá bởi hệ thống AI
           </p>
-          <button className="post-job-btn">
+          <a href="/login" className="post-job-btn" style={{ textDecoration: 'none', display: 'inline-flex' }}>
             Đăng tin tuyển dụng
             <i className="ti ti-arrow-narrow-right"></i>
-          </button>
+          </a>
         </Reveal>
 
         <div className="recruiter-features">

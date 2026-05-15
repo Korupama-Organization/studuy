@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Sidebar from "./components/Sidebar";
+import { useNavigate } from "react-router-dom";
+import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
 import TopHeader from "./components/TopHeader";
 import JobsTable from "./components/JobsTable";
 import Pagination from "./components/Pagination";
@@ -43,23 +44,27 @@ export interface SaveJobPayload {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.toString().trim() || "http://localhost:3000";
+  (
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    (typeof window !== "undefined" ? window.location.origin : "")
+  ).replace(/\/+$/, "");
 
 const PAGE_SIZE = 6;
 
-const getAuthHeaders = (): HeadersInit => {
+const getAuthHeaders = (includeJsonContentType = true): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
+  const headers: Record<string, string> = {};
 
-  if (!token) {
-    return {
-      "Content-Type": "application/json",
-    };
+  if (includeJsonContentType) {
+    headers["Content-Type"] = "application/json";
   }
 
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
+  if (!token) {
+    return headers;
+  }
+
+  headers.Authorization = `Bearer ${token}`;
+  return headers;
 };
 
 const parseDate = (value: unknown): string => {
@@ -97,47 +102,6 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     return [];
   };
 
-  const parseNumberValue = (value: unknown): number | null => {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value;
-    }
-
-    if (typeof value === "string") {
-      const trimmed = value.trim();
-      const numericMatch = trimmed.match(/[-+]?[0-9]*\.?[0-9]+/);
-      if (numericMatch) {
-        const parsed = Number(numericMatch[0]);
-        if (!Number.isNaN(parsed)) {
-          return parsed;
-        }
-      }
-    }
-
-    if (typeof value === "object" && value !== null) {
-      const obj = value as Record<string, unknown>;
-      if (typeof obj.$numberInt === "string") {
-        const parsed = Number(obj.$numberInt);
-        if (!Number.isNaN(parsed)) {
-          return parsed;
-        }
-      }
-      if (typeof obj.$numberLong === "string") {
-        const parsed = Number(obj.$numberLong);
-        if (!Number.isNaN(parsed)) {
-          return parsed;
-        }
-      }
-      if (typeof obj.$numberDecimal === "string") {
-        const parsed = Number(obj.$numberDecimal);
-        if (!Number.isNaN(parsed)) {
-          return parsed;
-        }
-      }
-    }
-
-    return null;
-  };
-
   const locationsFromBasicInfo = toStringArray(basicInfo?.locations);
   const locationsFromBasicInfoSingle = toStringArray(basicInfo?.location);
   const locationsFromRoot = toStringArray(raw.locations);
@@ -170,11 +134,6 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     (typeof raw._id === "string" && raw._id) ||
     (typeof raw.id === "string" && raw.id) ||
     "";
-  const rawSlug =
-    (typeof raw.slug === "string" && raw.slug) ||
-    (typeof raw.jobSlug === "string" && raw.jobSlug) ||
-    "";
-
   return {
     id: rawId || "N/A",
     slug: rawId ? `JOB-${rawId.slice(-5).toUpperCase()}` : "",
@@ -269,7 +228,7 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     })(),
     createdAt: parseDateField(raw.createdAt),
     createdBy,
-    status: (typeof raw.status === "string" && raw.status) || "Opening",
+    status: (typeof raw.status === "string" && raw.status) || "Đang tuyển",
   };
 };
 
@@ -300,25 +259,105 @@ const extractJobs = (payload: unknown): Record<string, unknown>[] => {
   return [];
 };
 
-const getResponseErrorMessage = async (response: Response, fallback: string): Promise<string> => {
-  try {
-    const payload = (await response.json()) as { message?: string; error?: string };
-
-    if (typeof payload.message === "string" && payload.message.trim()) {
-      return payload.message;
-    }
-
-    if (typeof payload.error === "string" && payload.error.trim()) {
-      return payload.error;
-    }
-  } catch {
-    return fallback;
+const getStringId = (value: unknown): string => {
+  if (typeof value === "string" && value.trim()) {
+    return value;
   }
 
-  return fallback;
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  if (value && typeof value === "object") {
+    const objectValue = value as Record<string, unknown>;
+    if (typeof objectValue.$oid === "string" && objectValue.$oid.trim()) {
+      return objectValue.$oid;
+    }
+  }
+
+  return "";
 };
 
-export default function JobsPage() {
+const extractCreatedJobId = (payload: unknown): string => {
+  if (!payload || typeof payload !== "object") {
+    return "";
+  }
+
+  const objectPayload = payload as Record<string, unknown>;
+  const directId =
+    getStringId(objectPayload._id) ||
+    getStringId(objectPayload.id) ||
+    getStringId(objectPayload.jobId);
+
+  if (directId) {
+    return directId;
+  }
+
+  const nestedKeys = ["data", "job", "createdJob", "result", "payload", "item"];
+
+  for (const key of nestedKeys) {
+    const nestedValue = objectPayload[key];
+    const nestedId = extractCreatedJobId(nestedValue);
+
+    if (nestedId) {
+      return nestedId;
+    }
+  }
+
+  for (const value of Object.values(objectPayload)) {
+    if (value && typeof value === "object") {
+      const nestedId = extractCreatedJobId(value);
+
+      if (nestedId) {
+        return nestedId;
+      }
+    }
+  }
+
+  return "";
+};
+
+const getResponseErrorMessage = async (response: Response, fallback: string): Promise<string> => {
+  const statusPart = response.status ? ` (${response.status}${response.statusText ? ` ${response.statusText}` : ""})` : "";
+
+  try {
+    const rawBody = (await response.text()).trim();
+
+    if (!rawBody) {
+      return `${fallback}${statusPart}`;
+    }
+
+    let payload: { message?: string | string[]; error?: string | string[] };
+    try {
+      payload = JSON.parse(rawBody) as { message?: string | string[]; error?: string | string[] };
+    } catch {
+      return rawBody;
+    }
+
+    const message = Array.isArray(payload.message)
+      ? payload.message.find((item) => typeof item === "string" && item.trim())
+      : payload.message;
+
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+
+    const error = Array.isArray(payload.error)
+      ? payload.error.find((item) => typeof item === "string" && item.trim())
+      : payload.error;
+
+    if (typeof error === "string" && error.trim()) {
+      return error;
+    }
+  } catch {
+    return `${fallback}${statusPart}`;
+  }
+
+  return `${fallback}${statusPart}`;
+};
+
+export default function RecruiterJobsPage() {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -342,12 +381,12 @@ export default function JobsPage() {
       const payload = (await response.json()) as unknown;
 
       if (!response.ok) {
-        throw new Error("Khong the tai danh sach jobs.");
+        throw new Error("Không thể tải danh sách việc làm.");
       }
 
       setJobs(extractJobs(payload).map(normalizeJob));
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Khong the tai danh sach jobs.");
+      setError(loadError instanceof Error ? loadError.message : "Không thể tải danh sách việc làm.");
       setJobs([]);
     } finally {
       setIsLoading(false);
@@ -406,7 +445,24 @@ export default function JobsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await getResponseErrorMessage(response, "Tao job that bai."));
+        throw new Error(await getResponseErrorMessage(response, "Tạo việc làm thất bại."));
+      }
+
+      const createPayload = (await response.json()) as unknown;
+      const createdJobId = extractCreatedJobId(createPayload);
+
+      if (!createdJobId) {
+        throw new Error("Tạo việc làm thành công nhưng không nhận được mã job để publish.");
+      }
+
+      const publishResponse = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(createdJobId)}/publish`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({}),
+      });
+
+      if (!publishResponse.ok) {
+        throw new Error(await getResponseErrorMessage(publishResponse, "Publish việc làm thất bại."));
       }
 
       await loadJobs(sortBy);
@@ -420,13 +476,13 @@ export default function JobsPage() {
       const nestedPayload = toNestedPayload(payload);
 
       const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify(nestedPayload),
       });
 
       if (!response.ok) {
-        throw new Error(await getResponseErrorMessage(response, "Cap nhat job that bai."));
+        throw new Error(await getResponseErrorMessage(response, "Cập nhật việc làm thất bại."));
       }
 
       await loadJobs(sortBy);
@@ -436,18 +492,40 @@ export default function JobsPage() {
 
   const handleDeleteJob = useCallback(
     async (id: string) => {
+      const closeResponse = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}/close`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({}),
+      });
+
+      if (!closeResponse.ok) {
+        throw new Error(await getResponseErrorMessage(closeResponse, "Đóng việc làm thất bại."));
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
-        throw new Error(await getResponseErrorMessage(response, "Xoa job that bai."));
+        throw new Error(await getResponseErrorMessage(response, "Xóa việc làm thất bại."));
       }
 
       await loadJobs();
     },
     [loadJobs],
+  );
+
+  const handleViewApplicants = useCallback(
+    (job: JobRow) => {
+      const params = new URLSearchParams();
+      params.set("jobId", job.id);
+      if (job.title) {
+        params.set("jobTitle", job.title);
+      }
+      navigate(`/recruiter/candidates?${params.toString()}`);
+    },
+    [navigate],
   );
 
   return (
@@ -457,10 +535,10 @@ export default function JobsPage() {
         <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-[#EDEEFF] blur-[120px]"></div>
       </div>
 
-      <div className="relative mx-auto flex min-h-dvh w-full max-w-[1280px] gap-5 px-4 py-6 lg:px-6">
-        <Sidebar />
+      <div className="relative flex min-h-dvh w-full gap-5 pr-4 lg:pr-6">
+        <RecruiterSidebar activePath="/recruiter/jobs" />
 
-        <main className="flex flex-1 flex-col gap-6">
+        <main className="flex flex-1 flex-col gap-6 pt-6">
           <TopHeader onCreateJob={handleCreateJob} onSortChange={handleSortChange} />
           {error ? <p className="text-sm text-red-500">{error}</p> : null}
           <JobsTable
@@ -468,6 +546,7 @@ export default function JobsPage() {
             isLoading={isLoading}
             onUpdateJob={handleUpdateJob}
             onDeleteJob={handleDeleteJob}
+            onViewApplicants={handleViewApplicants}
           />
           <Pagination
             currentPage={currentPage}

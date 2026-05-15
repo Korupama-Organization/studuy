@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import "./dashboard.css";
 
-import Header from "./components/Header";
+import GlobalHeader from "../../components/GlobalHeader";
 import WelcomeSection from "./components/WelcomeSection";
 import JobMatchesSection from "./components/JobMatchesSection";
 import Footer from "./components/Footer";

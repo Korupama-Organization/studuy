@@ -1,8 +1,10 @@
 import React from 'react';
 import Reveal from '../../shared/Reveal';
 import './CTASection.css';
+import { useNavigation } from '../../../../contexts/NavigationContext';
 
 const CTASection: React.FC = () => {
+  const { goToSlide } = useNavigation();
   return (
     <section className="cta-section">
       {/* Decorative background blobs */}
@@ -16,10 +18,10 @@ const CTASection: React.FC = () => {
           className="cta-badge"
           delay={80}
         >
-            <i className="ti ti-sparkles"></i>
-            Hoàn toàn miễn phí
+          <i className="ti ti-sparkles"></i>
+          Hoàn toàn miễn phí
         </Reveal>
-        
+
         <Reveal
           as="h2"
           className="cta-title"
@@ -28,7 +30,7 @@ const CTASection: React.FC = () => {
           Sẵn sàng chinh phục <br />
           phỏng vấn?
         </Reveal>
-        
+
         <Reveal
           as="p"
           className="cta-description"
@@ -42,11 +44,11 @@ const CTASection: React.FC = () => {
           className="cta-buttons"
           delay={260}
         >
-          <button className="cta-btn-primary">
+          <a href="/login" className="cta-btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             Bắt đầu luyện tập ngay
             <i className="ti ti-arrow-narrow-right"></i>
-          </button>
-          <button className="cta-btn-secondary">
+          </a>
+          <button className="cta-btn-secondary" onClick={() => goToSlide(9)}>
             Xem demo
           </button>
         </Reveal>

@@ -1,8 +1,10 @@
 import React from 'react';
 import Reveal from '../../shared/Reveal';
 import './SolutionSection.css';
+import { useNavigation } from '../../../../contexts/NavigationContext';
 
 const SolutionSection: React.FC = () => {
+  const { goToSlide } = useNavigation();
   return (
     <section className="solution-section">
       <div className="solution-container">
@@ -63,8 +65,12 @@ const SolutionSection: React.FC = () => {
             className="solution-actions"
             delay={320}
           >
-            <button className="btn-primary-sol">Cách hoạt động</button>
-            <button className="btn-secondary-sol">Vậy còn việc làm...</button>
+            <button className="btn-primary-sol" onClick={() => goToSlide(4)}>
+              Cách hoạt động
+            </button>
+            <button className="btn-secondary-sol" onClick={() => goToSlide(7)}>
+              Vậy còn việc làm...
+            </button>
           </Reveal>
         </div>
 

@@ -1,5 +1,5 @@
 .how-section {
-  padding: 100px 20px;
+  padding: clamp(4rem, 6vw, 6rem) 20px;
   background-color: #F4F7FB;
   text-align: center;
   position: relative;
@@ -8,23 +8,25 @@
 
 .how-container {
   max-width: 1200px;
-  mx-auto: auto;
   margin: 0 auto;
 }
 
 .how-header {
-  margin-bottom: 60px;
+  margin-bottom: 48px;
 }
 
 .how-title {
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-size: clamp(2rem, 4.5vw, 3rem);
   font-weight: 800;
   color: #101828;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .how-subtitle {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
   color: #4A5565;
   font-weight: 500;
 }
@@ -165,8 +167,9 @@
 @media (max-width: 640px) {
   .how-grid {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
   .how-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 }

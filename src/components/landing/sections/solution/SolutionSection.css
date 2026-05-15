@@ -1,7 +1,7 @@
 /* ── Solution Section ────────────────────────────────────── */
 .solution-section {
-  padding: 120px 24px;
-  background: #fdf2f2; /* Soft pinkish background */
+  padding: clamp(4rem, 6vw, 6rem) 24px;
+  background: #fdf2f2;
   position: relative;
   overflow: hidden;
 }
@@ -22,22 +22,24 @@
 }
 
 .solution-heading {
-  font-size: clamp(40px, 5vw, 64px);
-  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 800;
   color: #101828;
-  line-height: 1.1;
-  margin-bottom: 24px;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  max-width: 800px;
 }
 
 .solution-heading span {
-  color: #f36a5a; /* Highlighting AI in a warm color */
+  color: #f36a5a;
 }
 
 .solution-description {
-  font-size: 20px;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
   color: #4a5565;
-  line-height: 1.6;
-  margin-bottom: 40px;
+  line-height: 1.7;
+  margin-bottom: 36px;
+  max-width: 580px;
 }
 
 .solution-features {
@@ -251,6 +253,21 @@
   .solution-container {
     flex-direction: column;
     text-align: center;
+    gap: 60px;
+  }
+  
+  .solution-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .solution-heading {
+    max-width: 100%;
+  }
+  
+  .solution-description {
+    max-width: 100%;
   }
   
   .solution-features {

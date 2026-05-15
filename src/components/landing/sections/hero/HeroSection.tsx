@@ -1,8 +1,11 @@
 import React from 'react';
 import Reveal from '../../shared/Reveal';
 import './HeroSection.css';
+import { useNavigation } from '../../../../contexts/NavigationContext';
 
 const HeroSection: React.FC = () => {
+  const { goToSlide } = useNavigation();
+
   return (
     <section className="hs-slide">
       {/* Decorative blurred background orbs */}
@@ -34,8 +37,12 @@ const HeroSection: React.FC = () => {
             className="hs-cta"
             delay={240}
           >
-            <button className="hs-btn hs-btn--primary">Bắt đầu ngay</button>
-            <button className="hs-btn hs-btn--ghost">Tìm hiểu thêm</button>
+            <a href="/register" className="hs-btn hs-btn--primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+              Bắt đầu ngay
+            </a>
+            <button className="hs-btn hs-btn--ghost" onClick={() => goToSlide(1)}>
+              Tìm hiểu thêm
+            </button>
           </Reveal>
         </div>
 

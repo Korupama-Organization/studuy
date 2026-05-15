@@ -5,23 +5,23 @@ import './JobConnectionSection.css';
 const jobs = [
   {
     title: 'Backend Intern',
-    company: 'ABC Tech',
+    company: 'InnoTech',
     location: 'Hà Nội',
     type: 'Intern',
     match: '95%',
     tags: ['Node.js', 'MongoDB', 'Express'],
   },
   {
-    title: 'Ban do an dem',
-    company: 'Haky Food',
-    location: '120 Yen Lang, Hà Nội',
+    title: 'Software Engineer Fresher',
+    company: 'VNPT Technology',
+    location: 'Ho Chi Minh City',
     type: 'Fresher',
     match: '88%',
     tags: ['React', 'TypeScript', 'CSS'],
   },
   {
     title: 'AI Engineer Intern',
-    company: 'DEF Labs',
+    company: 'MTI Labs',
     location: 'Đà Nẵng',
     type: 'Intern',
     match: '92%',
@@ -69,7 +69,7 @@ const JobConnectionSection: React.FC = () => {
             </li>
           </Reveal>
 
-          <Reveal as="button" className="explore-btn" delay={320}>
+          <Reveal as="a" href="/login" className="explore-btn" delay={320} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             Khám phá công việc
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path d="M4.16663 10H15.8333M15.8333 10L10.8333 5M15.8333 10L10.8333 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -121,12 +121,12 @@ const JobConnectionSection: React.FC = () => {
                 ))}
               </div>
 
-              <button className="apply-btn">
+              <a href="/login" className="apply-btn" style={{ textDecoration: 'none' }}>
                 Ứng tuyển ngay
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
                   <path d="M4.16663 10H15.8333M15.8333 10L10.8333 5M15.8333 10L10.8333 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </button>
+              </a>
             </Reveal>
           ))}
         </div>

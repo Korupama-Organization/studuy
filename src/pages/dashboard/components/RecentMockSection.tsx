@@ -71,7 +71,7 @@ const RadarChart: React.FC<{ scores: Record<string, number> }> = ({ scores }) =>
           const x = center + r * Math.cos(angle);
           const y = center - r * Math.sin(angle);
           
-          let textAnchor = "middle";
+          let textAnchor: "inherit" | "end" | "start" | "middle" = "middle";
           if (x > center + 10) textAnchor = "start";
           else if (x < center - 10) textAnchor = "end";
           
@@ -116,12 +116,12 @@ const RecentMockSection: React.FC<RecentMockSectionProps> = ({ mockData }) => {
       <section>
         <div className="section-header">
           <h2 className="section-title mock-section-title">
-            Recent Mock Interview
-            <span className="badge-latest">Latest</span>
+            Phỏng vấn thử gần đây
+            <span className="badge-latest">Mới nhất</span>
           </h2>
         </div>
         <div className="radar-card" style={{ textAlign: "center", color: "#64748b", padding: "3rem" }}>
-          <p>No recent mock interview data available. Start a mock interview to see your performance analysis.</p>
+          <p>Chưa có dữ liệu phỏng vấn thử gần đây. Hãy bắt đầu một buổi phỏng vấn thử để xem phân tích hiệu suất của bạn.</p>
         </div>
       </section>
     );
@@ -133,20 +133,20 @@ const RecentMockSection: React.FC<RecentMockSectionProps> = ({ mockData }) => {
     <section>
       <div className="section-header">
         <h2 className="section-title mock-section-title">
-          Recent Mock Interview
-          <span className="badge-latest">Latest</span>
+          Phỏng vấn thử gần đây
+          <span className="badge-latest">Mới nhất</span>
         </h2>
       </div>
 
       <div className="mock-content-grid">
         <div className="radar-card">
-          <h3 className="radar-title">Performance Radar Analysis</h3>
+          <h3 className="radar-title">Phân tích radar hiệu suất</h3>
           <RadarChart scores={mockScores} />
         </div>
 
         <div className="mock-details">
           <div className="score-card">
-            <p className="score-label">Overall Score</p>
+            <p className="score-label">Điểm tổng thể</p>
             <div className="score-value">
               {overallScore} <span className="score-total">/100</span>
             </div>
@@ -156,7 +156,7 @@ const RecentMockSection: React.FC<RecentMockSectionProps> = ({ mockData }) => {
           </div>
 
           <div className="detailed-scores-card">
-            <h4 className="card-title">DETAILED SCORES</h4>
+            <h4 className="card-title">CHI TIẾT ĐIỂM SỐ</h4>
             
             {Object.entries(mockScores).map(([name, score]) => (
               <div className="score-row" key={name}>
@@ -172,12 +172,12 @@ const RecentMockSection: React.FC<RecentMockSectionProps> = ({ mockData }) => {
           </div>
 
           <div className="interviewer-summary-card">
-            <h4 className="card-title">INTERVIEWER'S SUMMARY</h4>
+            <h4 className="card-title">TỔNG KẾT CỦA NGƯỜI PHỎNG VẤN</h4>
             <p className="summary-text">
               {summary}
             </p>
             <div className="summary-meta">
-              Evaluated by: AI Interviewer<br/>
+              Đánh giá bởi: AI Interviewer<br/>
             </div>
           </div>
         </div>

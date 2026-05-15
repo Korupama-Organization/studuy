@@ -34,6 +34,30 @@ interface RegisterFormCardProps {
     onLinkedinUrlChange: (value: string) => void;
     onGithubUrlChange: (value: string) => void;
     onFacebookUrlChange: (value: string) => void;
+    companyName: string;
+    companyShortName: string;
+    companyLogoUrl: string;
+    companyWebsite: string;
+    companyAddress: string;
+    companyDescription: string;
+    companyType: 'On-site' | 'Remote' | 'Hybrid';
+    companyTechStack: string;
+    companyBenefits: string;
+    companyTargetRoles: string;
+    usingAIInterview: boolean;
+    usingManualInterview: boolean;
+    onCompanyNameChange: (value: string) => void;
+    onCompanyShortNameChange: (value: string) => void;
+    onCompanyLogoUrlChange: (value: string) => void;
+    onCompanyWebsiteChange: (value: string) => void;
+    onCompanyAddressChange: (value: string) => void;
+    onCompanyDescriptionChange: (value: string) => void;
+    onCompanyTypeChange: (value: 'On-site' | 'Remote' | 'Hybrid') => void;
+    onCompanyTechStackChange: (value: string) => void;
+    onCompanyBenefitsChange: (value: string) => void;
+    onCompanyTargetRolesChange: (value: string) => void;
+    onUsingAIInterviewChange: (value: boolean) => void;
+    onUsingManualInterviewChange: (value: boolean) => void;
     onCheckEmailAvailability: (email: string) => Promise<void>;
     onSubmit: () => Promise<string | null>;
 }
@@ -71,6 +95,30 @@ export default function RegisterFormCard({
     onLinkedinUrlChange,
     onGithubUrlChange,
     onFacebookUrlChange,
+    companyName,
+    companyShortName,
+    companyLogoUrl,
+    companyWebsite,
+    companyAddress,
+    companyDescription,
+    companyType,
+    companyTechStack,
+    companyBenefits,
+    companyTargetRoles,
+    usingAIInterview,
+    usingManualInterview,
+    onCompanyNameChange,
+    onCompanyShortNameChange,
+    onCompanyLogoUrlChange,
+    onCompanyWebsiteChange,
+    onCompanyAddressChange,
+    onCompanyDescriptionChange,
+    onCompanyTypeChange,
+    onCompanyTechStackChange,
+    onCompanyBenefitsChange,
+    onCompanyTargetRolesChange,
+    onUsingAIInterviewChange,
+    onUsingManualInterviewChange,
     onCheckEmailAvailability,
     onSubmit,
 }: RegisterFormCardProps) {
@@ -97,6 +145,12 @@ export default function RegisterFormCard({
                 title: 'Hồ sơ',
                 subtitle: 'Avatar và mạng xã hội',
                 sectionTitle: 'Hồ sơ chuyên nghiệp',
+            },
+            {
+                id: 4,
+                title: 'Công ty',
+                subtitle: 'Thông tin & Văn hóa',
+                sectionTitle: 'Thông tin công ty',
             },
         ],
         [],
@@ -145,6 +199,19 @@ export default function RegisterFormCard({
             }
         }
 
+        if (step === 3) {
+            // Optional fields, no validation needed
+        }
+
+        if (step === 4) {
+            if (!companyName.trim() || !companyWebsite.trim() || !companyAddress.trim()) {
+                return 'Vui lòng nhập đầy đủ thông tin công ty.';
+            }
+            if (!companyWebsite.includes('http')) {
+                return 'Website phải bắt đầu bằng http:// hoặc https://';
+            }
+        }
+
         return '';
     };
 
@@ -170,7 +237,7 @@ export default function RegisterFormCard({
         }
 
         setStepError('');
-        setCurrentStep((step) => Math.min(step + 1, 3));
+        setCurrentStep((step) => Math.min(step + 1, 4));
     };
 
     const handleFinalSubmit = async () => {
@@ -200,7 +267,7 @@ export default function RegisterFormCard({
             </h1>
 
             <div className="mb-2 sm:mb-3 rounded-[18px] border border-[#E1E4F0] bg-[#F8F9FF] px-3 py-2.5 shadow-[0_6px_14px_rgba(26,28,73,0.1)]">
-                <div className="grid grid-cols-3 gap-2 pb-1.5">
+                <div className="grid grid-cols-4 gap-1.5 pb-1.5">
                     {steps.map((step) => {
                         const isActive = currentStep === step.id;
                         const isCompleted = currentStep > step.id;
@@ -280,7 +347,7 @@ export default function RegisterFormCard({
                                     onChange={onFullNameChange}
                                     placeholder="Nhập họ và tên"
                                     iconUrl={USER_ICON_CDN}
-                                    iconAlt="full name icon"
+                                    iconAlt="Biểu tượng họ tên"
                                     autoComplete="name"
                                     autoCapitalize="words"
                                     compact
@@ -293,7 +360,7 @@ export default function RegisterFormCard({
                                     onChange={onIdentifierChange}
                                     placeholder="Nhập email công việc"
                                     iconUrl={EMAIL_ICON_CDN}
-                                    iconAlt="Email icon"
+                                    iconAlt="Biểu tượng email"
                                     autoComplete="username"
                                     autoCapitalize="none"
                                     labelClassName="pl-1.5"
@@ -311,7 +378,7 @@ export default function RegisterFormCard({
                                     onChange={onPasswordChange}
                                     placeholder="Nhập mật khẩu"
                                     iconUrl={PASSWORD_ICON_CDN}
-                                    iconAlt="password icon"
+                                    iconAlt="Biểu tượng mật khẩu"
                                     autoComplete="new-password"
                                     compact
                                 />
@@ -323,7 +390,7 @@ export default function RegisterFormCard({
                                     onChange={onConfirmPasswordChange}
                                     placeholder="Nhập lại mật khẩu"
                                     iconUrl={PASSWORD_ICON_CDN}
-                                    iconAlt="confirm password icon"
+                                    iconAlt="Biểu tượng xác nhận mật khẩu"
                                     autoComplete="new-password"
                                     compact
                                 />
@@ -335,7 +402,7 @@ export default function RegisterFormCard({
                                     onChange={onPhoneChange}
                                     placeholder="Ví dụ: 0901234567"
                                     iconUrl={PHONE_ICON_CDN}
-                                    iconAlt="phone icon"
+                                    iconAlt="Biểu tượng số điện thoại"
                                     autoComplete="tel"
                                     compact
                                 />
@@ -376,7 +443,7 @@ export default function RegisterFormCard({
                                     onChange={onAvatarUrlChange}
                                     placeholder="https://..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="avatar url icon"
+                                    iconAlt="Biểu tượng URL ảnh đại diện"
                                     autoComplete="url"
                                     autoCapitalize="none"
                                     compact
@@ -389,7 +456,7 @@ export default function RegisterFormCard({
                                     onChange={onLinkedinUrlChange}
                                     placeholder="https://linkedin.com/in/..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="linkedin url icon"
+                                    iconAlt="Biểu tượng URL LinkedIn"
                                     autoComplete="url"
                                     autoCapitalize="none"
                                     compact
@@ -402,7 +469,7 @@ export default function RegisterFormCard({
                                     onChange={onGithubUrlChange}
                                     placeholder="https://github.com/..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="github url icon"
+                                    iconAlt="Biểu tượng URL GitHub"
                                     autoComplete="url"
                                     autoCapitalize="none"
                                     compact
@@ -415,11 +482,125 @@ export default function RegisterFormCard({
                                     onChange={onFacebookUrlChange}
                                     placeholder="https://facebook.com/..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="facebook url icon"
+                                    iconAlt="Biểu tượng URL Facebook"
                                     autoComplete="url"
                                     autoCapitalize="none"
                                     compact
                                 />
+                            </>
+                        ) : null}
+
+                        {currentStep === 4 ? (
+                            <>
+                                <CredentialInput
+                                    label="Tên công ty"
+                                    type="text"
+                                    value={companyName}
+                                    onChange={onCompanyNameChange}
+                                    placeholder="Nhập tên doanh nghiệp"
+                                    iconUrl={USER_ICON_CDN}
+                                    iconAlt="Biểu tượng tên công ty"
+                                    compact
+                                />
+
+                                <CredentialInput
+                                    label="Website công ty"
+                                    type="text"
+                                    value={companyWebsite}
+                                    onChange={onCompanyWebsiteChange}
+                                    placeholder="https://..."
+                                    iconUrl={LINK_ICON_CDN}
+                                    iconAlt="Biểu tượng website công ty"
+                                    compact
+                                />
+
+                                <CredentialInput
+                                    label="Tên viết tắt"
+                                    type="text"
+                                    value={companyShortName}
+                                    onChange={onCompanyShortNameChange}
+                                    placeholder="Ví dụ: SEeds"
+                                    iconUrl={USER_ICON_CDN}
+                                    iconAlt="Biểu tượng tên viết tắt"
+                                    compact
+                                />
+
+                                <CredentialInput
+                                    label="Địa chỉ công ty"
+                                    type="text"
+                                    value={companyAddress}
+                                    onChange={onCompanyAddressChange}
+                                    placeholder="Nhập địa chỉ trụ sở"
+                                    iconUrl={LINK_ICON_CDN}
+                                    iconAlt="Biểu tượng địa chỉ công ty"
+                                    compact
+                                />
+
+                                <CredentialInput
+                                    label="Mô tả ngắn"
+                                    type="text"
+                                    value={companyDescription}
+                                    onChange={onCompanyDescriptionChange}
+                                    placeholder="Giới thiệu về công ty..."
+                                    iconUrl={USER_ICON_CDN}
+                                    iconAlt="Biểu tượng mô tả"
+                                    compact
+                                />
+
+                                <div className="flex flex-col gap-2 pb-1">
+                                    <label className="text-[#0A0A0A] font-inter font-light" style={{ fontSize: 'clamp(0.82rem, 2.1vw, 0.95rem)' }}>Hình thức làm việc</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {([
+                                            { value: 'On-site', label: 'Tại văn phòng' },
+                                            { value: 'Remote', label: 'Từ xa' },
+                                            { value: 'Hybrid', label: 'Linh hoạt' },
+                                        ] as const).map((type) => (
+                                            <button
+                                                key={type.value}
+                                                type="button"
+                                                onClick={() => onCompanyTypeChange(type.value)}
+                                                className={`h-[38px] rounded-full border text-center transition-colors ${companyType === type.value ? 'border-[#5E52D9] bg-[#E9E8FE] text-[#3D30B9]' : 'border-[#D5D8E8] bg-white text-[#6C728C]'}`}
+                                                style={{ fontSize: 'clamp(0.75rem, 2vw, 0.85rem)' }}
+                                            >
+                                                {type.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <CredentialInput
+                                    label="Ngăn xếp công nghệ (cách nhau bởi dấu phẩy)"
+                                    type="text"
+                                    value={companyTechStack}
+                                    onChange={onCompanyTechStackChange}
+                                    placeholder="Node.js, TypeScript, ..."
+                                    iconUrl={LINK_ICON_CDN}
+                                    iconAlt="Biểu tượng ngăn xếp công nghệ"
+                                    compact
+                                />
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="flex items-center gap-2 px-3 h-[44px] bg-white border border-[#D5D8E8] rounded-xl">
+                                        <input
+                                            type="checkbox"
+                                            checked={usingAIInterview}
+                                            onChange={(e) => onUsingAIInterviewChange(e.target.checked)}
+                                            id="ai-interview"
+                                            className="w-4 h-4"
+                                        />
+                                        <label htmlFor="ai-interview" className="text-[#6C728C] text-xs font-medium cursor-pointer">Phỏng vấn AI</label>
+                                    </div>
+                                    <div className="flex items-center gap-2 px-3 h-[44px] bg-white border border-[#D5D8E8] rounded-xl">
+                                        <input
+                                            type="checkbox"
+                                            checked={usingManualInterview}
+                                            onChange={(e) => onUsingManualInterviewChange(e.target.checked)}
+                                            id="manual-interview"
+                                            className="w-4 h-4"
+                                        />
+                                        <label htmlFor="manual-interview" className="text-[#6C728C] text-xs font-medium cursor-pointer">Phỏng vấn trực tiếp</label>
+                                    </div>
+                                </div>
                             </>
                         ) : null}
                     </div>
@@ -436,7 +617,7 @@ export default function RegisterFormCard({
                         Quay lại
                     </button>
 
-                    {currentStep < 3 ? (
+                    {currentStep < 4 ? (
                         <button
                             type="button"
                             onClick={() => {

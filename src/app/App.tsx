@@ -1,6 +1,5 @@
 import React from 'react';
 import LandingPage from '../pages/landing/Index';
-import JobsPage from '../pages/jobs/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import CandidateDashboard from '../pages/dashboard/Index';
@@ -51,6 +50,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <AuthSessionGuard />
         <Routes>
           <Route path="/" element={<LandingPage />} />
 
@@ -77,6 +77,20 @@ function App() {
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/login/*" element={<LoginPage />} />
           <Route path="/register/*" element={<RegisterPage />} />
+          <Route path="/candidate/dashboard" element={<DashboardPage />} />
+          <Route path="/candidate/profile/update" element={<ProfileFormProvider><UpdateProfile /></ProfileFormProvider>} />
+          <Route path="/candidate/profile/update/step2" element={<ProfileFormProvider><UpdateProfileStep2 /></ProfileFormProvider>} />
+          <Route path="/candidate/profile/update/step3" element={<ProfileFormProvider><UpdateProfileStep3 /></ProfileFormProvider>} />
+          <Route path="/candidate/profile/update/step4" element={<ProfileFormProvider><UpdateProfileStep4 /></ProfileFormProvider>} />
+          <Route path="/candidate/jobs" element={<CandidateJobsPage />} />
+
+          <Route path="/recruiter/company" element={<CompanyPage />} />
+          <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
+          <Route path="/recruiter/jobs" element={<RecruiterJobsPage />} />
+          <Route path="/recruiter/management" element={<RecruiterManagementPage />} />
+          <Route path="/recruiter/candidates" element={<RecruiterCandidatesPage />} />
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
