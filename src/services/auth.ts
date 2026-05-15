@@ -93,7 +93,7 @@ const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
     (typeof window !== 'undefined' ? window.location.origin : '');
 
-const buildApiUrl = (path: string): string => {
+export const buildApiUrl = (path: string): string => {
     return new URL(path, API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`).toString();
 };
 

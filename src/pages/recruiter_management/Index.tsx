@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
+import { buildApiUrl } from "../../services/auth";
+import { useCurrentRecruiter } from "../../hooks/useCurrentRecruiter";
+import { useRecruiterActivity } from "../../hooks/useRecruiterActivity";
+import RecruiterSidebar from "../recruiter_dashboard/components/RecruiterSidebar";
+import RecruiterTopBar from "../recruiter_dashboard/components/RecruiterTopBar";
+import ActivityPanel from "../recruiter_dashboard/components/ActivityPanel";
 import RecruiterTable from "./RecruiterTable";
 import TopHeader from "./TopHeader";
+import "../recruiter_dashboard/recruiter.css";
 
 export interface Recruiter {
   _id?: string;
@@ -94,134 +100,155 @@ const getResponseErrorMessage = async (
   return fallback;
 };
 
-const normalizeRecruiter = (raw: Record<string, unknown>): Recruiter => ({
-  _id:
-    typeof raw._id === "string"
-      ? raw._id
-      : typeof raw.id === "string"
-        ? raw.id
-        : undefined,
-  fullName:
-    typeof raw.fullName === "string"
-      ? raw.fullName
-      : typeof raw.fullname === "string"
-        ? raw.fullname
-        : typeof raw.name === "string"
-          ? raw.name
-          : (() => {
-              const userId = raw.userId as Record<string, unknown> | undefined;
-              return typeof userId?.fullName === "string"
-                ? userId.fullName
-                : "-";
-            })(),
-  email:
-    typeof raw.email === "string"
-      ? raw.email
-      : (() => {
-          const contactInfo = raw.contactInfo as
-            | Record<string, unknown>
-            | undefined;
-          if (typeof contactInfo?.email === "string") return contactInfo.email;
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
-          const userId = raw.userId as Record<string, unknown> | undefined;
-          const nestedContactInfo = userId?.contactInfo as
-            | Record<string, unknown>
-            | undefined;
-          return typeof nestedContactInfo?.email === "string"
-            ? nestedContactInfo.email
-            : "-";
-        })(),
-  phone:
-    typeof raw.phone === "string"
-      ? raw.phone
-      : (() => {
-          const contactInfo = raw.contactInfo as
-            | Record<string, unknown>
-            | undefined;
-          if (typeof contactInfo?.phone === "string") return contactInfo.phone;
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  isRecord(value) ? value : undefined;
 
-          const userId = raw.userId as Record<string, unknown> | undefined;
-          const nestedContactInfo = userId?.contactInfo as
-            | Record<string, unknown>
-            | undefined;
-          return typeof nestedContactInfo?.phone === "string"
-            ? nestedContactInfo.phone
-            : undefined;
-        })(),
-  linkedinUrl: (() => {
-    const contactInfo = raw.contactInfo as Record<string, unknown> | undefined;
-    if (typeof contactInfo?.linkedinUrl === "string")
-      return contactInfo.linkedinUrl;
+const readString = (...values: unknown[]): string | undefined => {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) {
+      return value;
+    }
+  }
+  return undefined;
+};
 
-    const userId = raw.userId as Record<string, unknown> | undefined;
-    const nestedContactInfo = userId?.contactInfo as
-      | Record<string, unknown>
-      | undefined;
-    return typeof nestedContactInfo?.linkedinUrl === "string"
-      ? nestedContactInfo.linkedinUrl
-      : undefined;
-  })(),
-  githubUrl: (() => {
-    const contactInfo = raw.contactInfo as Record<string, unknown> | undefined;
-    if (typeof contactInfo?.githubUrl === "string")
-      return contactInfo.githubUrl;
+const toRawDateString = (value: unknown): string | undefined => {
+  if (!value) return undefined;
 
-    const userId = raw.userId as Record<string, unknown> | undefined;
-    const nestedContactInfo = userId?.contactInfo as
-      | Record<string, unknown>
-      | undefined;
-    return typeof nestedContactInfo?.githubUrl === "string"
-      ? nestedContactInfo.githubUrl
-      : undefined;
-  })(),
-  facebookUrl: (() => {
-    const contactInfo = raw.contactInfo as Record<string, unknown> | undefined;
-    if (typeof contactInfo?.facebookUrl === "string")
-      return contactInfo.facebookUrl;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || undefined;
+  }
 
-    const userId = raw.userId as Record<string, unknown> | undefined;
-    const nestedContactInfo = userId?.contactInfo as
-      | Record<string, unknown>
-      | undefined;
-    return typeof nestedContactInfo?.facebookUrl === "string"
-      ? nestedContactInfo.facebookUrl
-      : undefined;
-  })(),
-  role: (() => {
-    if (typeof raw.membershipRole === "string") return raw.membershipRole;
-    if (typeof raw.role === "string") return raw.role;
-    const userId = raw.userId as Record<string, unknown> | undefined;
-    return typeof userId?.role === "string" ? userId.role : "recruiter";
-  })(),
-  status: raw.status === "inactive" ? "inactive" : "active",
-  avatarUrl:
-    typeof raw.avatarUrl === "string"
-      ? raw.avatarUrl
-      : typeof raw.avatar === "string"
-        ? raw.avatar
-        : (() => {
-            const userId = raw.userId as Record<string, unknown> | undefined;
-            return typeof userId?.avatarUrl === "string"
-              ? userId.avatarUrl
-              : undefined;
-          })(),
-  gender: (() => {
-    if (typeof raw.gender === "string") return raw.gender;
-    const userId = raw.userId as Record<string, unknown> | undefined;
-    return typeof userId?.gender === "string" ? userId.gender : undefined;
-  })(),
-  dateOfBirth: (() => {
-    if (typeof raw.dateOfBirth === "string") return raw.dateOfBirth;
-    const userId = raw.userId as Record<string, unknown> | undefined;
-    return typeof userId?.dateOfBirth === "string"
-      ? userId.dateOfBirth
-      : undefined;
-  })(),
-  jobTitle: typeof raw.jobTitle === "string" ? raw.jobTitle : undefined,
-  membershipRole:
-    typeof raw.membershipRole === "string" ? raw.membershipRole : undefined,
-  createdAt: typeof raw.createdAt === "string" ? raw.createdAt : "-",
-});
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return new Date(value).toISOString();
+  }
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString();
+  }
+
+  if (isRecord(value)) {
+    return toRawDateString(
+      value.$date ??
+        value.date ??
+        value.value ??
+        value.iso ??
+        value.dateOfBirth ??
+        value.birthDate ??
+        value.dob,
+    );
+  }
+
+  return undefined;
+};
+
+const readDateString = (...values: unknown[]): string | undefined => {
+  for (const value of values) {
+    const raw = toRawDateString(value);
+    if (raw) return raw;
+  }
+  return undefined;
+};
+
+const getUserRecord = (
+  raw: Record<string, unknown>,
+): Record<string, unknown> | undefined =>
+  asRecord(raw.userId) || asRecord(raw.user) || asRecord(raw.account);
+
+const getProfileRecord = (
+  raw: Record<string, unknown>,
+  user?: Record<string, unknown>,
+): Record<string, unknown> | undefined =>
+  asRecord(raw.profile) || asRecord(raw.userProfile) || asRecord(user?.profile);
+
+const normalizeRecruiter = (raw: Record<string, unknown>): Recruiter => {
+  const user = getUserRecord(raw);
+  const profile = getProfileRecord(raw, user);
+  const contactInfo = asRecord(raw.contactInfo);
+  const userContactInfo = asRecord(user?.contactInfo);
+  const profileContactInfo = asRecord(profile?.contactInfo);
+
+  return {
+    _id: readString(raw._id, raw.id),
+    fullName:
+      readString(raw.fullName, raw.fullname, raw.name, user?.fullName, profile?.fullName) ||
+      "-",
+    email:
+      readString(
+        raw.email,
+        contactInfo?.email,
+        user?.email,
+        userContactInfo?.email,
+        profile?.email,
+        profileContactInfo?.email,
+      ) || "-",
+    phone: readString(
+      raw.phone,
+      contactInfo?.phone,
+      user?.phone,
+      userContactInfo?.phone,
+      profile?.phone,
+      profileContactInfo?.phone,
+    ),
+    linkedinUrl: readString(
+      raw.linkedinUrl,
+      contactInfo?.linkedinUrl,
+      user?.linkedinUrl,
+      userContactInfo?.linkedinUrl,
+      profile?.linkedinUrl,
+      profileContactInfo?.linkedinUrl,
+    ),
+    githubUrl: readString(
+      raw.githubUrl,
+      contactInfo?.githubUrl,
+      user?.githubUrl,
+      userContactInfo?.githubUrl,
+      profile?.githubUrl,
+      profileContactInfo?.githubUrl,
+    ),
+    facebookUrl: readString(
+      raw.facebookUrl,
+      contactInfo?.facebookUrl,
+      user?.facebookUrl,
+      userContactInfo?.facebookUrl,
+      profile?.facebookUrl,
+      profileContactInfo?.facebookUrl,
+    ),
+    role: readString(
+      raw.membershipRole,
+      raw.role,
+      user?.membershipRole,
+      user?.role,
+      profile?.membershipRole,
+      profile?.role,
+    ) || "recruiter",
+    status: raw.status === "inactive" ? "inactive" : "active",
+    avatarUrl: readString(raw.avatarUrl, raw.avatar, user?.avatarUrl, profile?.avatarUrl),
+    gender: readString(user?.gender, profile?.gender, raw.gender),
+    dateOfBirth: readDateString(
+      user?.dateOfBirth,
+      user?.birthDate,
+      user?.dob,
+      profile?.dateOfBirth,
+      profile?.birthDate,
+      profile?.dob,
+      raw.dateOfBirth,
+      raw.birthDate,
+      raw.dob,
+    ),
+    jobTitle: readString(raw.jobTitle, user?.jobTitle, profile?.jobTitle),
+    membershipRole: readString(
+      raw.membershipRole,
+      user?.membershipRole,
+      profile?.membershipRole,
+    ),
+    createdAt: readString(raw.createdAt) || "-",
+  };
+};
 
 const extractRecruiters = (payload: unknown): Record<string, unknown>[] => {
   if (Array.isArray(payload)) return payload as Record<string, unknown>[];
@@ -232,12 +259,21 @@ const extractRecruiters = (payload: unknown): Record<string, unknown>[] => {
       return obj.recruiters as Record<string, unknown>[];
     if (Array.isArray(obj.members))
       return obj.members as Record<string, unknown>[];
+    const data = asRecord(obj.data);
+    if (Array.isArray(data?.members))
+      return data.members as Record<string, unknown>[];
+    if (Array.isArray(data?.recruiters))
+      return data.recruiters as Record<string, unknown>[];
+    if (Array.isArray(data?.items))
+      return data.items as Record<string, unknown>[];
   }
   return [];
 };
 
 export default function RecruiterManagementPage() {
   const [recruiters, setRecruiters] = useState<Recruiter[]>([]);
+  const topbarRecruiter = useCurrentRecruiter();
+  const recruiterActivity = useRecruiterActivity();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -248,7 +284,7 @@ export default function RecruiterManagementPage() {
       setError("");
       try {
         const params = new URLSearchParams({ sort, limit: "100" });
-        const response = await fetch(`/api/company-members?${params.toString()}`, {
+        const response = await fetch(buildApiUrl(`/api/company-members?${params.toString()}`), {
           method: "GET",
           headers: getAuthHeaders(),
         });
@@ -299,7 +335,7 @@ export default function RecruiterManagementPage() {
   const handleCreateRecruiter = useCallback(
     async (payload: CreateRecruiterPayload) => {
       const response = await fetch(
-        "/api/company-members/create-member",
+        buildApiUrl("/api/company-members/create-member"),
         {
           method: "POST",
           headers: getAuthHeaders(),
@@ -319,9 +355,9 @@ export default function RecruiterManagementPage() {
   const handleUpdateRecruiter = useCallback(
     async (payload: UpdateProfilePayload) => {
       const response = await fetch(
-        "/api/company-members/profile",
+        buildApiUrl("/api/company-members/profile"),
         {
-          method: "PUT",
+          method: "PATCH",
           headers: getAuthHeaders(),
           body: JSON.stringify(payload),
         },
@@ -342,7 +378,7 @@ export default function RecruiterManagementPage() {
   const handleDeleteRecruiter = useCallback(
     async (id: string) => {
       const response = await fetch(
-        `/api/company-members/${encodeURIComponent(id)}`,
+        buildApiUrl(`/api/company-members/${encodeURIComponent(id)}`),
         {
           method: "DELETE",
           headers: getAuthHeaders(),
@@ -359,45 +395,62 @@ export default function RecruiterManagementPage() {
   );
 
   return (
-    <div className="min-h-dvh bg-[#F4F6FB] text-slate-900 font-['Inter']">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -left-20 top-20 h-64 w-64 rounded-full bg-[#E8E9FF] blur-[90px]"></div>
-        <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-[#EDEEFF] blur-[120px]"></div>
-      </div>
+    <div className="rd-layout">
+      <RecruiterSidebar activeItem="employees" />
 
-      <div className="relative flex min-h-dvh w-full gap-5 pr-4 lg:pr-6">
-        <RecruiterSidebar activePath="/recruiter/management" />
+      <div className="rd-body">
+        <div className="rd-content-area">
+          <RecruiterTopBar
+            recruiter={topbarRecruiter}
+            company={null}
+            notificationCount={recruiterActivity.notificationCount}
+            isActivityPanelOpen={recruiterActivity.isActivityPanelOpen}
+            onToggleActivityPanel={recruiterActivity.toggleActivityPanel}
+          />
 
-        <main className="flex flex-1 flex-col gap-6 pt-6">
-          <div className="overflow-hidden rounded-[28px] border border-white/80 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.08)]">
-            <div className="border-b border-slate-100 px-5 py-5 lg:px-6">
-              <TopHeader
-                onCreateRecruiter={handleCreateRecruiter}
-                onSearchChange={setSearchQuery}
-              />
-            </div>
-            {error ? (
-              <p className="border-b border-slate-100 px-5 py-4 text-sm text-red-500 lg:px-6">
-                {error}
-              </p>
-            ) : null}
-            {!error ? (
-              <div className="px-5 py-5 lg:px-6">
-                <RecruiterTable
-                  recruiters={filteredRecruiters}
-                  isLoading={isLoading}
-                  onUpdateRecruiter={handleUpdateRecruiter}
-                  onDeleteRecruiter={handleDeleteRecruiter}
+          <div className="rd-main">
+            <div className="overflow-hidden rounded-[20px] border border-[#e2e8f0] bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-5 py-5 lg:px-6">
+                <TopHeader
+                  onCreateRecruiter={handleCreateRecruiter}
+                  onSearchChange={setSearchQuery}
                 />
               </div>
-            ) : null}
-            <div className="border-t border-slate-100 px-5 py-4 lg:px-6">
-              <p className="text-sm text-slate-500">
-                Hiển thị {filteredRecruiters.length} nhân viên
-              </p>
+              {error ? (
+                <p className="border-b border-slate-100 px-5 py-4 text-sm text-red-500 lg:px-6">
+                  {error}
+                </p>
+              ) : null}
+              {!error ? (
+                <div className="px-5 py-5 lg:px-6">
+                  <RecruiterTable
+                    recruiters={filteredRecruiters}
+                    isLoading={isLoading}
+                    onUpdateRecruiter={handleUpdateRecruiter}
+                    onDeleteRecruiter={handleDeleteRecruiter}
+                  />
+                </div>
+              ) : null}
+              <div className="border-t border-slate-100 px-5 py-4 lg:px-6">
+                <p className="text-sm text-slate-500">
+                  Hiển thị {filteredRecruiters.length} nhân viên
+                </p>
+              </div>
             </div>
           </div>
-        </main>
+        </div>
+
+        {recruiterActivity.isActivityPanelOpen ? (
+          <ActivityPanel
+            notifications={recruiterActivity.notifications}
+            upcomingInterviews={recruiterActivity.upcomingInterviews}
+            isLoading={recruiterActivity.isActivityLoading}
+            error={recruiterActivity.activityError}
+            unreadCount={recruiterActivity.unreadNotificationCount}
+            onMarkAllAsRead={recruiterActivity.markAllNotificationsAsRead}
+            onClose={recruiterActivity.closeActivityPanel}
+          />
+        ) : null}
       </div>
     </div>
   );

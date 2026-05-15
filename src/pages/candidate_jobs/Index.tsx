@@ -1,7 +1,7 @@
 ﻿import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import GlobalHeader from "../../components/GlobalHeader";
-import { getStoredUser } from "../../services/auth";
+import { buildApiUrl, getStoredUser } from "../../services/auth";
 import {
   extractCandidateApplications,
   normalizeCandidateApplication,
@@ -197,7 +197,7 @@ const fetchCompanyDescriptions = async (companyIds: string[]): Promise<Map<strin
   await Promise.all(
     companyIds.map(async (companyId) => {
       try {
-        const response = await fetch(`/api/companies/?companyId=${encodeURIComponent(companyId)}`, {
+        const response = await fetch(buildApiUrl(`/api/companies/?companyId=${encodeURIComponent(companyId)}`), {
           method: "GET",
           headers: getAuthHeaders(),
         });
@@ -395,7 +395,7 @@ export default function CandidateJobsPage() {
   const { data, error, isLoading } = useQuery({
     queryKey: ["candidate-applications"],
     queryFn: async () => {
-      const response = await fetch("/api/applications", {
+      const response = await fetch(buildApiUrl("/api/applications"), {
         method: "GET",
         headers: getAuthHeaders(),
       });
@@ -419,7 +419,7 @@ export default function CandidateJobsPage() {
       }
 
       try {
-        const jobsResponse = await fetch("/api/jobs", {
+        const jobsResponse = await fetch(buildApiUrl("/api/jobs"), {
           method: "GET",
           headers: getAuthHeaders(),
         });
@@ -473,7 +473,7 @@ export default function CandidateJobsPage() {
         throw new Error("Không tìm thấy tài khoản candidate để ứng tuyển.");
       }
 
-      const response = await fetch("/api/applications", {
+      const response = await fetch(buildApiUrl("/api/applications"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

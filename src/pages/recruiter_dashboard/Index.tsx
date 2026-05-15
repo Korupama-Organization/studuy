@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./recruiter.css";
 
 import { dashboardService } from "../../services/dashboardService";
+import { useNotificationReadState } from "../../hooks/useRecruiterActivity";
 import RecruiterSidebar from "./components/RecruiterSidebar";
 import RecruiterTopBar from "./components/RecruiterTopBar";
 import StatsCards from "./components/StatsCards";
@@ -14,12 +15,16 @@ import ActivityPanel from "./components/ActivityPanel";
 
 const RecruiterDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const [isActivityPanelOpen, setIsActivityPanelOpen] = React.useState(true);
+  const [dashboardPeriod, setDashboardPeriod] = React.useState<"week" | "month">("week");
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["recruiter-dashboard"],
-    queryFn: () => dashboardService.getDashboard("week"),
+    queryKey: ["recruiter-dashboard", dashboardPeriod],
+    queryFn: () => dashboardService.getDashboard(dashboardPeriod),
     retry: 1,
   });
+  const notifications = data?.notifications ?? [];
+  const notificationReadState = useNotificationReadState(notifications);
 
   // Handle 401 errors — redirect to login
   React.useEffect(() => {
@@ -82,6 +87,11 @@ const RecruiterDashboard: React.FC = () => {
           <RecruiterTopBar
             recruiter={data?.recruiter ?? null}
             company={data?.company ?? null}
+            notificationCount={notificationReadState.unreadNotificationCount}
+            isActivityPanelOpen={isActivityPanelOpen}
+            onToggleActivityPanel={() =>
+              setIsActivityPanelOpen((current) => !current)
+            }
           />
 
           {/* Main content */}
@@ -98,7 +108,11 @@ const RecruiterDashboard: React.FC = () => {
 
             {/* Charts */}
             <div className="rd-charts-row">
-              <ApplicationsBarChart data={data?.chartData ?? []} />
+              <ApplicationsBarChart
+                data={data?.chartData ?? []}
+                period={dashboardPeriod}
+                onPeriodChange={setDashboardPeriod}
+              />
               <StatusDonutChart
                 statusOverview={data?.statusOverview ?? { total: 0, items: [] }}
               />
@@ -111,11 +125,15 @@ const RecruiterDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Activity Panel */}
-        <ActivityPanel
-          notifications={data?.notifications ?? []}
-          upcomingInterviews={data?.upcomingInterviews ?? []}
-        />
+        {isActivityPanelOpen ? (
+          <ActivityPanel
+            notifications={notifications}
+            upcomingInterviews={data?.upcomingInterviews ?? []}
+            unreadCount={notificationReadState.unreadNotificationCount}
+            onMarkAllAsRead={notificationReadState.markAllNotificationsAsRead}
+            onClose={() => setIsActivityPanelOpen(false)}
+          />
+        ) : null}
       </div>
     </div>
   );
