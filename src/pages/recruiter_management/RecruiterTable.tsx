@@ -8,6 +8,7 @@ interface RecruiterTableProps {
   isLoading: boolean;
   onUpdateRecruiter: (payload: UpdateProfilePayload) => Promise<void>;
   onDeleteRecruiter: (id: string) => Promise<void>;
+  isCurrentRecruiter: (recruiter: Recruiter) => boolean;
 }
 
 export default function RecruiterTable({
@@ -15,6 +16,7 @@ export default function RecruiterTable({
   isLoading,
   onUpdateRecruiter,
   onDeleteRecruiter,
+  isCurrentRecruiter,
 }: RecruiterTableProps) {
   const [selectedRecruiter, setSelectedRecruiter] = useState<Recruiter | null>(
     null,
@@ -31,6 +33,11 @@ export default function RecruiterTable({
   };
 
   const handleDeleteClick = (recruiter: Recruiter) => {
+    if (isCurrentRecruiter(recruiter)) {
+      setActionError("Bạn không thể xóa chính tài khoản đang đăng nhập.");
+      return;
+    }
+
     setPendingDeleteRecruiter(recruiter);
     setActionError("");
     setIsDeleteConfirmOpen(true);
@@ -147,72 +154,88 @@ export default function RecruiterTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
-            {recruiters.map((recruiter) => (
-              <tr
-                key={recruiter._id || recruiter.email}
-                className="transition hover:bg-slate-50/70">
-                <td className="whitespace-nowrap px-6 py-4">
-                  <p className="text-sm font-semibold text-slate-900">
-                    {recruiter.fullName || "-"}
-                  </p>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                  {recruiter.email || "-"}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                  {recruiter.phone || "-"}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                  {getRoleLabel(recruiter.role)}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4">
-                  <span
-                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${getStatusStyles(
-                      recruiter.status,
-                    )}`}>
+            {recruiters.map((recruiter) => {
+              const isSelf = isCurrentRecruiter(recruiter);
+
+              return (
+                <tr
+                  key={recruiter._id || recruiter.email}
+                  className="transition hover:bg-slate-50/70">
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <p className="text-sm font-semibold text-slate-900">
+                      {recruiter.fullName || "-"}
+                    </p>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                    {recruiter.email || "-"}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                    {recruiter.phone || "-"}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                    {getRoleLabel(recruiter.role)}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4">
                     <span
-                      className={`h-2 w-2 rounded-full ${getStatusDot(recruiter.status)}`}
-                    />
-                    {recruiter.status === "active" ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                  {formatJoinDate(recruiter.createdAt)}
-                </td>
-                <td className="whitespace-nowrap px-6 py-4 text-right">
-                  <div className="inline-flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleClick(recruiter)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-[#5B5BF6]/25 hover:bg-[#EEF0FF] hover:text-[#5B5BF6]"
-                      aria-label={`Chỉnh sửa ${recruiter.fullName}`}>
-                      <span className="material-symbols-outlined text-[18px]">
-                        edit
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteClick(recruiter)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
-                      aria-label={`Xóa ${recruiter.fullName}`}>
-                      <span className="material-symbols-outlined text-[18px]">
-                        delete
-                      </span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${getStatusStyles(
+                        recruiter.status,
+                      )}`}>
+                      <span
+                        className={`h-2 w-2 rounded-full ${getStatusDot(recruiter.status)}`}
+                      />
+                      {recruiter.status === "active" ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                    {formatJoinDate(recruiter.createdAt)}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-right">
+                    <div className="inline-flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleClick(recruiter)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-[#5B5BF6]/25 hover:bg-[#EEF0FF] hover:text-[#5B5BF6]"
+                        aria-label={`Chỉnh sửa ${recruiter.fullName}`}>
+                        <span className="material-symbols-outlined text-[18px]">
+                          edit
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteClick(recruiter)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-slate-200 disabled:hover:bg-white disabled:hover:text-slate-500"
+                        aria-label={
+                          isSelf
+                            ? "Không thể xóa tài khoản đang đăng nhập"
+                            : `Xóa ${recruiter.fullName}`
+                        }
+                        disabled={isSelf}
+                        title={
+                          isSelf
+                            ? "Không thể xóa chính tài khoản đang đăng nhập"
+                            : `Xóa ${recruiter.fullName}`
+                        }>
+                        <span className="material-symbols-outlined text-[18px]">
+                          delete
+                        </span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       <UpdateRecruiterModal
+        key={selectedRecruiter?._id || selectedRecruiter?.email || "update-recruiter-modal"}
         isOpen={isUpdateModalOpen}
         onClose={() => setIsUpdateModalOpen(false)}
         recruiter={selectedRecruiter || undefined}
         onUpdate={onUpdateRecruiter}
         onDelete={onDeleteRecruiter}
+        isSelf={selectedRecruiter ? isCurrentRecruiter(selectedRecruiter) : false}
       />
 
       <DeleteConfirmDialog

@@ -138,9 +138,72 @@ export interface CompletionResponse {
     data: ProfileCompletionData;
 }
 
+export interface DashboardJobMatch {
+    jobId: string;
+    title: string;
+    summary: string;
+    company: {
+        id: string;
+        name: string;
+        logoUrl: string | null;
+    };
+    location: string;
+    workModel: string;
+    level: string;
+    jobType: string;
+    status: string;
+    matchScore: number;
+    matchedSkills: string[];
+    missingSkills: string[];
+    requiredSkillCount: number;
+    matchedSkillCount: number;
+    createdAt: string | null;
+}
+
+export interface DashboardProfile {
+    id: string;
+    fullName: string;
+    avatarUrl: string | null;
+    role: string;
+    hasProfile: boolean;
+    completionPercentage: number;
+    status: 'empty' | 'incomplete' | 'almost_complete' | 'complete';
+    nextRecommendedFields: string[];
+}
+
+export interface DashboardQuickStats {
+    appliedJobs: number;
+    matchedJobs: number;
+    profileCompletion: number;
+    interviews?: number;
+    savedJobs?: number;
+}
+
+export interface DashboardAIReport {
+    id: string;
+    comment: string;
+    status: string;
+    videoUrl: string | null;
+}
+
+export interface DashboardRecentMockInterview {
+    id: string;
+    overallScore: number;
+    scores: Record<string, number>;
+    summary: string;
+}
+
+export interface CandidateDashboardData {
+    profile: DashboardProfile;
+    quickStats: DashboardQuickStats;
+    jobMatches: DashboardJobMatch[];
+    aiInterviewReports?: DashboardAIReport[];
+    recentMockInterview?: DashboardRecentMockInterview | null;
+}
+
 export interface DashboardResponse {
     message: string;
-    data: unknown;
+    data: CandidateDashboardData;
 }
 
 // ── Helpers ──

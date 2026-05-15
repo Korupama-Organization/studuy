@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
+import { useCurrentRecruiter } from "../../hooks/useCurrentRecruiter";
+import { useRecruiterActivity } from "../../hooks/useRecruiterActivity";
+import RecruiterSidebar from "../recruiter_dashboard/components/RecruiterSidebar";
+import RecruiterTopBar from "../recruiter_dashboard/components/RecruiterTopBar";
+import ActivityPanel from "../recruiter_dashboard/components/ActivityPanel";
 import TopHeader from "./components/TopHeader";
 import JobsTable from "./components/JobsTable";
 import Pagination from "./components/Pagination";
+import "../recruiter_dashboard/recruiter.css";
 
 interface JobRow {
   id: string;
@@ -358,6 +363,8 @@ const getResponseErrorMessage = async (response: Response, fallback: string): Pr
 
 export default function RecruiterJobsPage() {
   const navigate = useNavigate();
+  const topbarRecruiter = useCurrentRecruiter();
+  const recruiterActivity = useRecruiterActivity();
   const [currentPage, setCurrentPage] = useState(1);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -394,15 +401,33 @@ export default function RecruiterJobsPage() {
   }, []);
 
   useEffect(() => {
-    void loadJobs(sortBy);
+    let isActive = true;
+
+    void Promise.resolve().then(() => {
+      if (isActive) {
+        void loadJobs(sortBy);
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [loadJobs, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(jobs.length / PAGE_SIZE));
 
   useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
+    let isActive = true;
+
+    void Promise.resolve().then(() => {
+      if (isActive && currentPage > totalPages) {
+        setCurrentPage(totalPages);
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [currentPage, totalPages]);
 
   const pagedJobs = useMemo(() => {
@@ -529,31 +554,48 @@ export default function RecruiterJobsPage() {
   );
 
   return (
-    <div className="min-h-dvh bg-[#F4F6FB] text-slate-900 font-['Inter']">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -left-20 top-20 h-64 w-64 rounded-full bg-[#E8E9FF] blur-[90px]"></div>
-        <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-[#EDEEFF] blur-[120px]"></div>
-      </div>
+    <div className="rd-layout">
+      <RecruiterSidebar activeItem="jobs" />
 
-      <div className="relative flex min-h-dvh w-full gap-5 pr-4 lg:pr-6">
-        <RecruiterSidebar activePath="/recruiter/jobs" />
+      <div className="rd-body">
+        <div className="rd-content-area">
+          <RecruiterTopBar
+            recruiter={topbarRecruiter}
+            company={null}
+            notificationCount={recruiterActivity.notificationCount}
+            isActivityPanelOpen={recruiterActivity.isActivityPanelOpen}
+            onToggleActivityPanel={recruiterActivity.toggleActivityPanel}
+          />
 
-        <main className="flex flex-1 flex-col gap-6 pt-6">
-          <TopHeader onCreateJob={handleCreateJob} onSortChange={handleSortChange} />
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
-          <JobsTable
-            jobs={pagedJobs}
-            isLoading={isLoading}
-            onUpdateJob={handleUpdateJob}
-            onDeleteJob={handleDeleteJob}
-            onViewApplicants={handleViewApplicants}
+          <div className="rd-main">
+            <TopHeader onCreateJob={handleCreateJob} onSortChange={handleSortChange} />
+            {error ? <p className="text-sm text-red-500">{error}</p> : null}
+            <JobsTable
+              jobs={pagedJobs}
+              isLoading={isLoading}
+              onUpdateJob={handleUpdateJob}
+              onDeleteJob={handleDeleteJob}
+              onViewApplicants={handleViewApplicants}
+            />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+
+        {recruiterActivity.isActivityPanelOpen ? (
+          <ActivityPanel
+            notifications={recruiterActivity.notifications}
+            upcomingInterviews={recruiterActivity.upcomingInterviews}
+            isLoading={recruiterActivity.isActivityLoading}
+            error={recruiterActivity.activityError}
+            unreadCount={recruiterActivity.unreadNotificationCount}
+            onMarkAllAsRead={recruiterActivity.markAllNotificationsAsRead}
+            onClose={recruiterActivity.closeActivityPanel}
           />
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </main>
+        ) : null}
       </div>
     </div>
   );

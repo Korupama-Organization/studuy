@@ -172,12 +172,98 @@
   margin: 0 auto;
 }
 
-.candidate-jobs-shell > h1 {
+.candidate-jobs-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   margin: 0 0 64px;
+}
+
+.candidate-jobs-heading h1 {
+  margin: 0;
   color: #202182;
   font-size: clamp(34px, 3vw, 40px);
   font-weight: 800;
   letter-spacing: -0.04em;
+}
+
+.candidate-jobs-sort {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.candidate-jobs-sort__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-width: 230px;
+  min-height: 88px;
+  padding: 0 26px;
+  border: 3px solid #0d66d0;
+  border-radius: 20px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 7px rgba(13, 102, 208, 0.14);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.candidate-jobs-sort__trigger:hover,
+.candidate-jobs-sort__trigger[aria-expanded="true"] {
+  border-color: #095ab8;
+  box-shadow: 0 10px 22px rgba(13, 102, 208, 0.16);
+}
+
+.candidate-jobs-sort__trigger:active {
+  transform: translateY(1px);
+}
+
+.candidate-jobs-sort__chevron {
+  display: inline-flex;
+  color: #111827;
+}
+
+.candidate-jobs-sort__menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 25;
+  width: 100%;
+  min-width: 230px;
+  overflow: hidden;
+  border: 1px solid rgba(13, 102, 208, 0.18);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 18px 36px rgba(31, 25, 75, 0.18);
+}
+
+.candidate-jobs-sort__option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 20px;
+  border: 0;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 17px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.candidate-jobs-sort__option:hover,
+.candidate-jobs-sort__option--active {
+  background: #eef6ff;
+  color: #0d66d0;
 }
 
 .candidate-jobs-notice,
@@ -636,8 +722,23 @@
     left: auto;
   }
 
-  .candidate-jobs-shell > h1 {
+  .candidate-jobs-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
     margin-bottom: 28px;
+  }
+
+  .candidate-jobs-sort,
+  .candidate-jobs-sort__trigger {
+    width: 100%;
+  }
+
+  .candidate-jobs-sort__trigger {
+    justify-content: space-between;
+    min-height: 64px;
+    min-width: 0;
+    font-size: 22px;
   }
 
   .candidate-jobs-notice,

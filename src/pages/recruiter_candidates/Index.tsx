@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
+import { useCurrentRecruiter } from "../../hooks/useCurrentRecruiter";
+import { useRecruiterActivity } from "../../hooks/useRecruiterActivity";
+import RecruiterSidebar from "../recruiter_dashboard/components/RecruiterSidebar";
+import RecruiterTopBar from "../recruiter_dashboard/components/RecruiterTopBar";
+import ActivityPanel from "../recruiter_dashboard/components/ActivityPanel";
+import "../recruiter_dashboard/recruiter.css";
 
 const candidatePhotoFallback =
   "https://www.figma.com/api/mcp/asset/1880ebb6-d692-4b48-8841-0be386f46699";
@@ -32,6 +37,9 @@ interface CandidateItem {
   applicationStatus?: ApiApplicationStatus[];
   screeningScore?: number | null;
   profileSummary?: ApiCandidateProfileSummary | null;
+  cvUrl?: string;
+  cvFileName?: string;
+  sortDate?: string;
 }
 
 interface CandidateDetail extends CandidateItem {
@@ -73,6 +81,15 @@ interface ApiCandidateSummary {
   userId: string;
   fullName: string;
   avatarUrl?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  cvUrl?: string | null;
+  resumeUrl?: string | null;
+  cv?: unknown;
+  resume?: unknown;
+  attachments?: unknown[];
+  documents?: unknown[];
+  files?: unknown[];
   status?: string;
   role?: string;
   studentID?: string | null;
@@ -100,6 +117,13 @@ interface ApiScreeningResults {
 interface ApiJobApplicant {
   applicationId: string;
   jobId: string;
+  cvUrl?: string | null;
+  resumeUrl?: string | null;
+  cv?: unknown;
+  resume?: unknown;
+  attachments?: unknown[];
+  documents?: unknown[];
+  files?: unknown[];
   currentStatus?: ApiApplicationStatus | null;
   applicationStatus?: ApiApplicationStatus[];
   screeningResults?: ApiScreeningResults | null;
@@ -153,6 +177,13 @@ interface ApiIntroductionQuestions {
 }
 
 interface ApiCandidateProfile {
+  cvUrl?: string | null;
+  resumeUrl?: string | null;
+  cv?: unknown;
+  resume?: unknown;
+  attachments?: unknown[];
+  documents?: unknown[];
+  files?: unknown[];
   academicInfo?: {
     university?: string;
     major?: string;
@@ -173,9 +204,23 @@ interface ApiCandidateProfile {
 interface ApiApplicantProfileResponse {
   jobId?: string;
   applicationId?: string;
+  cvUrl?: string | null;
+  resumeUrl?: string | null;
+  cv?: unknown;
+  resume?: unknown;
+  attachments?: unknown[];
+  documents?: unknown[];
+  files?: unknown[];
   currentStatus?: ApiApplicationStatus | null;
   candidate?: ApiCandidateSummary | null;
   application?: {
+    cvUrl?: string | null;
+    resumeUrl?: string | null;
+    cv?: unknown;
+    resume?: unknown;
+    attachments?: unknown[];
+    documents?: unknown[];
+    files?: unknown[];
     applicationStatus?: ApiApplicationStatus[];
     screeningResults?: ApiScreeningResults | null;
     finalDecision?: {
@@ -252,6 +297,301 @@ const getAuthHeaders = (): HeadersInit => {
   };
 };
 
+const getAuthDownloadHeaders = (): HeadersInit => {
+  const token = localStorage.getItem("accessToken") || "";
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const readString = (value: unknown): string | undefined => {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  return trimmed || undefined;
+};
+
+const CV_URL_KEYS = [
+  "cvUrl",
+  "cvURL",
+  "cv_url",
+  "resumeUrl",
+  "resumeURL",
+  "resume_url",
+  "fileUrl",
+  "fileURL",
+  "downloadUrl",
+  "downloadURL",
+  "publicUrl",
+  "secureUrl",
+  "url",
+  "href",
+] as const;
+
+const CV_OBJECT_KEYS = [
+  "cv",
+  "resume",
+  "cvFile",
+  "resumeFile",
+  "file",
+  "document",
+  "attachment",
+] as const;
+
+const CV_ARRAY_KEYS = ["attachments", "documents", "files"] as const;
+const CV_NAME_KEYS = [
+  "name",
+  "fileName",
+  "filename",
+  "originalName",
+  "title",
+  "type",
+  "kind",
+  "label",
+] as const;
+
+const isCvLikeRecord = (record: Record<string, unknown>): boolean => {
+  const descriptor = CV_NAME_KEYS.map((key) => readString(record[key]) || "")
+    .join(" ")
+    .toLowerCase();
+
+  return /(^|\W)(cv|resume|curriculum|hồ sơ|ho so)(\W|$)/i.test(descriptor);
+};
+
+const extractCvUrlFromRecord = (
+  record: Record<string, unknown>,
+): string | undefined => {
+  for (const key of CV_URL_KEYS) {
+    const value = readString(record[key]);
+    if (value) return value;
+  }
+
+  for (const key of CV_OBJECT_KEYS) {
+    const value = record[key];
+    if (typeof value === "string") {
+      const url = readString(value);
+      if (url) return url;
+    }
+    if (isRecord(value)) {
+      const url = extractCvUrlFromRecord(value);
+      if (url) return url;
+    }
+  }
+
+  for (const key of CV_ARRAY_KEYS) {
+    const items = Array.isArray(record[key]) ? record[key] : [];
+    const records = items.filter(isRecord);
+    const cvRecord = records.find(isCvLikeRecord);
+    const url = cvRecord
+      ? extractCvUrlFromRecord(cvRecord)
+      : records.length === 1
+        ? extractCvUrlFromRecord(records[0])
+        : undefined;
+    if (url) return url;
+  }
+
+  return undefined;
+};
+
+const extractCvUrl = (...sources: unknown[]): string | undefined => {
+  for (const source of sources) {
+    const direct = readString(source);
+    if (direct) return direct;
+
+    if (isRecord(source)) {
+      const url = extractCvUrlFromRecord(source);
+      if (url) return url;
+    }
+  }
+
+  return undefined;
+};
+
+const extractCvFileName = (...sources: unknown[]): string | undefined => {
+  const fileNameKeys = [
+    "cvFileName",
+    "resumeFileName",
+    "fileName",
+    "filename",
+    "originalName",
+    "name",
+    "title",
+  ];
+
+  for (const source of sources) {
+    if (!isRecord(source)) continue;
+
+    for (const key of fileNameKeys) {
+      const value = readString(source[key]);
+      if (value) return value;
+    }
+
+    for (const key of CV_OBJECT_KEYS) {
+      const value = source[key];
+      if (isRecord(value)) {
+        const fileName = extractCvFileName(value);
+        if (fileName) return fileName;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+const sanitizeFileName = (value: string): string =>
+  value.replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, " ").trim();
+
+const parseContentDispositionFileName = (header: string | null): string | undefined => {
+  if (!header) return undefined;
+
+  const utf8Match = header.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1]);
+    } catch {
+      return utf8Match[1];
+    }
+  }
+
+  const fallbackMatch = header.match(/filename="?([^";]+)"?/i);
+  return fallbackMatch?.[1];
+};
+
+const getCvFileName = (detail: CandidateDetail, response?: Response): string => {
+  const fromHeader = parseContentDispositionFileName(
+    response?.headers.get("content-disposition") || null,
+  );
+  const fallback = `${detail.name || "candidate"} CV.pdf`;
+  return sanitizeFileName(fromHeader || detail.cvFileName || fallback);
+};
+
+const resolveDownloadUrl = (url: string): string => {
+  if (/^(https?:|blob:|data:)/i.test(url)) return url;
+  return buildApiUrl(url);
+};
+
+const isApiDownloadUrl = (rawUrl: string, resolvedUrl: string): boolean =>
+  !/^(https?:|blob:|data:)/i.test(rawUrl) || resolvedUrl.startsWith(API_BASE_URL);
+
+const triggerBrowserDownload = (url: string, fileName: string, revoke = false) => {
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.rel = "noopener noreferrer";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  if (revoke) {
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+};
+
+const getCandidateCvDownloadUrls = (
+  detail: CandidateDetail,
+  jobIdParam: string,
+): string[] => {
+  const urls: string[] = [];
+  const explicitUrl = extractCvUrl(detail.cvUrl);
+  if (explicitUrl) urls.push(explicitUrl);
+
+  const jobId = detail.jobId || jobIdParam;
+
+  if (jobId) {
+    const applicantsCvUrl = new URL(
+      buildApiUrl(`api/jobs/${encodeURIComponent(jobId)}/applicants/cv`),
+    );
+    if (detail.applicationId) {
+      applicantsCvUrl.searchParams.set("applicationId", detail.applicationId);
+    } else if (detail.userId) {
+      applicantsCvUrl.searchParams.set("candidateUserId", detail.userId);
+    }
+    urls.push(applicantsCvUrl.toString());
+
+    if (detail.applicationId) {
+      urls.push(
+        buildApiUrl(
+          `api/jobs/${encodeURIComponent(jobId)}/applicants/${encodeURIComponent(
+            detail.applicationId,
+          )}/cv`,
+        ),
+      );
+    }
+  }
+
+  if (detail.applicationId) {
+    urls.push(
+      buildApiUrl(`api/applications/${encodeURIComponent(detail.applicationId)}/cv`),
+      buildApiUrl(`api/applications/${encodeURIComponent(detail.applicationId)}/resume`),
+    );
+  }
+
+  if (detail.userId) {
+    urls.push(
+      buildApiUrl(`api/candidate-profiles/${encodeURIComponent(detail.userId)}/cv`),
+      buildApiUrl(`api/candidate-profiles/${encodeURIComponent(detail.userId)}/resume`),
+    );
+  }
+
+  return Array.from(new Set(urls));
+};
+
+const downloadCvFromUrl = async (
+  rawUrl: string,
+  detail: CandidateDetail,
+): Promise<boolean> => {
+  const resolvedUrl = resolveDownloadUrl(rawUrl);
+
+  if (!isApiDownloadUrl(rawUrl, resolvedUrl)) {
+    triggerBrowserDownload(resolvedUrl, getCvFileName(detail));
+    return true;
+  }
+
+  const response = await fetch(resolvedUrl, {
+    method: "GET",
+    headers: getAuthDownloadHeaders(),
+  });
+
+  if (!response.ok) {
+    return false;
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    const payload = (await response.json().catch(() => null)) as unknown;
+    const nestedUrl = extractCvUrl(payload);
+    if (!nestedUrl || nestedUrl === rawUrl) {
+      return false;
+    }
+    return downloadCvFromUrl(nestedUrl, detail);
+  }
+
+  const blob = await response.blob();
+  if (!blob.size) return false;
+
+  const objectUrl = URL.createObjectURL(blob);
+  triggerBrowserDownload(objectUrl, getCvFileName(detail, response), true);
+  return true;
+};
+
+const downloadCandidateCv = async (
+  detail: CandidateDetail,
+  jobIdParam: string,
+): Promise<void> => {
+  const urls = getCandidateCvDownloadUrls(detail, jobIdParam);
+
+  for (const url of urls) {
+    try {
+      const downloaded = await downloadCvFromUrl(url, detail);
+      if (downloaded) return;
+    } catch {
+      // Try the next known CV endpoint/URL.
+    }
+  }
+
+  throw new Error("Chưa tìm thấy CV để tải cho ứng viên này.");
+};
+
 const parseErrorMessage = async (
   response: Response,
   fallback: string,
@@ -278,6 +618,26 @@ const formatDateShort = (value?: string | null): string => {
     return value;
   }
   return date.toLocaleDateString("vi-VN");
+};
+
+const getSortTimestamp = (value?: string | null): number => {
+  if (!value) return 0;
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
+const sortCandidates = (
+  items: CandidateItem[],
+  sortOrder: "newest" | "oldest",
+): CandidateItem[] => {
+  return [...items].sort((left, right) => {
+    const leftTime = getSortTimestamp(left.sortDate);
+    const rightTime = getSortTimestamp(right.sortDate);
+    const byTime =
+      sortOrder === "newest" ? rightTime - leftTime : leftTime - rightTime;
+
+    return byTime || left.name.localeCompare(right.name, "vi");
+  });
 };
 
 const normalizeScore = (score: unknown): number => {
@@ -411,6 +771,13 @@ const mapCandidateSummaryToItem = (candidate: ApiCandidateSummary): CandidateIte
     desiredRole,
     avatarUrl: candidate.avatarUrl || undefined,
     profileSummary: candidate.profile || null,
+    cvUrl: extractCvUrl(candidate, candidate.profile),
+    cvFileName: extractCvFileName(candidate, candidate.profile),
+    sortDate:
+      candidate.updatedAt ||
+      candidate.createdAt ||
+      candidate.profile?.updatedAt ||
+      undefined,
   };
 };
 
@@ -427,6 +794,16 @@ const mapApplicantToItem = (applicant: ApiJobApplicant): CandidateItem | null =>
     applicationId: applicant.applicationId,
     applicationStatus: applicant.applicationStatus || [],
     screeningScore: applicant.screeningResults?.score ?? null,
+    cvUrl: extractCvUrl(applicant, applicant.candidate, mapped.cvUrl),
+    cvFileName: extractCvFileName(applicant, applicant.candidate) || mapped.cvFileName,
+    sortDate:
+      applicant.updatedAt ||
+      applicant.createdAt ||
+      applicant.currentStatus?.updatedAt ||
+      applicant.currentStatus?.createdAt ||
+      applicant.applicationStatus?.at(-1)?.updatedAt ||
+      applicant.applicationStatus?.at(-1)?.createdAt ||
+      mapped.sortDate,
   };
 };
 
@@ -467,6 +844,7 @@ const buildCandidateDetailFromProfile = (
   candidate: CandidateItem,
   profile?: ApiCandidateProfile | null,
   application?: ApiApplicantProfileResponse["application"] | null,
+  responseData?: ApiApplicantProfileResponse | null,
 ): CandidateDetail => {
   const academicInfo = profile?.academicInfo;
   const gpaValue = academicInfo?.gpa;
@@ -500,18 +878,47 @@ const buildCandidateDetailFromProfile = (
     skills: buildSkillsFromProfile(profile),
     timeline: buildTimelineFromStatus(application?.applicationStatus),
     socials: defaultSocials,
+    cvUrl: extractCvUrl(
+      responseData,
+      application,
+      responseData?.candidate,
+      profile,
+      candidate.cvUrl,
+    ),
+    cvFileName:
+      extractCvFileName(responseData, application, responseData?.candidate, profile) ||
+      candidate.cvFileName,
   };
 };
 
 interface CandidateDetailViewProps {
   detail: CandidateDetail;
   onBack: () => void;
+  jobIdParam: string;
 }
 
-function CandidateDetailView({ detail, onBack }: CandidateDetailViewProps) {
+function CandidateDetailView({ detail, onBack, jobIdParam }: CandidateDetailViewProps) {
   const candidatePhoto = detail.avatarUrl || candidatePhotoFallback;
+  const [isCvDownloading, setIsCvDownloading] = useState(false);
+  const [cvDownloadError, setCvDownloadError] = useState("");
   const scoreToPercent = (score: number) =>
     Math.min(100, Math.max(0, Math.round(score * 10)));
+
+  const handleDownloadCv = async () => {
+    setCvDownloadError("");
+    setIsCvDownloading(true);
+    try {
+      await downloadCandidateCv(detail, jobIdParam);
+    } catch (downloadError) {
+      setCvDownloadError(
+        downloadError instanceof Error
+          ? downloadError.message
+          : "Không thể tải CV ứng viên.",
+      );
+    } finally {
+      setIsCvDownloading(false);
+    }
+  };
 
   return (
     <div className="space-y-5">
@@ -558,12 +965,21 @@ function CandidateDetailView({ detail, onBack }: CandidateDetailViewProps) {
                   </a>
                 ))}
               </div>
-              <button
-                type="button"
-                className="flex h-[35px] items-center justify-center rounded-full border border-[#3f4cf7] bg-[rgba(63,76,247,0.11)] px-6 text-[14px] font-medium text-[#3f4cf7]"
-              >
-                Tải CV
-              </button>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadCv}
+                  disabled={isCvDownloading}
+                  className="flex h-[35px] items-center justify-center rounded-full border border-[#3f4cf7] bg-[rgba(63,76,247,0.11)] px-6 text-[14px] font-medium text-[#3f4cf7] transition hover:bg-[rgba(63,76,247,0.18)] disabled:cursor-wait disabled:opacity-60"
+                >
+                  {isCvDownloading ? "Đang tải..." : "Tải CV"}
+                </button>
+                {cvDownloadError ? (
+                  <p className="max-w-[240px] text-right text-[12px] text-red-500">
+                    {cvDownloadError}
+                  </p>
+                ) : null}
+              </div>
             </div>
           </div>
 
@@ -784,15 +1200,17 @@ export default function RecruiterCandidatesPage() {
   const jobIdParam = searchParams.get("jobId") || "";
   const jobTitleParam = searchParams.get("jobTitle") || "";
 
+  const topbarRecruiter = useCurrentRecruiter();
+  const recruiterActivity = useRecruiterActivity();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentUser, setCurrentUser] = useState<
-    { fullName?: string; avatarUrl?: string } | null
-  >(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(
     null,
   );
   const [candidates, setCandidates] = useState<CandidateItem[]>([]);
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const [pagination, setPagination] = useState<PaginationData>({
     page: 1,
     limit: 6,
@@ -810,23 +1228,19 @@ export default function RecruiterCandidatesPage() {
   const pageSize = 6;
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("currentUser");
-      if (storedUser) {
-        setCurrentUser(
-          JSON.parse(storedUser) as { fullName?: string; avatarUrl?: string },
-        );
-      }
-    } catch {
-      setCurrentUser(null);
-    }
-  }, []);
+    let isActive = true;
 
-  useEffect(() => {
-    setCurrentPage(1);
-    setSelectedCandidateId(null);
-    setSelectedDetail(null);
-  }, [searchQuery, jobIdParam]);
+    void Promise.resolve().then(() => {
+      if (!isActive) return;
+      setCurrentPage(1);
+      setSelectedCandidateId(null);
+      setSelectedDetail(null);
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [searchQuery, jobIdParam, sortOrder]);
 
   useEffect(() => {
     let isActive = true;
@@ -845,6 +1259,7 @@ export default function RecruiterCandidatesPage() {
         if (searchQuery.trim()) {
           url.searchParams.set("search", searchQuery.trim());
         }
+        url.searchParams.set("sort", sortOrder);
 
         const response = await fetch(url.toString(), {
           method: "GET",
@@ -882,7 +1297,7 @@ export default function RecruiterCandidatesPage() {
 
         if (!isActive) return;
 
-        setCandidates(items as CandidateItem[]);
+        setCandidates(sortCandidates(items as CandidateItem[], sortOrder));
         setPagination({
           page: payload?.pagination?.page ?? currentPage,
           limit: payload?.pagination?.limit ?? pageSize,
@@ -910,12 +1325,21 @@ export default function RecruiterCandidatesPage() {
     return () => {
       isActive = false;
     };
-  }, [currentPage, jobIdParam, pageSize, searchQuery]);
+  }, [currentPage, jobIdParam, pageSize, searchQuery, sortOrder]);
 
   const totalPages = Math.max(1, pagination.totalPages || 1);
 
   useEffect(() => {
-    setCurrentPage((prev) => Math.min(prev, totalPages));
+    let isActive = true;
+
+    void Promise.resolve().then(() => {
+      if (!isActive) return;
+      setCurrentPage((prev) => Math.min(prev, totalPages));
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [totalPages]);
 
   const pageNumbers = useMemo(
@@ -931,24 +1355,32 @@ export default function RecruiterCandidatesPage() {
     );
   }, [candidates, selectedCandidateId]);
 
+  const handleSortChange = (nextSortOrder: "newest" | "oldest") => {
+    setSortOrder(nextSortOrder);
+    setIsSortOpen(false);
+  };
+
   useEffect(() => {
-    if (!selectedCandidate) {
-      setSelectedDetail(null);
-      setDetailError("");
-      return;
-    }
-
-    const jobId = selectedCandidate.jobId || jobIdParam;
-    const fallbackDetail = buildCandidateDetailFallback(selectedCandidate);
-
-    setSelectedDetail(fallbackDetail);
-    if (!jobId) {
-      return;
-    }
-
     let isActive = true;
 
     const loadDetail = async () => {
+      await Promise.resolve();
+      if (!isActive) return;
+
+      if (!selectedCandidate) {
+        setSelectedDetail(null);
+        setDetailError("");
+        return;
+      }
+
+      const jobId = selectedCandidate.jobId || jobIdParam;
+      const fallbackDetail = buildCandidateDetailFallback(selectedCandidate);
+
+      setSelectedDetail(fallbackDetail);
+      if (!jobId) {
+        return;
+      }
+
       setIsDetailLoading(true);
       setDetailError("");
 
@@ -985,7 +1417,12 @@ export default function RecruiterCandidatesPage() {
         const profile = payload?.data?.profile;
         const application = payload?.data?.application;
         setSelectedDetail(
-          buildCandidateDetailFromProfile(selectedCandidate, profile, application),
+          buildCandidateDetailFromProfile(
+            selectedCandidate,
+            profile,
+            application,
+            payload?.data,
+          ),
         );
       } catch (loadError) {
         if (!isActive) return;
@@ -1015,8 +1452,6 @@ export default function RecruiterCandidatesPage() {
     }
   }, [selectedCandidateId]);
 
-  const displayName = currentUser?.fullName || "Evan Yates";
-
   const renderAvatar = (candidate: CandidateItem) => {
     if (candidate.avatarUrl) {
       return (
@@ -1044,38 +1479,20 @@ export default function RecruiterCandidatesPage() {
   }, [searchParams, setSearchParams]);
 
   return (
-    <div className="min-h-dvh bg-[#f2f2f7] font-['Nunito_Sans'] text-[#141515]">
-      <div className="flex min-h-dvh">
-        <RecruiterSidebar activePath="/recruiter/candidates" />
+    <div className="rd-layout">
+      <RecruiterSidebar activeItem="candidates" />
 
-        <main className="flex-1 px-6 py-5 lg:px-8">
-          <div className="flex items-center justify-end gap-5">
-            <button
-              type="button"
-              className="relative flex h-12 w-12 items-center justify-center rounded-[14px] border border-[rgba(63,76,247,0.11)] bg-white shadow-[0_6px_58px_rgba(196,203,214,0.1)]"
-              aria-label="Thông báo"
-            >
-              <span className="material-symbols-outlined text-[22px] text-[#0a1629]">
-                notifications
-              </span>
-            </button>
-            <button
-              type="button"
-              className="flex h-12 items-center gap-3 rounded-[14px] border border-[rgba(63,76,247,0.11)] bg-white px-3 shadow-[0_6px_29px_rgba(196,203,214,0.1)]"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E8EAFF] text-sm font-bold text-[#3f4cf7]">
-                {displayName.trim().charAt(0).toUpperCase()}
-              </div>
-              <span className="text-[16px] font-bold text-[#0a1629]">
-                {displayName}
-              </span>
-              <span className="material-symbols-outlined text-[20px] text-[#0a1629]">
-                expand_more
-              </span>
-            </button>
-          </div>
+      <div className="rd-body">
+        <div className="rd-content-area">
+          <RecruiterTopBar
+            recruiter={topbarRecruiter}
+            company={null}
+            notificationCount={recruiterActivity.notificationCount}
+            isActivityPanelOpen={recruiterActivity.isActivityPanelOpen}
+            onToggleActivityPanel={recruiterActivity.toggleActivityPanel}
+          />
 
-          <div className="mt-6 flex flex-col gap-5">
+          <div className="rd-main">
             {selectedDetail ? (
               <>
                 {detailError ? (
@@ -1089,6 +1506,7 @@ export default function RecruiterCandidatesPage() {
                 <CandidateDetailView
                   detail={selectedDetail}
                   onBack={() => setSelectedCandidateId(null)}
+                  jobIdParam={jobIdParam}
                 />
               </>
             ) : (
@@ -1123,17 +1541,57 @@ export default function RecruiterCandidatesPage() {
                       search
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    className="flex h-[54px] w-full max-w-[143px] items-center justify-between rounded-[12px] border border-[rgba(63,76,247,0.11)] bg-white px-4 shadow-[0_4px_6px_rgba(62,73,84,0.04)]"
-                  >
-                    <span className="text-[16px] font-medium text-[#141515]">
-                      Mới nhất
-                    </span>
-                    <span className="material-symbols-outlined text-[20px] text-[#141515]">
-                      expand_more
-                    </span>
-                  </button>
+                  <div className="relative w-full max-w-[143px]">
+                    <button
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded={isSortOpen}
+                      onClick={() => setIsSortOpen((current) => !current)}
+                      className="flex h-[54px] w-full items-center justify-between rounded-[12px] border border-[rgba(63,76,247,0.11)] bg-white px-4 shadow-[0_4px_6px_rgba(62,73,84,0.04)]"
+                    >
+                      <span className="text-[16px] font-medium text-[#141515]">
+                        {sortOrder === "newest" ? "Mới nhất" : "Cũ nhất"}
+                      </span>
+                      <span className="material-symbols-outlined text-[20px] text-[#141515]">
+                        expand_more
+                      </span>
+                    </button>
+
+                    {isSortOpen ? (
+                      <div
+                        className="absolute right-0 top-[calc(100%+8px)] z-20 w-full overflow-hidden rounded-[12px] border border-[rgba(63,76,247,0.11)] bg-white shadow-[0_12px_28px_rgba(62,73,84,0.14)]"
+                        role="listbox"
+                        aria-label="Sắp xếp ứng viên"
+                      >
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={sortOrder === "newest"}
+                          onClick={() => handleSortChange("newest")}
+                          className={`w-full px-4 py-3 text-left text-[14px] font-medium transition ${
+                            sortOrder === "newest"
+                              ? "bg-[rgba(63,76,247,0.11)] text-[#3f4cf7]"
+                              : "text-[#141515] hover:bg-[#f8fafc]"
+                          }`}
+                        >
+                          Mới nhất
+                        </button>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={sortOrder === "oldest"}
+                          onClick={() => handleSortChange("oldest")}
+                          className={`w-full px-4 py-3 text-left text-[14px] font-medium transition ${
+                            sortOrder === "oldest"
+                              ? "bg-[rgba(63,76,247,0.11)] text-[#3f4cf7]"
+                              : "text-[#141515] hover:bg-[#f8fafc]"
+                          }`}
+                        >
+                          Cũ nhất
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
 
                 {error ? <p className="text-sm text-red-500">{error}</p> : null}
@@ -1241,7 +1699,19 @@ export default function RecruiterCandidatesPage() {
               </>
             )}
           </div>
-        </main>
+        </div>
+
+        {recruiterActivity.isActivityPanelOpen ? (
+          <ActivityPanel
+            notifications={recruiterActivity.notifications}
+            upcomingInterviews={recruiterActivity.upcomingInterviews}
+            isLoading={recruiterActivity.isActivityLoading}
+            error={recruiterActivity.activityError}
+            unreadCount={recruiterActivity.unreadNotificationCount}
+            onMarkAllAsRead={recruiterActivity.markAllNotificationsAsRead}
+            onClose={recruiterActivity.closeActivityPanel}
+          />
+        ) : null}
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { getStoredUser } from "../../../services/auth";
+import { useState } from "react";
 import FilterModal from "./FilterModal";
 import CreateJobModal from "./CreateJobModal";
 import type { SaveJobPayload } from "../Index";
@@ -14,26 +13,6 @@ export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps)
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
-  const [currentUser, setCurrentUser] = useState<
-    { fullName?: string; avatarUrl?: string; role?: string } | null
-  >(null);
-
-  useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("currentUser");
-      if (storedUser) {
-        setCurrentUser(
-          JSON.parse(storedUser) as {
-            fullName?: string;
-            avatarUrl?: string;
-            role?: string;
-          },
-        );
-      }
-    } catch {
-      setCurrentUser(null);
-    }
-  }, []);
 
   const handleApplyFilter = (filters: unknown) => {
     console.log("Bộ lọc đã áp dụng:", filters);
@@ -45,47 +24,9 @@ export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps)
     setIsSortOpen(false);
   };
 
-  const displayName = currentUser?.fullName || "Nguyễn Văn A";
-  const displayRole = currentUser?.role || "Quản lý nhân sự";
-
-  const renderAvatar = () => {
-    if (currentUser?.avatarUrl) {
-      return (
-        <img
-          alt="Ảnh đại diện người dùng"
-          className="h-8 w-8 rounded-full object-cover"
-          src={currentUser.avatarUrl}
-        />
-      );
-    }
-
-    const initial = displayName.trim().charAt(0).toUpperCase() || "U";
-    return (
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E8EAFF] text-xs font-bold text-[#3f4cf7]">
-        {initial}
-      </div>
-    );
-  };
-
   return (
     <>
       <header className="flex flex-col gap-3">
-        <div className="flex items-center justify-end gap-3">
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-500 shadow-sm hover:bg-slate-50 transition"
-            type="button">
-            <span className="material-symbols-outlined text-[18px]">notifications</span>
-          </button>
-          <div className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-sm">
-            {renderAvatar()}
-            <div>
-              <p className="text-xs font-semibold text-slate-900">{displayName}</p>
-              <p className="text-[10px] text-slate-400">{displayRole}</p>
-            </div>
-            <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
-          </div>
-        </div>
-
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex h-11 w-full items-center gap-3 rounded-2xl bg-white px-4 shadow-[0_10px_24px_rgba(109,120,196,0.12)] lg:max-w-[440px]">
             <input
@@ -162,24 +103,5 @@ export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps)
         onCreate={onCreateJob}
       />
     </>
-  );
-}
-
-function UserBadge() {
-  const stored = getStoredUser();
-  const name = stored?.fullName ?? "Người dùng";
-  const role = stored?.role ?? "Người dùng";
-  const avatar = (stored as any)?.avatarUrl ||
-    "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80";
-
-  return (
-    <div className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-sm">
-      <img alt="Ảnh đại diện người dùng" className="h-8 w-8 rounded-full object-cover" src={avatar} />
-      <div>
-        <p className="text-xs font-semibold text-slate-900">{name}</p>
-        <p className="text-[10px] text-slate-400">{role}</p>
-      </div>
-      <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
-    </div>
   );
 }
