@@ -1,5 +1,6 @@
 ﻿export interface CandidateApplicationCard {
   id: string;
+  jobId: string;
   companyName: string;
   companyDetail: string;
   jobTitle: string;
@@ -143,9 +144,11 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
     basicInfo.jobDescription,
     "Thông tin mô tả công việc sẽ được cập nhật sau.",
   );
+  const jobId = getString(raw.jobId, job._id, job.id, raw._id, raw.id, job.slug);
 
   return {
-    id: getString(raw.applicationId, raw._id, raw.id, raw.jobId, job.slug, crypto.randomUUID()),
+    id: getString(raw.applicationId, raw._id, raw.id, jobId, crypto.randomUUID()),
+    jobId,
     companyName: getString(company.name, jobCompany.name, raw.companyName, job.companyName, "Tên công ty"),
     companyDetail: getString(
       company.description,

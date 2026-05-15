@@ -1,6 +1,7 @@
-﻿import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+﻿import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import GlobalHeader from "../../components/GlobalHeader";
+import { getStoredUser } from "../../services/auth";
 import {
   extractCandidateApplications,
   normalizeCandidateApplication,
@@ -14,17 +15,21 @@ const getAuthHeaders = (): HeadersInit => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const getResponseErrorMessage = async (response: Response): Promise<string> => {
+const getCandidateUserId = (): string => {
+  return getStoredUser()?._id || "";
+};
+
+const getResponseErrorMessage = async (response: Response, fallback = "Không thể tải danh sách ứng tuyển."): Promise<string> => {
   try {
     const contentType = response.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
-      return "Không thể tải danh sách ứng tuyển.";
+      return fallback;
     }
 
     const payload = (await response.json()) as { message?: string; error?: string };
-    return payload.message || payload.error || "Không thể tải danh sách ứng tuyển.";
+    return payload.message || payload.error || fallback;
   } catch {
-    return "Không thể tải danh sách ứng tuyển.";
+    return fallback;
   }
 };
 
@@ -70,7 +75,15 @@ function InfoPanel({ title, content }: { title: string; content: string }) {
   );
 }
 
-function CandidateJobCard({ application }: { application: CandidateApplicationCard }) {
+function CandidateJobCard({
+  application,
+  isApplying,
+  onApply,
+}: {
+  application: CandidateApplicationCard;
+  isApplying: boolean;
+  onApply: (application: CandidateApplicationCard) => void;
+}) {
   const initials = useMemo(() => {
     return application.companyName
       .split(" ")
@@ -92,6 +105,14 @@ function CandidateJobCard({ application }: { application: CandidateApplicationCa
           <p className="candidate-job-company__detail">{application.companyDetail}</p>
           <h3>{application.jobTitle}</h3>
           <p className="candidate-job-company__location">{application.location}</p>
+          <button
+            className="candidate-job-apply"
+            type="button"
+            onClick={() => onApply(application)}
+            disabled={isApplying || !application.jobId}
+          >
+            {isApplying ? "Đang apply..." : "Apply"}
+          </button>
         </div>
 
         <ProcessBars application={application} />
@@ -113,6 +134,10 @@ function CandidateJobCard({ application }: { application: CandidateApplicationCa
 }
 
 export default function CandidateJobsPage() {
+  const queryClient = useQueryClient();
+  const [applyMessage, setApplyMessage] = useState("");
+  const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
+
   const { data, error, isLoading } = useQuery({
     queryKey: ["candidate-applications"],
     queryFn: async () => {
@@ -130,6 +155,49 @@ export default function CandidateJobsPage() {
     },
   });
 
+  const applyMutation = useMutation({
+    mutationFn: async (application: CandidateApplicationCard) => {
+      if (!application.jobId) {
+        throw new Error("Không tìm thấy mã job để ứng tuyển.");
+      }
+
+      const candidateUserId = getCandidateUserId();
+      if (!candidateUserId) {
+        throw new Error("Không tìm thấy tài khoản candidate để ứng tuyển.");
+      }
+
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          jobId: application.jobId,
+          candidateUserId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await getResponseErrorMessage(response, "Ứng tuyển thất bại."));
+      }
+    },
+    onMutate: (application) => {
+      setApplyMessage("");
+      setApplyingJobId(application.jobId);
+    },
+    onSuccess: async () => {
+      setApplyMessage("Ứng tuyển thành công.");
+      await queryClient.invalidateQueries({ queryKey: ["candidate-applications"] });
+    },
+    onError: (mutationError) => {
+      setApplyMessage(mutationError instanceof Error ? mutationError.message : "Ứng tuyển thất bại.");
+    },
+    onSettled: () => {
+      setApplyingJobId(null);
+    },
+  });
+
   const applications = data ?? [];
   const errorMessage = error instanceof Error ? error.message : "";
 
@@ -143,6 +211,7 @@ export default function CandidateJobsPage() {
 
           {isLoading ? <p className="candidate-jobs-loading">Đang tải danh sách ứng tuyển...</p> : null}
           {errorMessage ? <p className="candidate-jobs-notice">{errorMessage}</p> : null}
+          {applyMessage ? <p className="candidate-jobs-notice">{applyMessage}</p> : null}
 
           {!isLoading && !errorMessage && applications.length === 0 ? (
             <div className="candidate-jobs-empty">
@@ -154,7 +223,12 @@ export default function CandidateJobsPage() {
           {applications.length > 0 ? (
             <div className="candidate-jobs-list">
               {applications.map((application) => (
-                <CandidateJobCard key={application.id} application={application} />
+                <CandidateJobCard
+                  key={application.id}
+                  application={application}
+                  isApplying={applyMutation.isPending && applyingJobId === application.jobId}
+                  onApply={(selectedApplication) => applyMutation.mutate(selectedApplication)}
+                />
               ))}
             </div>
           ) : null}

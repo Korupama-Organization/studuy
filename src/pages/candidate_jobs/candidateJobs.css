@@ -285,6 +285,31 @@
   font-style: italic;
 }
 
+.candidate-job-apply {
+  width: min(160px, 100%);
+  min-height: 42px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #6251e8 0%, #d74491 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(98, 81, 232, 0.24);
+  transition: opacity 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.candidate-job-apply:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(98, 81, 232, 0.3);
+}
+
+.candidate-job-apply:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 .candidate-job-process {
   display: grid;
   gap: 11px;
