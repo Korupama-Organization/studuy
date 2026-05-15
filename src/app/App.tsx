@@ -16,15 +16,57 @@ import RecruiterDashboard from '../pages/recruiter_dashboard/RecruiterDashboard'
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';
 import RecruiterCandidatesPage from '../pages/recruiter_candidates/Index';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { getStoredAccessTokenExpiry } from '../services/auth';
+import { useEffect } from 'react';
 
 const queryClient = new QueryClient();
+
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password'];
+
+const isPublicPath = (pathname: string): boolean => {
+  return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+};
+
+function AuthSessionGuard() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isPublicPath(location.pathname)) {
+      return;
+    }
+
+    const expiry = getStoredAccessTokenExpiry();
+    if (!expiry) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const remainingMs = expiry * 1000 - Date.now();
+    if (remainingMs <= 0) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      navigate('/login', { replace: true });
+    }, remainingMs);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [location.pathname, navigate]);
+
+  return null;
+}
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <AuthSessionGuard />
         <Routes>
           <Route path="/" element={<LandingPage />} />
 
