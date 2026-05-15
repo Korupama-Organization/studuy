@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FilterModal from "./FilterModal";
 import CreateJobModal from "./CreateJobModal";
 import type { SaveJobPayload } from "../Index";
@@ -13,6 +13,26 @@ export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps)
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
+  const [currentUser, setCurrentUser] = useState<
+    { fullName?: string; avatarUrl?: string; role?: string } | null
+  >(null);
+
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem("currentUser");
+      if (storedUser) {
+        setCurrentUser(
+          JSON.parse(storedUser) as {
+            fullName?: string;
+            avatarUrl?: string;
+            role?: string;
+          },
+        );
+      }
+    } catch {
+      setCurrentUser(null);
+    }
+  }, []);
 
   const handleApplyFilter = (filters: unknown) => {
     console.log("Bộ lọc đã áp dụng:", filters);
@@ -22,6 +42,28 @@ export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps)
     setSortBy(option);
     onSortChange(option);
     setIsSortOpen(false);
+  };
+
+  const displayName = currentUser?.fullName || "Nguyễn Văn A";
+  const displayRole = currentUser?.role || "Quản lý nhân sự";
+
+  const renderAvatar = () => {
+    if (currentUser?.avatarUrl) {
+      return (
+        <img
+          alt="Ảnh đại diện người dùng"
+          className="h-8 w-8 rounded-full object-cover"
+          src={currentUser.avatarUrl}
+        />
+      );
+    }
+
+    const initial = displayName.trim().charAt(0).toUpperCase() || "U";
+    return (
+      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E8EAFF] text-xs font-bold text-[#3f4cf7]">
+        {initial}
+      </div>
+    );
   };
 
   return (
@@ -34,14 +76,10 @@ export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps)
             <span className="material-symbols-outlined text-[18px]">notifications</span>
           </button>
           <div className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-sm">
-            <img
-              alt="Ảnh đại diện người dùng"
-              className="h-8 w-8 rounded-full object-cover"
-              src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80"
-            />
+            {renderAvatar()}
             <div>
-              <p className="text-xs font-semibold text-slate-900">Nguyễn Văn A</p>
-              <p className="text-[10px] text-slate-400">Quản lý nhân sự</p>
+              <p className="text-xs font-semibold text-slate-900">{displayName}</p>
+              <p className="text-[10px] text-slate-400">{displayRole}</p>
             </div>
             <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
           </div>
