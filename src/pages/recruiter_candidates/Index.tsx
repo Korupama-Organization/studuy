@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
 
 const candidatePhotoFallback =
@@ -18,12 +19,19 @@ const timelineCheckIcon =
 
 interface CandidateItem {
   id: string;
+  userId: string;
   name: string;
   email: string;
+  phone: string;
   major: string;
   school: string;
   desiredRole: string;
   avatarUrl?: string;
+  jobId?: string;
+  applicationId?: string;
+  applicationStatus?: ApiApplicationStatus[];
+  screeningScore?: number | null;
+  profileSummary?: ApiCandidateProfileSummary | null;
 }
 
 interface CandidateDetail extends CandidateItem {
@@ -47,72 +55,146 @@ interface CandidateDetail extends CandidateItem {
   socials: { label: string; href: string; icon: string }[];
 }
 
-const mockCandidates: CandidateItem[] = [
-  {
-    id: "cand-1",
-    name: "Lenora Fowler",
-    email: "eravi@foisictpro.com",
-    major: "23",
-    school: "Facebook",
-    desiredRole: "React · Node.js · AWS",
-  },
-  {
-    id: "cand-2",
-    name: "Lenora Fowler",
-    email: "eravi@foisictpro.com",
-    major: "23",
-    school: "Facebook",
-    desiredRole: "React · Node.js · AWS",
-  },
-  {
-    id: "cand-3",
-    name: "Laney Sutton",
-    email: "lsutton@example.com",
-    major: "Sản phẩm",
-    school: "Shopify",
-    desiredRole: "React · UX · Sản phẩm",
-  },
-  {
-    id: "cand-4",
-    name: "Emil Ortega",
-    email: "emil.ortega@example.com",
-    major: "Di động",
-    school: "Apple",
-    desiredRole: "Swift · iOS · UIKit",
-  },
-  {
-    id: "cand-5",
-    name: "Dara Long",
-    email: "dara.long@example.com",
-    major: "Trí tuệ nhân tạo",
-    school: "OpenAI",
-    desiredRole: "Python · ML · LLMs",
-  },
-  {
-    id: "cand-6",
-    name: "Cody Payne",
-    email: "cody.payne@example.com",
-    major: "Đám mây",
-    school: "AWS",
-    desiredRole: "DevOps · AWS · Terraform",
-  },
-  {
-    id: "cand-7",
-    name: "Elisa Moran",
-    email: "elisa.moran@example.com",
-    major: "Backend",
-    school: "Stripe",
-    desiredRole: "Node.js · Thanh toán · API",
-  },
-  {
-    id: "cand-8",
-    name: "Ivy Sutton",
-    email: "ivy.sutton@example.com",
-    major: "Thiết kế",
-    school: "Figma",
-    desiredRole: "UX · Nghiên cứu · UI",
-  },
-];
+interface ApiCandidateProfileSummary {
+  academicInfo?: {
+    university?: string;
+    major?: string;
+    graduationYear?: number;
+    gpa?: number;
+  };
+  advantagePoint?: string | null;
+  technicalSkillsCount?: number;
+  softSkillsCount?: number;
+  updatedAt?: string | null;
+}
+
+interface ApiCandidateSummary {
+  id: string;
+  userId: string;
+  fullName: string;
+  avatarUrl?: string | null;
+  status?: string;
+  role?: string;
+  studentID?: string | null;
+  contactInfo?: {
+    email?: string;
+    phone?: string | null;
+  };
+  hasProfile?: boolean;
+  profile?: ApiCandidateProfileSummary | null;
+}
+
+interface ApiApplicationStatus {
+  status: string;
+  note?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface ApiScreeningResults {
+  score?: number | null;
+  matchedSkills?: string[];
+  missingSkills?: string[];
+}
+
+interface ApiJobApplicant {
+  applicationId: string;
+  jobId: string;
+  currentStatus?: ApiApplicationStatus | null;
+  applicationStatus?: ApiApplicationStatus[];
+  screeningResults?: ApiScreeningResults | null;
+  finalDecision?: {
+    decision?: string | null;
+    decidedAt?: string | null;
+    decidedBy?: string | null;
+  } | null;
+  createdAt?: string;
+  updatedAt?: string;
+  candidate?: ApiCandidateSummary | null;
+}
+
+interface ApiTechnicalSkill {
+  category?: string;
+  skillId?: { _id?: string; skill_name?: string; category?: string } | string;
+  yearsOfExperience?: number;
+  confidence?: boolean;
+}
+
+interface ApiLanguage {
+  certificateName?: string;
+  score?: number;
+  issuedAt?: string;
+  expiresAt?: string;
+}
+
+interface ApiAchievement {
+  title?: string;
+  achievedAt?: string;
+}
+
+interface ApiProject {
+  name?: string;
+  role?: string;
+  technologies?: Array<{ _id?: string; skill_name?: string; category?: string }>;
+}
+
+interface ApiWorkExperience {
+  companyName?: string;
+  position?: string;
+  description?: string;
+  technologiesUsed?: Array<{ _id?: string; skill_name?: string; category?: string }>;
+}
+
+interface ApiIntroductionQuestions {
+  preferredRoles?: { preferredRole?: string }[];
+  whyTheseRoles?: string;
+  futureGoals?: string;
+  favoriteTechnology?: string;
+}
+
+interface ApiCandidateProfile {
+  academicInfo?: {
+    university?: string;
+    major?: string;
+    graduationYear?: number;
+    gpa?: number;
+  };
+  languages?: ApiLanguage[];
+  achievements?: ApiAchievement[];
+  advantagePoint?: string;
+  technicalSkills?: ApiTechnicalSkill[];
+  softSkills?: string[];
+  projects?: ApiProject[];
+  workExperiences?: ApiWorkExperience[];
+  introductionQuestions?: ApiIntroductionQuestions;
+  updatedAt?: string;
+}
+
+interface ApiApplicantProfileResponse {
+  jobId?: string;
+  applicationId?: string;
+  currentStatus?: ApiApplicationStatus | null;
+  candidate?: ApiCandidateSummary | null;
+  application?: {
+    applicationStatus?: ApiApplicationStatus[];
+    screeningResults?: ApiScreeningResults | null;
+    finalDecision?: {
+      decision?: string | null;
+      decidedAt?: string | null;
+      decidedBy?: string | null;
+    } | null;
+    createdAt?: string;
+    updatedAt?: string;
+  } | null;
+  profile?: ApiCandidateProfile | null;
+}
+
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 const defaultSummary = [
   "Kỹ sư phần mềm với hơn 3 năm kinh nghiệm trong phát triển ứng dụng web và di động. Thành thạo trong việc thiết kế kiến trúc, tối ưu hiệu năng và triển khai các giải pháp công nghệ hiện đại. Có kinh nghiệm làm việc với nhiều khung phát triển như Django, FastAPI, Node.js, Flutter, và thành thạo với MySQL, PostgreSQL, Redis.",
@@ -151,35 +233,274 @@ const defaultSocials = [
   { label: "Instagram", href: "#", icon: instagramIcon },
 ];
 
-const makeCandidateDetail = (candidate: CandidateItem): CandidateDetail => ({
-  ...candidate,
-  positionApplied: candidate.desiredRole,
-  university: candidate.school,
-  gpa: "3.7/4.0",
-  aiScore: 8,
-  technicalScore: 8,
-  experienceScore: 8,
-  softScore: 8,
-  summary: defaultSummary,
-  personalInfo: {
-    gender: "Nam",
-    dob: "05/11/1999",
-    email: candidate.email,
-    phone: "039672432",
-    address: "46 fjfkeow, fjfieow, iêiee",
-  },
-  skills: defaultSkills,
-  timeline: defaultTimeline,
-  socials: defaultSocials,
-});
+const API_BASE_URL =
+  (
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    (typeof window !== "undefined" ? window.location.origin : "")
+  ).replace(/\/+$/, "");
 
-const candidateDetailOverrides: Record<string, Partial<CandidateDetail>> = {
-  "cand-1": {
-    positionApplied: "Kỹ sư Backend",
-    major: "Python, Java, C#",
-    university: "Tại chỗ",
-    gpa: "3.8/4.0",
-  },
+const buildApiUrl = (path: string): string => {
+  const normalizedPath = path.replace(/^\/+/, "");
+  return `${API_BASE_URL}/${normalizedPath}`;
+};
+
+const getAuthHeaders = (): HeadersInit => {
+  const token = localStorage.getItem("accessToken") || "";
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
+const parseErrorMessage = async (
+  response: Response,
+  fallback: string,
+): Promise<string> => {
+  try {
+    const payload = (await response.json()) as { message?: string; error?: string };
+    if (typeof payload.message === "string" && payload.message.trim()) {
+      return payload.message;
+    }
+    if (typeof payload.error === "string" && payload.error.trim()) {
+      return payload.error;
+    }
+  } catch {
+    return fallback;
+  }
+
+  return fallback;
+};
+
+const formatDateShort = (value?: string | null): string => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toLocaleDateString("vi-VN");
+};
+
+const normalizeScore = (score: unknown): number => {
+  if (typeof score !== "number" || !Number.isFinite(score)) {
+    return 8;
+  }
+  const normalized = score > 10 ? score / 10 : score;
+  return Math.min(10, Math.max(0, Math.round(normalized)));
+};
+
+const statusLabelMap: Record<string, string> = {
+  applied: "Đã nộp",
+  screening_passed: "Qua vòng lọc",
+  ai_interview_completed: "Phỏng vấn AI",
+  manual_interview_completed: "Phỏng vấn trực tiếp",
+  offered: "Đề nghị",
+  hired: "Tuyển dụng",
+};
+
+const buildSummaryFromProfile = (profile?: ApiCandidateProfile | null): string[] => {
+  if (!profile) return defaultSummary;
+
+  const summaryParts = [
+    profile.advantagePoint,
+    profile.introductionQuestions?.whyTheseRoles,
+    profile.introductionQuestions?.futureGoals,
+  ].filter((part): part is string => typeof part === "string" && part.trim().length > 0);
+
+  return summaryParts.length > 0 ? summaryParts : defaultSummary;
+};
+
+const buildSkillsFromProfile = (
+  profile?: ApiCandidateProfile | null,
+): { label: string; detail: string }[] => {
+  if (!profile) return defaultSkills;
+
+  const skillGroups = new Map<string, string[]>();
+
+  (profile.technicalSkills || []).forEach((skill) => {
+    const category =
+      skill.category ||
+      (typeof skill.skillId === "object" && skill.skillId?.category
+        ? skill.skillId.category
+        : "Kỹ năng");
+    const name =
+      (typeof skill.skillId === "object" && skill.skillId?.skill_name) ||
+      (typeof skill.skillId === "string" ? skill.skillId : "") ||
+      "";
+    if (!name.trim()) return;
+
+    const years =
+      typeof skill.yearsOfExperience === "number" && Number.isFinite(skill.yearsOfExperience)
+        ? ` (${skill.yearsOfExperience} năm)`
+        : "";
+    const label = `${name}${years}`.trim();
+
+    if (!skillGroups.has(category)) {
+      skillGroups.set(category, []);
+    }
+    skillGroups.get(category)?.push(label);
+  });
+
+  const skills: { label: string; detail: string }[] = [];
+
+  skillGroups.forEach((items, category) => {
+    if (items.length) {
+      skills.push({ label: category, detail: items.join(" · ") });
+    }
+  });
+
+  if (profile.softSkills && profile.softSkills.length) {
+    skills.push({ label: "Kỹ năng mềm", detail: profile.softSkills.join(" · ") });
+  }
+
+  if (profile.languages && profile.languages.length) {
+    const certificates = profile.languages
+      .map((lang) => {
+        const score = typeof lang.score === "number" ? ` ${lang.score}` : "";
+        return `${lang.certificateName || ""}${score}`.trim();
+      })
+      .filter((item) => item);
+    if (certificates.length) {
+      skills.push({ label: "Chứng chỉ", detail: certificates.join(" · ") });
+    }
+  }
+
+  if (profile.achievements && profile.achievements.length) {
+    const achievementTitles = profile.achievements
+      .map((achievement) => achievement.title || "")
+      .filter((item) => item);
+    if (achievementTitles.length) {
+      skills.push({ label: "Thành tích", detail: achievementTitles.join(" · ") });
+    }
+  }
+
+  return skills.length ? skills : defaultSkills;
+};
+
+const buildTimelineFromStatus = (
+  statusList?: ApiApplicationStatus[],
+): { phase: string; date: string }[] => {
+  if (!statusList || statusList.length === 0) {
+    return defaultTimeline;
+  }
+
+  const sorted = [...statusList].sort((left, right) => {
+    const leftDate = new Date(left.createdAt || left.updatedAt || 0).getTime();
+    const rightDate = new Date(right.createdAt || right.updatedAt || 0).getTime();
+    return leftDate - rightDate;
+  });
+
+  return sorted.map((item) => ({
+    phase: statusLabelMap[item.status] || item.status,
+    date: formatDateShort(item.updatedAt || item.createdAt),
+  }));
+};
+
+const mapCandidateSummaryToItem = (candidate: ApiCandidateSummary): CandidateItem => {
+  const academicInfo = candidate.profile?.academicInfo;
+  const desiredRole =
+    (candidate.profile?.advantagePoint || "").trim() || "Chưa cập nhật";
+
+  return {
+    id: candidate.id || candidate.userId,
+    userId: candidate.userId,
+    name: candidate.fullName || "-",
+    email: candidate.contactInfo?.email || "-",
+    phone: candidate.contactInfo?.phone || "-",
+    major: academicInfo?.major || "-",
+    school: academicInfo?.university || "-",
+    desiredRole,
+    avatarUrl: candidate.avatarUrl || undefined,
+    profileSummary: candidate.profile || null,
+  };
+};
+
+const mapApplicantToItem = (applicant: ApiJobApplicant): CandidateItem | null => {
+  if (!applicant.candidate) {
+    return null;
+  }
+
+  const mapped = mapCandidateSummaryToItem(applicant.candidate);
+
+  return {
+    ...mapped,
+    jobId: applicant.jobId,
+    applicationId: applicant.applicationId,
+    applicationStatus: applicant.applicationStatus || [],
+    screeningScore: applicant.screeningResults?.score ?? null,
+  };
+};
+
+const buildCandidateDetailFallback = (candidate: CandidateItem): CandidateDetail => {
+  const academicInfo = candidate.profileSummary?.academicInfo;
+  const gpaValue = academicInfo?.gpa;
+  const gpa =
+    typeof gpaValue === "number" && Number.isFinite(gpaValue)
+      ? `${gpaValue}/4.0`
+      : "Chưa cập nhật";
+
+  return {
+    ...candidate,
+    positionApplied: candidate.desiredRole,
+    university: academicInfo?.university || candidate.school,
+    gpa,
+    aiScore: normalizeScore(candidate.screeningScore),
+    technicalScore: normalizeScore(candidate.screeningScore),
+    experienceScore: normalizeScore(candidate.screeningScore),
+    softScore: normalizeScore(candidate.screeningScore),
+    summary: candidate.profileSummary?.advantagePoint
+      ? [candidate.profileSummary.advantagePoint]
+      : defaultSummary,
+    personalInfo: {
+      gender: "Chưa cập nhật",
+      dob: "Chưa cập nhật",
+      email: candidate.email,
+      phone: candidate.phone,
+      address: "Chưa cập nhật",
+    },
+    skills: defaultSkills,
+    timeline: defaultTimeline,
+    socials: defaultSocials,
+  };
+};
+
+const buildCandidateDetailFromProfile = (
+  candidate: CandidateItem,
+  profile?: ApiCandidateProfile | null,
+  application?: ApiApplicantProfileResponse["application"] | null,
+): CandidateDetail => {
+  const academicInfo = profile?.academicInfo;
+  const gpaValue = academicInfo?.gpa;
+  const gpa =
+    typeof gpaValue === "number" && Number.isFinite(gpaValue)
+      ? `${gpaValue}/4.0`
+      : "Chưa cập nhật";
+  const preferredRole =
+    profile?.introductionQuestions?.preferredRoles?.[0]?.preferredRole;
+  const aiScore = normalizeScore(
+    application?.screeningResults?.score ?? candidate.screeningScore,
+  );
+
+  return {
+    ...candidate,
+    positionApplied: preferredRole || candidate.desiredRole,
+    university: academicInfo?.university || candidate.school,
+    gpa,
+    aiScore,
+    technicalScore: aiScore,
+    experienceScore: aiScore,
+    softScore: aiScore,
+    summary: buildSummaryFromProfile(profile),
+    personalInfo: {
+      gender: "Chưa cập nhật",
+      dob: "Chưa cập nhật",
+      email: candidate.email,
+      phone: candidate.phone,
+      address: "Chưa cập nhật",
+    },
+    skills: buildSkillsFromProfile(profile),
+    timeline: buildTimelineFromStatus(application?.applicationStatus),
+    socials: defaultSocials,
+  };
 };
 
 interface CandidateDetailViewProps {
@@ -406,7 +727,7 @@ function CandidateDetailView({ detail, onBack }: CandidateDetailViewProps) {
                 type="button"
                 className="text-[14px] text-[#3f4cf7]"
               >
-                Xem thêm
+                Xem them
               </button>
             </div>
             <div className="mt-4 space-y-4">
@@ -459,12 +780,30 @@ function CandidateDetailView({ detail, onBack }: CandidateDetailViewProps) {
 }
 
 export default function RecruiterCandidatesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const jobIdParam = searchParams.get("jobId") || "";
+  const jobTitleParam = searchParams.get("jobTitle") || "";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [currentUser, setCurrentUser] = useState<
     { fullName?: string; avatarUrl?: string } | null
   >(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(
+    null,
+  );
+  const [candidates, setCandidates] = useState<CandidateItem[]>([]);
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    limit: 6,
+    total: 0,
+    totalPages: 1,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState("");
+  const [selectedDetail, setSelectedDetail] = useState<CandidateDetail | null>(
     null,
   );
 
@@ -474,29 +813,106 @@ export default function RecruiterCandidatesPage() {
     try {
       const storedUser = localStorage.getItem("currentUser");
       if (storedUser) {
-        setCurrentUser(JSON.parse(storedUser) as { fullName?: string; avatarUrl?: string });
+        setCurrentUser(
+          JSON.parse(storedUser) as { fullName?: string; avatarUrl?: string },
+        );
       }
     } catch {
       setCurrentUser(null);
     }
   }, []);
 
-  const filteredCandidates = useMemo(() => {
-    if (!searchQuery.trim()) return mockCandidates;
-    const q = searchQuery.trim().toLowerCase();
-    return mockCandidates.filter(
-      (item) =>
-        item.name.toLowerCase().includes(q) ||
-        item.email.toLowerCase().includes(q) ||
-        item.desiredRole.toLowerCase().includes(q),
-    );
-  }, [searchQuery]);
-
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+    setSelectedCandidateId(null);
+    setSelectedDetail(null);
+  }, [searchQuery, jobIdParam]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredCandidates.length / pageSize));
+  useEffect(() => {
+    let isActive = true;
+
+    const loadCandidates = async () => {
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const endpoint = jobIdParam
+          ? `api/jobs/${encodeURIComponent(jobIdParam)}/applicants`
+          : "api/jobs/candidates";
+        const url = new URL(buildApiUrl(endpoint));
+        url.searchParams.set("page", String(currentPage));
+        url.searchParams.set("limit", String(pageSize));
+        if (searchQuery.trim()) {
+          url.searchParams.set("search", searchQuery.trim());
+        }
+
+        const response = await fetch(url.toString(), {
+          method: "GET",
+          headers: getAuthHeaders(),
+        });
+
+        const payload = (await response
+          .json()
+          .catch(() => null)) as
+          | {
+              data?: unknown;
+              pagination?: PaginationData;
+              message?: string;
+            }
+          | null;
+
+        if (!response.ok) {
+          const fallback = jobIdParam
+            ? "Không thể tải danh sách ứng viên theo job."
+            : "Không thể tải danh sách ứng viên.";
+          throw new Error(await parseErrorMessage(response, fallback));
+        }
+
+        const rawData = Array.isArray(payload?.data) ? payload?.data : [];
+        const items = jobIdParam
+          ? rawData
+              .map((item) => mapApplicantToItem(item as ApiJobApplicant))
+              .filter(Boolean)
+          : rawData.map((item) => mapCandidateSummaryToItem(item as ApiCandidateSummary));
+
+        const total = payload?.pagination?.total ?? items.length;
+        const totalPages =
+          payload?.pagination?.totalPages ??
+          Math.max(1, Math.ceil(total / pageSize));
+
+        if (!isActive) return;
+
+        setCandidates(items as CandidateItem[]);
+        setPagination({
+          page: payload?.pagination?.page ?? currentPage,
+          limit: payload?.pagination?.limit ?? pageSize,
+          total,
+          totalPages,
+        });
+      } catch (loadError) {
+        if (!isActive) return;
+        setCandidates([]);
+        setPagination({ page: 1, limit: pageSize, total: 0, totalPages: 1 });
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Không thể tải danh sách ứng viên.",
+        );
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadCandidates();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentPage, jobIdParam, pageSize, searchQuery]);
+
+  const totalPages = Math.max(1, pagination.totalPages || 1);
 
   useEffect(() => {
     setCurrentPage((prev) => Math.min(prev, totalPages));
@@ -507,37 +923,91 @@ export default function RecruiterCandidatesPage() {
     [totalPages],
   );
 
-  const visibleCandidates = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredCandidates.slice(start, start + pageSize);
-  }, [currentPage, filteredCandidates]);
-
   const selectedCandidate = useMemo(() => {
     if (!selectedCandidateId) return null;
     return (
-      mockCandidates.find((candidate) => candidate.id === selectedCandidateId) ||
+      candidates.find((candidate) => candidate.id === selectedCandidateId) ||
       null
     );
-  }, [selectedCandidateId]);
+  }, [candidates, selectedCandidateId]);
 
-  const selectedDetail = useMemo(() => {
-    if (!selectedCandidate) return null;
-    const baseDetail = makeCandidateDetail(selectedCandidate);
-    const override = candidateDetailOverrides[selectedCandidate.id];
-    if (!override) return baseDetail;
-    return {
-      ...baseDetail,
-      ...override,
-      personalInfo: {
-        ...baseDetail.personalInfo,
-        ...override.personalInfo,
-      },
-      skills: override.skills ?? baseDetail.skills,
-      timeline: override.timeline ?? baseDetail.timeline,
-      socials: override.socials ?? baseDetail.socials,
-      summary: override.summary ?? baseDetail.summary,
+  useEffect(() => {
+    if (!selectedCandidate) {
+      setSelectedDetail(null);
+      setDetailError("");
+      return;
+    }
+
+    const jobId = selectedCandidate.jobId || jobIdParam;
+    const fallbackDetail = buildCandidateDetailFallback(selectedCandidate);
+
+    setSelectedDetail(fallbackDetail);
+    if (!jobId) {
+      return;
+    }
+
+    let isActive = true;
+
+    const loadDetail = async () => {
+      setIsDetailLoading(true);
+      setDetailError("");
+
+      try {
+        const url = new URL(
+          buildApiUrl(`api/jobs/${encodeURIComponent(jobId)}/applicants/profile`),
+        );
+        if (selectedCandidate.applicationId) {
+          url.searchParams.set("applicationId", selectedCandidate.applicationId);
+        } else if (selectedCandidate.userId) {
+          url.searchParams.set("candidateUserId", selectedCandidate.userId);
+        }
+
+        const response = await fetch(url.toString(), {
+          method: "GET",
+          headers: getAuthHeaders(),
+        });
+
+        const payload = (await response
+          .json()
+          .catch(() => null)) as { data?: ApiApplicantProfileResponse } | null;
+
+        if (!response.ok) {
+          throw new Error(
+            await parseErrorMessage(
+              response,
+              "Không thể tải hồ sơ ứng viên.",
+            ),
+          );
+        }
+
+        if (!isActive) return;
+
+        const profile = payload?.data?.profile;
+        const application = payload?.data?.application;
+        setSelectedDetail(
+          buildCandidateDetailFromProfile(selectedCandidate, profile, application),
+        );
+      } catch (loadError) {
+        if (!isActive) return;
+        setDetailError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Không thể tải hồ sơ ứng viên.",
+        );
+        setSelectedDetail(fallbackDetail);
+      } finally {
+        if (isActive) {
+          setIsDetailLoading(false);
+        }
+      }
     };
-  }, [selectedCandidate]);
+
+    void loadDetail();
+
+    return () => {
+      isActive = false;
+    };
+  }, [jobIdParam, selectedCandidate]);
 
   useEffect(() => {
     if (selectedCandidateId) {
@@ -565,6 +1035,13 @@ export default function RecruiterCandidatesPage() {
       </div>
     );
   };
+
+  const clearJobFilter = useCallback(() => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("jobId");
+    nextParams.delete("jobTitle");
+    setSearchParams(nextParams);
+  }, [searchParams, setSearchParams]);
 
   return (
     <div className="min-h-dvh bg-[#f2f2f7] font-['Nunito_Sans'] text-[#141515]">
@@ -600,12 +1077,40 @@ export default function RecruiterCandidatesPage() {
 
           <div className="mt-6 flex flex-col gap-5">
             {selectedDetail ? (
-              <CandidateDetailView
-                detail={selectedDetail}
-                onBack={() => setSelectedCandidateId(null)}
-              />
+              <>
+                {detailError ? (
+                  <p className="text-sm text-red-500">{detailError}</p>
+                ) : null}
+                {isDetailLoading ? (
+                  <p className="text-sm text-slate-500">
+                    Đang tải hồ sơ ứng viên...
+                  </p>
+                ) : null}
+                <CandidateDetailView
+                  detail={selectedDetail}
+                  onBack={() => setSelectedCandidateId(null)}
+                />
+              </>
             ) : (
               <>
+                {jobIdParam ? (
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[rgba(63,76,247,0.11)] bg-white px-4 py-3">
+                    <div>
+                      <p className="text-[12px] text-[#64748b]">Đang xem ứng viên</p>
+                      <p className="text-[16px] font-semibold text-[#0a1629]">
+                        {jobTitleParam || jobIdParam}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={clearJobFilter}
+                      className="rounded-full border border-[#3f4cf7] px-4 py-2 text-[14px] font-medium text-[#3f4cf7]"
+                    >
+                      Xem tất cả
+                    </button>
+                  </div>
+                ) : null}
+
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex h-[54px] w-full max-w-[578px] items-center justify-between rounded-[8px] border border-[rgba(63,76,247,0.11)] bg-white px-5">
                     <input
@@ -631,51 +1136,60 @@ export default function RecruiterCandidatesPage() {
                   </button>
                 </div>
 
-                <div className="space-y-4">
-                  {visibleCandidates.map((candidate) => (
-                    <button
-                      key={candidate.id}
-                      type="button"
-                      onClick={() => setSelectedCandidateId(candidate.id)}
-                      className="flex w-full flex-col gap-6 rounded-[8px] border border-[rgba(63,76,247,0.11)] bg-white px-5 py-4 text-left transition hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(196,203,214,0.2)] lg:flex-row lg:items-center lg:justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        {renderAvatar(candidate)}
-                        <div>
-                          <p className="text-[16px] font-bold text-[#0a1629]">
-                            {candidate.name}
-                          </p>
-                          <p className="text-[14px] text-[#91929e]">
-                            {candidate.email}
-                          </p>
-                        </div>
-                      </div>
+                {error ? <p className="text-sm text-red-500">{error}</p> : null}
+                {isLoading ? (
+                  <p className="text-sm text-slate-500">Đang tải ứng viên...</p>
+                ) : null}
 
-                      <div className="flex flex-1 flex-wrap items-center gap-6 lg:gap-12">
-                        <div>
-                          <p className="text-[14px] text-[#91929e]">Chuyên ngành</p>
-                          <p className="text-[16px] text-[#0a1629]">
-                            {candidate.major}
-                          </p>
+                {!isLoading && !candidates.length ? (
+                  <p className="text-sm text-slate-500">Chưa có ứng viên.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {candidates.map((candidate) => (
+                      <button
+                        key={candidate.id}
+                        type="button"
+                        onClick={() => setSelectedCandidateId(candidate.id)}
+                        className="flex w-full flex-col gap-6 rounded-[8px] border border-[rgba(63,76,247,0.11)] bg-white px-5 py-4 text-left transition hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(196,203,214,0.2)] lg:flex-row lg:items-center lg:justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          {renderAvatar(candidate)}
+                          <div>
+                            <p className="text-[16px] font-bold text-[#0a1629]">
+                              {candidate.name}
+                            </p>
+                            <p className="text-[14px] text-[#91929e]">
+                              {candidate.email}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[14px] text-[#91929e]">Trường</p>
-                          <p className="text-[16px] text-[#0a1629]">
-                            {candidate.school}
-                          </p>
+
+                        <div className="flex flex-1 flex-wrap items-center gap-6 lg:gap-12">
+                          <div>
+                            <p className="text-[14px] text-[#91929e]">Chuyên ngành</p>
+                            <p className="text-[16px] text-[#0a1629]">
+                              {candidate.major}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[14px] text-[#91929e]">Trường</p>
+                            <p className="text-[16px] text-[#0a1629]">
+                              {candidate.school}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[14px] text-[#91929e]">
+                              Vị trí mong muốn
+                            </p>
+                            <p className="text-[16px] text-[#0a1629]">
+                              {candidate.desiredRole}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-[14px] text-[#91929e]">
-                            Vị trí mong muốn
-                          </p>
-                          <p className="text-[16px] text-[#0a1629]">
-                            {candidate.desiredRole}
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-end gap-4">
                   <button

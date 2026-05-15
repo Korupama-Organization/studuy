@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { MouseEvent } from "react";
 import UpdateJobModal from "./UpdateJobModal";
 import type { SaveJobPayload } from "../Index";
 
@@ -29,9 +30,10 @@ interface JobsTableProps {
   isLoading: boolean;
   onUpdateJob: (id: string, payload: SaveJobPayload) => Promise<void>;
   onDeleteJob: (id: string) => Promise<void>;
+  onViewApplicants: (job: JobRow) => void;
 }
 
-export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }: JobsTableProps) {
+export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob, onViewApplicants }: JobsTableProps) {
   const [selectedJob, setSelectedJob] = useState<JobRow | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
@@ -51,6 +53,11 @@ export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }:
   const handleJobClick = (job: JobRow) => {
     setSelectedJob(job);
     setIsUpdateModalOpen(true);
+  };
+
+  const handleViewApplicants = (event: MouseEvent<HTMLButtonElement>, job: JobRow) => {
+    event.stopPropagation();
+    onViewApplicants(job);
   };
 
   if (isLoading) {
@@ -80,7 +87,14 @@ export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }:
                 <h3 className="text-base font-bold text-slate-900">{job.title || "-"}</h3>
                 <p className="text-xs text-slate-500 mt-1 line-clamp-2">{job.summary || "Chưa có mô tả"}</p>
               </div>
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(event) => handleViewApplicants(event, job)}
+                  className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800"
+                >
+                  Ung vien
+                </button>
                 <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
                   job.status === "published"
                     ? "bg-emerald-100 text-emerald-600"
@@ -152,13 +166,22 @@ export default function JobsTable({ jobs, isLoading, onUpdateJob, onDeleteJob }:
                 <p className="text-[10px] font-semibold uppercase text-slate-400">Mã việc làm</p>
                 <p className="font-semibold text-slate-900">{job.slug || job.id}</p>
               </div>
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                job.status === "published"
-                  ? "bg-emerald-100 text-emerald-600"
-                  : "bg-slate-100 text-slate-600"
-              }`}>
-                {translateStatus(job.status)}
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(event) => handleViewApplicants(event, job)}
+                  className="rounded-full border border-slate-200 px-2.5 py-0.5 text-[10px] font-semibold text-slate-600"
+                >
+                  Ung vien
+                </button>
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                  job.status === "published"
+                    ? "bg-emerald-100 text-emerald-600"
+                    : "bg-slate-100 text-slate-600"
+                }`}>
+                  {job.status}
+                </span>
+              </div>
             </div>
             <h3 className="font-bold text-slate-900 mb-1">{job.title || "-"}</h3>
             <p className="text-xs text-slate-500 line-clamp-2 mb-3">{job.summary || "Chưa có mô tả"}</p>

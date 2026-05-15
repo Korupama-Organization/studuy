@@ -5,23 +5,23 @@ import './JobConnectionSection.css';
 const jobs = [
   {
     title: 'Backend Intern',
-    company: 'ABC Tech',
+    company: 'InnoTech',
     location: 'Hà Nội',
     type: 'Intern',
     match: '95%',
     tags: ['Node.js', 'MongoDB', 'Express'],
   },
   {
-    title: 'Ban do an dem',
-    company: 'Haky Food',
-    location: '120 Yen Lang, Hà Nội',
+    title: 'Software Engineer Fresher',
+    company: 'VNPT Technology',
+    location: 'Ho Chi Minh City',
     type: 'Fresher',
     match: '88%',
     tags: ['React', 'TypeScript', 'CSS'],
   },
   {
     title: 'AI Engineer Intern',
-    company: 'DEF Labs',
+    company: 'MTI Labs',
     location: 'Đà Nẵng',
     type: 'Intern',
     match: '92%',

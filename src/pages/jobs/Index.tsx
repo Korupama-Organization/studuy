@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
 import TopHeader from "./components/TopHeader";
 import JobsTable from "./components/JobsTable";
@@ -276,6 +277,7 @@ const getResponseErrorMessage = async (response: Response, fallback: string): Pr
 };
 
 export default function RecruiterJobsPage() {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -407,6 +409,18 @@ export default function RecruiterJobsPage() {
     [loadJobs],
   );
 
+  const handleViewApplicants = useCallback(
+    (job: JobRow) => {
+      const params = new URLSearchParams();
+      params.set("jobId", job.id);
+      if (job.title) {
+        params.set("jobTitle", job.title);
+      }
+      navigate(`/recruiter/candidates?${params.toString()}`);
+    },
+    [navigate],
+  );
+
   return (
     <div className="min-h-dvh bg-[#F4F6FB] text-slate-900 font-['Inter']">
       <div className="absolute inset-0 pointer-events-none">
@@ -425,6 +439,7 @@ export default function RecruiterJobsPage() {
             isLoading={isLoading}
             onUpdateJob={handleUpdateJob}
             onDeleteJob={handleDeleteJob}
+            onViewApplicants={handleViewApplicants}
           />
           <Pagination
             currentPage={currentPage}
