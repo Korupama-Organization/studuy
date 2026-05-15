@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   dashboardService,
   type Notification,
+  type RecentApplication,
   type UpcomingInterview,
 } from "../services/dashboardService";
 
@@ -88,6 +89,9 @@ export const useNotificationReadState = (notifications: Notification[]) => {
 export const useRecruiterActivity = (defaultOpen = false) => {
   const [isActivityPanelOpen, setIsActivityPanelOpen] = useState(defaultOpen);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [recentApplications, setRecentApplications] = useState<RecentApplication[]>(
+    [],
+  );
   const [upcomingInterviews, setUpcomingInterviews] = useState<UpcomingInterview[]>(
     [],
   );
@@ -109,6 +113,7 @@ export const useRecruiterActivity = (defaultOpen = false) => {
         if (!isActive) return;
 
         setNotifications(data.notifications ?? []);
+        setRecentApplications(data.recentApplications ?? []);
         setUpcomingInterviews(data.upcomingInterviews ?? []);
       } catch (error) {
         if (!isActive) return;
@@ -147,6 +152,7 @@ export const useRecruiterActivity = (defaultOpen = false) => {
     toggleActivityPanel,
     closeActivityPanel,
     notifications,
+    recentApplications,
     upcomingInterviews,
     isActivityLoading,
     activityError,

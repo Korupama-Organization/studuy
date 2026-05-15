@@ -77,6 +77,9 @@ const EMPTY_FORM: CompanyForm = {
   partnerStatus: "",
 };
 
+const isPartnerStatus = (value: string): value is "active" | "inactive" =>
+  value === "active" || value === "inactive";
+
 // ─── Tag Input ────────────────────────────────────────────────────────────────
 interface TagInputProps {
   tags: string[];
@@ -151,6 +154,7 @@ export default function CompanyPage() {
       if (!res.ok) return;
       const data = (await res.json()) as Record<string, unknown>;
       const company = (data.company ?? data) as Record<string, unknown>;
+      const partnerStatus = (company.partnerStatus as string) ?? "";
 
       setForm({
         name: (company.name as string) ?? "",
@@ -178,7 +182,7 @@ export default function CompanyPage() {
         recruitmentLevels: Array.isArray(company.recruitmentLevels)
           ? (company.recruitmentLevels as RecruitmentOption[])
           : [],
-        partnerStatus: (company.partnerStatus as string) ?? "",
+        partnerStatus: isPartnerStatus(partnerStatus) ? partnerStatus : "",
       });
     } catch {
       // silently fail
@@ -204,10 +208,18 @@ export default function CompanyPage() {
     setIsSaving(true);
     setSaveMsg(null);
     try {
+      const payload = {
+        ...form,
+        ...(form.partnerStatus ? { partnerStatus: form.partnerStatus } : {}),
+      };
+      if (!form.partnerStatus) {
+        delete (payload as Partial<CompanyForm>).partnerStatus;
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/companies/me`, {
         method: "PATCH",
         headers: getAuthHeaders(),
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         let errorMsg = "Lưu thất bại";
@@ -585,11 +597,14 @@ export default function CompanyPage() {
                 <select
                   className="company-input"
                   value={form.partnerStatus}
-                  onChange={(e) => set("partnerStatus", e.target.value)}
+                  onChange={(e) => {
+                    if (isPartnerStatus(e.target.value)) {
+                      set("partnerStatus", e.target.value);
+                    }
+                  }}
                 >
-                  <option value="">-- Chọn trạng thái --</option>
+                  <option value="" disabled>-- Chọn trạng thái --</option>
                   <option value="active">Đang hoạt động</option>
-                  <option value="pending">Chờ duyệt</option>
                   <option value="inactive">Ngừng hoạt động</option>
                 </select>
               </div>
