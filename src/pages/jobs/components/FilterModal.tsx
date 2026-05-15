@@ -14,25 +14,28 @@ interface FilterState {
 const createdByOptions = [
   {
     id: "oscar1",
-    name: "Oscar Holloway",
+    name: "Nguyễn Văn A",
     avatar:
       "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
   },
   {
     id: "oscar2",
-    name: "Oscar Holloway",
+    name: "Trần Thị B",
     avatar:
       "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
   },
   {
     id: "oscar3",
-    name: "Oscar Holloway",
+    name: "Lê Văn C",
     avatar:
       "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
   },
 ];
 
-const statusOptions = ["Opening", "Closed"];
+const statusOptions = [
+  { value: "Opening", label: "Đang tuyển" },
+  { value: "Closed", label: "Đã đóng" },
+];
 
 export default function FilterModal({
   isOpen,
@@ -81,7 +84,7 @@ export default function FilterModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div className="flex w-full max-w-md flex-col gap-6 rounded-2xl bg-white p-6 shadow-lg">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900">Filters</h2>
+          <h2 className="text-lg font-bold text-slate-900">Bộ lọc</h2>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition">
@@ -92,7 +95,7 @@ export default function FilterModal({
         <div className="space-y-4">
           <div>
             <h3 className="mb-3 text-sm font-semibold text-slate-500">
-              Created By
+              Người tạo
             </h3>
             <div className="space-y-3">
               {createdByOptions
@@ -127,7 +130,7 @@ export default function FilterModal({
               <button
                 onClick={() => setShowMoreCreatedBy(!showMoreCreatedBy)}
                 className="mt-2 text-sm font-semibold text-[#5B5BF6] hover:underline">
-                View more{" "}
+                Xem thêm{" "}
                 <span className="material-symbols-outlined inline text-[14px]">
                   {showMoreCreatedBy ? "expand_less" : "expand_more"}
                 </span>
@@ -137,25 +140,25 @@ export default function FilterModal({
 
           <div className="pt-2">
             <h3 className="mb-3 text-sm font-semibold text-slate-500">
-              Status
+              Trạng thái
             </h3>
             <div className="space-y-3">
               {statusOptions.map((status) => (
                 <div
-                  key={status}
-                  onClick={() => handleStatusChange(status)}
+                  key={status.value}
+                  onClick={() => handleStatusChange(status.value)}
                   className="flex cursor-pointer items-center gap-3">
                   <div
                     className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition ${
-                      filters.status.includes(status)
+                      filters.status.includes(status.value)
                         ? "border-[#5B5BF6] bg-[#5B5BF6]"
                         : "border-slate-300 hover:border-slate-400"
                     }`}>
-                    {filters.status.includes(status) && (
+                    {filters.status.includes(status.value) && (
                       <span className="text-white text-[12px]">✓</span>
                     )}
                   </div>
-                  <span className="text-sm text-slate-700">{status}</span>
+                  <span className="text-sm text-slate-700">{status.label}</span>
                 </div>
               ))}
             </div>
@@ -166,12 +169,12 @@ export default function FilterModal({
           <button
             onClick={handleClearFilter}
             className="flex-1 rounded-2xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
-            Clear Filter
+            Xóa bộ lọc
           </button>
           <button
             onClick={handleApply}
             className="flex-1 rounded-2xl bg-[#5B5BF6] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(91,91,246,0.3)] transition hover:bg-[#4A4AE6]">
-            Apply
+            Áp dụng
           </button>
         </div>
       </div>

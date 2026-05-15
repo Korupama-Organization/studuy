@@ -155,12 +155,12 @@ export default function RegisterPage() {
                 email: normalizedIdentifier,
                 phone: normalizedPhone || "0909123456",
                 address: normalizedCompanyAddress,
-                description: companyDescription.trim() || "Company profile for first-time recruiter team",
+                                description: companyDescription.trim() || "Hồ sơ công ty cho đội tuyển dụng mới",
                 location: [
                   {
                     address: normalizedCompanyAddress,
-                    city: "Ho Chi Minh",
-                    country: "Vietnam"
+                                        city: "Hồ Chí Minh",
+                                        country: "Việt Nam"
                   }
                 ],
                 workingEnvironment: {
@@ -170,17 +170,17 @@ export default function RegisterPage() {
                 },
                 socialMediaLinks: [
                   {
-                    platform: "LinkedIn",
+                                        platform: "LinkedIn",
                     url: normalizedLinkedinUrl || "https://www.linkedin.com/company/seeds-technology"
                   },
                   {
-                    platform: "Facebook",
+                                        platform: "Facebook",
                     url: normalizedFacebookUrl || "https://facebook.com/seeds.technology"
                   }
                 ],
                 recruitingPreferences: {
                   targetRoles: companyTargetRoles.split(',').map(s => s.trim()).filter(Boolean),
-                  targetLevels: [{ level: "Intern" }, { level: "Fresher" }],
+                                    targetLevels: [{ level: "Thực tập sinh" }, { level: "Mới ra trường" }],
                   usingAIInterview: usingAIInterview,
                   usingManualInterview: usingManualInterview
                 },

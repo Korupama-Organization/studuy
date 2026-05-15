@@ -29,18 +29,18 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({ profile, stats }) => {
         />
         <div className="welcome-text">
           <div className="completion-badge">
-            Hồ sơ hoàn thành {profile.completionPercentage}%
+            Hồ sơ đã hoàn thành {profile.completionPercentage}%
           </div>
           <h1>
             Chào mừng trở lại, <span className="welcome-name-highlight">{firstName}👋</span>
           </h1>
           <p>
-            Your Profile has been completed: <span className="completion-percent">{profile.completionPercentage}%</span>
+            Hồ sơ của bạn đã hoàn thiện: <span className="completion-percent">{profile.completionPercentage}%</span>
           </p>
           <div className="welcome-actions">
-            <Link to="/profile" className="action-link">View Profile</Link>
-            <button className="action-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Generate CV</button>
-            <Link to="/profile/edit" className="action-link">Update CV</Link>
+            <Link to="/profile" className="action-link">Xem hồ sơ</Link>
+            <button className="action-link" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Tạo CV</button>
+            <Link to="/profile/edit" className="action-link">Cập nhật CV</Link>
           </div>
         </div>
       </div>
@@ -58,7 +58,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({ profile, stats }) => {
           </div>
           <div>
             <h3 className="stat-value">{stats.appliedJobs}</h3>
-            <p className="stat-label">Applied</p>
+            <p className="stat-label">Đã ứng tuyển</p>
           </div>
         </div>
         <div className="stat-card">
@@ -72,7 +72,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({ profile, stats }) => {
           </div>
           <div>
             <h3 className="stat-value">{stats.interviews || 0}</h3>
-            <p className="stat-label">Interviews</p>
+            <p className="stat-label">Phỏng vấn</p>
           </div>
         </div>
         <div className="stat-card">
@@ -83,7 +83,7 @@ const WelcomeSection: React.FC<WelcomeSectionProps> = ({ profile, stats }) => {
           </div>
           <div>
             <h3 className="stat-value">{stats.savedJobs || 0}</h3>
-            <p className="stat-label">Saved</p>
+            <p className="stat-label">Đã lưu</p>
           </div>
         </div>
       </div>

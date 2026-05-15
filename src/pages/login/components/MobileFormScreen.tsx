@@ -9,6 +9,7 @@ interface MobileFormScreenProps {
     onIdentifierChange: (value: string) => void;
     onPasswordChange: (value: string) => void;
     onSubmit: (event: React.FormEvent) => void;
+    onBack?: () => void;
 }
 
 export default function MobileFormScreen({
@@ -19,6 +20,7 @@ export default function MobileFormScreen({
     onIdentifierChange,
     onPasswordChange,
     onSubmit,
+    onBack,
 }: MobileFormScreenProps) {
     return (
         <div className="w-full h-full bg-gradient-to-b from-[#2F3FB8] via-[#4C45CC] to-[#7E50E8] p-0 flex flex-col">
@@ -33,7 +35,15 @@ export default function MobileFormScreen({
             </div>
 
             <div className="w-full flex-1 min-h-0 bg-white rounded-t-[125px] rounded-b-none px-6 pt-7 pb-7 flex flex-col overflow-hidden mt-0">
-
+                {onBack ? (
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="mb-4 self-start text-sm font-semibold text-[#4D55CC]"
+                    >
+                        Quay lại
+                    </button>
+                ) : null}
 
                 <div className="w-full">
                     <LoginFormCard

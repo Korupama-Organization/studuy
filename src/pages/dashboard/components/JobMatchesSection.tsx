@@ -22,9 +22,9 @@ const JobMatchesSection: React.FC<JobMatchesSectionProps> = ({ jobs, firstName, 
   return (
     <section>
       <div className="section-header">
-        <h2 className="section-title">JOB MATCHES FOR {firstName.toUpperCase()}</h2>
+        <h2 className="section-title">Việc làm phù hợp cho {firstName.toUpperCase()}</h2>
         <Link to="/jobs" className="view-all-link">
-          View all 
+          Xem tất cả 
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="5" y1="12" x2="19" y2="12"></line>
             <polyline points="12 5 19 12 12 19"></polyline>
@@ -62,18 +62,18 @@ const JobMatchesSection: React.FC<JobMatchesSectionProps> = ({ jobs, firstName, 
                       <line x1="12" y1="1" x2="12" y2="23"></line>
                       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                     </svg>
-                    $2,000 - $3,500 {/* Mocked salary as requested by design */}
+                    $2,000 - $3,500 {/* Mức lương mô phỏng theo thiết kế */}
                   </span>
                 </div>
                 <div className="job-actions">
-                  <button className="btn-primary">Apply Now</button>
-                  <button className="btn-outline">Save</button>
+                  <button className="btn-primary">Ứng tuyển ngay</button>
+                  <button className="btn-outline">Lưu</button>
                 </div>
               </div>
             </div>
           )) : (
              <div className="job-card" style={{ justifyContent: 'center', color: '#64748b' }}>
-                No job matches found. Update your profile to get matches.
+                Chưa tìm thấy việc làm phù hợp. Hãy cập nhật hồ sơ để hệ thống đề xuất tốt hơn.
              </div>
           )}
         </div>
@@ -86,10 +86,10 @@ const JobMatchesSection: React.FC<JobMatchesSectionProps> = ({ jobs, firstName, 
                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
               </svg>
             </div>
-            <h3>Browse our latest job openings to view & apply to the best jobs today!</h3>
-            <p>Explore remote, hybrid or on-site jobs that are aligned with your experience, goals & preferences.</p>
+            <h3>Khám phá các vị trí mới nhất để xem và ứng tuyển ngay hôm nay!</h3>
+            <p>Khám phá các công việc từ xa, hybrid hoặc tại văn phòng phù hợp với kinh nghiệm, mục tiêu và sở thích của bạn.</p>
             <Link to="/jobs" className="btn-white" style={{ textDecoration: 'none' }}>
-              View all jobs
+              Xem tất cả việc làm
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
@@ -98,7 +98,7 @@ const JobMatchesSection: React.FC<JobMatchesSectionProps> = ({ jobs, firstName, 
           </div>
 
           <div className="score-card">
-            <p className="score-label">Overall Score</p>
+            <p className="score-label">Điểm tổng thể</p>
             <div className="score-value">
               {overallScore} <span className="score-total">/100</span>
             </div>

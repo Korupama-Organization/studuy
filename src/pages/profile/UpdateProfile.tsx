@@ -158,7 +158,7 @@ export default function UpdateProfile() {
                                                         <clipPath id="clip-github"><rect width="15.99" height="15.99" fill="white"/></clipPath>
                                                     </defs>
                                                 </svg>
-                                                GitHub URL
+                                                URL GitHub
                                             </label>
                                             <input type="url" className="field-input" placeholder="https://github.com/username" value={form.githubUrl} onChange={(e) => updateField('githubUrl', e.target.value)} />
                                         </div>
@@ -174,7 +174,7 @@ export default function UpdateProfile() {
                                                         <clipPath id="clip-linkedin"><rect width="15.99" height="15.99" fill="white"/></clipPath>
                                                     </defs>
                                                 </svg>
-                                                LinkedIn URL
+                                                URL LinkedIn
                                             </label>
                                             <input type="url" className="field-input" placeholder="https://linkedin.com/in/username" value={form.linkedinUrl} onChange={(e) => updateField('linkedinUrl', e.target.value)} />
                                         </div>
@@ -188,7 +188,7 @@ export default function UpdateProfile() {
                                                         <clipPath id="clip-facebook"><rect width="15.99" height="15.99" fill="white"/></clipPath>
                                                     </defs>
                                                 </svg>
-                                                Facebook URL
+                                                URL Facebook
                                             </label>
                                             <input type="url" className="field-input" placeholder="https://facebook.com/username" value={form.facebookUrl} onChange={(e) => updateField('facebookUrl', e.target.value)} />
                                         </div>
@@ -204,7 +204,7 @@ export default function UpdateProfile() {
                                                         <clipPath id="clip-portfolio"><rect width="15.99" height="15.99" fill="white"/></clipPath>
                                                     </defs>
                                                 </svg>
-                                                Portfolio URL
+                                                URL Portfolio
                                             </label>
                                             <input type="url" className="field-input" placeholder="https://yourportfolio.com" value={form.portfolioUrl} onChange={(e) => updateField('portfolioUrl', e.target.value)} />
                                             <p className="field-hint">Trang portfolio của bạn</p>

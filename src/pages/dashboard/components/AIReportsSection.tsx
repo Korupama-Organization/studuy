@@ -12,10 +12,23 @@ interface AIReportsSectionProps {
 }
 
 const AIReportsSection: React.FC<AIReportsSectionProps> = ({ reports }) => {
+  const translateStatus = (status: string) => {
+    switch (status) {
+      case 'Passed':
+        return 'Đạt';
+      case 'Pending':
+        return 'Đang chờ';
+      case 'Failed':
+        return 'Không đạt';
+      default:
+        return status;
+    }
+  };
+
   return (
     <section>
       <div className="section-header">
-        <h2 className="section-title">AI Interview Reports</h2>
+        <h2 className="section-title">Báo cáo phỏng vấn AI</h2>
       </div>
 
       <div className="ai-reports-container">
@@ -25,13 +38,13 @@ const AIReportsSection: React.FC<AIReportsSectionProps> = ({ reports }) => {
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" placeholder="Search candidates..." />
+            <input type="text" placeholder="Tìm ứng viên..." />
           </div>
           <button className="toolbar-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
             </svg>
-            Filter by Status
+            Lọc theo trạng thái
           </button>
           <button className="toolbar-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -39,17 +52,17 @@ const AIReportsSection: React.FC<AIReportsSectionProps> = ({ reports }) => {
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            Save
+            Lưu
           </button>
         </div>
 
         <table className="ai-table">
           <thead>
             <tr>
-              <th>APPLICATION ID</th>
-              <th>VIDEO RESUME</th>
-              <th>AI COMMENT</th>
-              <th>STATUS</th>
+              <th>MÃ ỨNG TUYỂN</th>
+              <th>VIDEO CV</th>
+              <th>NHẬN XÉT AI</th>
+              <th>TRẠNG THÁI</th>
             </tr>
           </thead>
           <tbody>
@@ -64,17 +77,17 @@ const AIReportsSection: React.FC<AIReportsSectionProps> = ({ reports }) => {
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
                           </svg>
-                          Watch Recording
+                          Xem bản ghi
                         </button>
                       </a>
                     ) : (
-                      <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>No recording</span>
+                      <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Không có bản ghi</span>
                     )}
                   </td>
                   <td>
                     <p className="ai-comment">{report.comment}</p>
                     <a href="#" className="view-report-link">
-                      View Full Report
+                      Xem báo cáo đầy đủ
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
@@ -92,7 +105,7 @@ const AIReportsSection: React.FC<AIReportsSectionProps> = ({ reports }) => {
                       {report.status === 'Failed' && (
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
                       )}
-                      {report.status}
+                      {translateStatus(report.status)}
                     </span>
                   </td>
                 </tr>
@@ -100,7 +113,7 @@ const AIReportsSection: React.FC<AIReportsSectionProps> = ({ reports }) => {
             ) : (
               <tr>
                 <td colSpan={4} style={{ textAlign: "center", color: "#64748b" }}>
-                  No AI interview reports available yet.
+                  Hiện chưa có báo cáo phỏng vấn AI nào.
                 </td>
               </tr>
             )}

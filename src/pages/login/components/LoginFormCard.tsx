@@ -49,7 +49,7 @@ export default function LoginFormCard({
                     onChange={onIdentifierChange}
                     placeholder="Nhập mã số sinh viên hoặc email"
                     iconUrl={EMAIL_ICON_CDN}
-                    iconAlt="Email icon"
+                    iconAlt="Biểu tượng email"
                     autoComplete="username"
                     autoCapitalize="none"
                 />
@@ -61,7 +61,7 @@ export default function LoginFormCard({
                     onChange={onPasswordChange}
                     placeholder="Nhập mật khẩu"
                     iconUrl={PASSWORD_ICON_CDN}
-                    iconAlt="password icon"
+                    iconAlt="Biểu tượng mật khẩu"
                     autoComplete="current-password"
                 />
 
