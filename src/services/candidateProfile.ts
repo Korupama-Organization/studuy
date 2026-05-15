@@ -24,20 +24,22 @@ export interface Achievement {
 export interface TechnicalSkillPayload {
     category?: string;
     name?: string;
-    skillId?: string;
+    skillId?: string | null;
     yearsOfExperience: number;
     confidence?: boolean;
 }
 
+export interface SkillSummary {
+    _id: string;
+    name: string;
+    category: string;
+}
+
 export interface TechnicalSkillResponse {
-    skillId: string;
+    skillId: string | null;
     yearsOfExperience: number;
     confidence: boolean;
-    skill: {
-        _id: string;
-        name: string;
-        category: string;
-    } | null;
+    skill: SkillSummary | null;
 }
 
 export interface ProjectPayload {
@@ -54,28 +56,20 @@ export interface ProjectPayload {
 }
 
 export interface ProjectResponse extends ProjectPayload {
-    technologySkills: {
-        _id: string;
-        name: string;
-        category: string;
-    }[];
+    technologySkills: SkillSummary[];
 }
 
 export interface WorkExperiencePayload {
     companyName: string;
     position: string;
     startDate: string;
-    endDate: string;
+    endDate?: string;
     description: string;
     technologiesUsed: string[];
 }
 
 export interface WorkExperienceResponse extends WorkExperiencePayload {
-    technologyUsedSkills: {
-        _id: string;
-        name: string;
-        category: string;
-    }[];
+    technologyUsedSkills: SkillSummary[];
 }
 
 export interface IntroductionQuestions {
@@ -88,17 +82,17 @@ export interface IntroductionQuestions {
 export interface CandidateProfileData {
     _id: string;
     userId: string;
-    academicInfo: AcademicInfo;
-    languages: Language[];
-    achievements: Achievement[];
-    advantagePoint: string;
-    technicalSkills: TechnicalSkillResponse[];
-    softSkills: string[];
-    projects: ProjectResponse[];
-    workExperiences: WorkExperienceResponse[];
-    introductionQuestions: IntroductionQuestions;
-    createdAt: string;
-    updatedAt: string;
+    academicInfo?: AcademicInfo;
+    languages?: Language[];
+    achievements?: Achievement[];
+    advantagePoint?: string;
+    technicalSkills?: TechnicalSkillResponse[];
+    softSkills?: string[];
+    projects?: ProjectResponse[];
+    workExperiences?: WorkExperienceResponse[];
+    introductionQuestions?: IntroductionQuestions;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface UpdateCandidateProfilePayload {
@@ -136,7 +130,7 @@ export interface UpdateProfileResponse {
     meta: {
         matchedCount: number;
         modifiedCount: number;
-    };
+    } | null;
 }
 
 export interface CompletionResponse {
@@ -152,8 +146,8 @@ export interface DashboardResponse {
 // ── Helpers ──
 
 interface ApiErrorShape {
-    message?: string;
-    error?: string;
+    message?: string | string[];
+    error?: string | string[];
 }
 
 const API_BASE_URL =
@@ -164,10 +158,23 @@ const buildApiUrl = (path: string): string => {
     return new URL(path, API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`).toString();
 };
 
+const firstText = (value?: string | string[]): string => {
+    if (Array.isArray(value)) {
+        return value.find((item) => typeof item === 'string' && item.trim()) || '';
+    }
+
+    return typeof value === 'string' ? value : '';
+};
+
 const toErrorMessage = (fallback: string, payload?: ApiErrorShape): string => {
     if (!payload) return fallback;
-    if (typeof payload.message === 'string' && payload.message.trim()) return payload.message;
-    if (typeof payload.error === 'string' && payload.error.trim()) return payload.error;
+
+    const message = firstText(payload.message).trim();
+    if (message) return message;
+
+    const error = firstText(payload.error).trim();
+    if (error) return error;
+
     return fallback;
 };
 
@@ -177,6 +184,14 @@ const authHeaders = (): HeadersInit => {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
+};
+
+const parseJsonOrNull = async <T>(response: Response): Promise<T | null> => {
+    try {
+        return (await response.json()) as T;
+    } catch {
+        return null;
+    }
 };
 
 // ── API functions ──
@@ -192,11 +207,13 @@ export const getCandidateProfile = async (): Promise<GetProfileResponse> => {
         headers: authHeaders(),
     });
 
-    let payload: GetProfileResponse | ApiErrorShape | null = null;
-    try {
-        payload = (await response.json()) as GetProfileResponse | ApiErrorShape;
-    } catch {
-        payload = null;
+    const payload = await parseJsonOrNull<GetProfileResponse | ApiErrorShape>(response);
+
+    if (response.status === 404) {
+        return {
+            message: 'Candidate profile not found',
+            data: null,
+        };
     }
 
     if (!response.ok) {
@@ -205,7 +222,7 @@ export const getCandidateProfile = async (): Promise<GetProfileResponse> => {
         );
     }
 
-    return payload as GetProfileResponse;
+    return (payload || { message: 'OK', data: null }) as GetProfileResponse;
 };
 
 export const updateCandidateProfile = async (
@@ -217,12 +234,7 @@ export const updateCandidateProfile = async (
         body: JSON.stringify(payload),
     });
 
-    let responsePayload: UpdateProfileResponse | ApiErrorShape | null = null;
-    try {
-        responsePayload = (await response.json()) as UpdateProfileResponse | ApiErrorShape;
-    } catch {
-        responsePayload = null;
-    }
+    const responsePayload = await parseJsonOrNull<UpdateProfileResponse | ApiErrorShape>(response);
 
     if (!response.ok) {
         throw new Error(
@@ -239,12 +251,7 @@ export const getProfileCompletion = async (): Promise<CompletionResponse> => {
         headers: authHeaders(),
     });
 
-    let payload: CompletionResponse | ApiErrorShape | null = null;
-    try {
-        payload = (await response.json()) as CompletionResponse | ApiErrorShape;
-    } catch {
-        payload = null;
-    }
+    const payload = await parseJsonOrNull<CompletionResponse | ApiErrorShape>(response);
 
     if (!response.ok) {
         throw new Error(
@@ -261,12 +268,7 @@ export const getCandidateDashboard = async (): Promise<DashboardResponse> => {
         headers: authHeaders(),
     });
 
-    let payload: DashboardResponse | ApiErrorShape | null = null;
-    try {
-        payload = (await response.json()) as DashboardResponse | ApiErrorShape;
-    } catch {
-        payload = null;
-    }
+    const payload = await parseJsonOrNull<DashboardResponse | ApiErrorShape>(response);
 
     if (!response.ok) {
         throw new Error(

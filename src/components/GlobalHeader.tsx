@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/Logo.png";
-import { getStoredUser } from "../services/auth";
+import { clearAuthSession, getStoredUser } from "../services/auth";
 
 interface GlobalHeaderProps {
   userName?: string;
@@ -24,7 +24,7 @@ export default function GlobalHeader({ userName }: GlobalHeaderProps) {
     // small async tick to allow a loading skeleton render
     const stored = getStoredUser();
     const id = window.setTimeout(() => {
-      setLoadedName(stored?.fullName ?? "Nguyễn Văn A");
+      setLoadedName(stored?.fullName ?? "Candidate");
     }, 50);
 
     return () => window.clearTimeout(id);
@@ -33,9 +33,7 @@ export default function GlobalHeader({ userName }: GlobalHeaderProps) {
   const effectiveUserName = userName ?? loadedName;
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("currentUser");
+    clearAuthSession();
     navigate("/login");
   };
 

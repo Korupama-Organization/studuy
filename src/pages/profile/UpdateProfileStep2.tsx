@@ -5,10 +5,10 @@ import ProfileSidebar from './ProfileSidebar';
 import GlobalHeader from '../../components/GlobalHeader';
 
 const STEPS = [
-    { label: "Bước 1", sub: "Thông tin cơ bản" },
-    { label: "Bước 2", sub: "Học vấn và Kỹ năng" },
-    { label: "Bước 3", sub: "Dự án và Kinh nghiệm" },
-    { label: "Bước 4", sub: "Mục tiêu sự nghiệp" },
+    { label: "Bước 1", sub: "Thông tin cơ bản", path: "/candidate/profile/update" },
+    { label: "Bước 2", sub: "Học vấn và Kỹ năng", path: "/candidate/profile/update/step2" },
+    { label: "Bước 3", sub: "Dự án và Kinh nghiệm", path: "/candidate/profile/update/step3" },
+    { label: "Bước 4", sub: "Mục tiêu sự nghiệp", path: "/candidate/profile/update/step4" },
 ];
 
 
@@ -24,7 +24,7 @@ const TECH_CATEGORIES = [
 ];
 
 export default function UpdateProfileStep2() {
-    const [activeStep] = useState(1);
+    const activeStep = 1;
     const [newSoftSkill, setNewSoftSkill] = useState('');
     const navigate = useNavigate();
     const { form, updateField, completion, completionLoading, saveStep2, saving } = useProfileForm();
@@ -37,7 +37,7 @@ export default function UpdateProfileStep2() {
 
     return (
         <div className="profile-page">
-            <GlobalHeader />
+            <GlobalHeader userName={form.fullName || undefined} />
 
             {/* Page Body */}
             <main className="profile-main">
@@ -67,6 +67,8 @@ export default function UpdateProfileStep2() {
                                         <button
                                             key={idx}
                                             className={`step-tab ${idx === activeStep ? "step-tab--active" : "step-tab--inactive"}`}
+                                            type="button"
+                                            onClick={() => navigate(step.path)}
                                         >
                                             <span className="step-tab-label">{step.label}</span>
                                             <span className="step-tab-sub">{step.sub}</span>
@@ -103,7 +105,7 @@ export default function UpdateProfileStep2() {
                                             <input type="number" className="field-input" placeholder="2026" value={form.academicInfo.graduationYear} onChange={(e) => updateField('academicInfo', { ...form.academicInfo, graduationYear: parseInt(e.target.value) || 0 })} />
                                         </div>
                                         <div className="form-field">
-                                            <label className="field-label">GPA (Hệ 4) <span className="required-star">*</span></label>
+                                            <label className="field-label">GPA (Hệ 4)</label>
                                             <input type="number" step="0.1" className="field-input" placeholder="e.g. 3.2" value={form.academicInfo.gpa || ''} onChange={(e) => updateField('academicInfo', { ...form.academicInfo, gpa: parseFloat(e.target.value) || 0 })} />
                                         </div>
                                     </div>
@@ -128,13 +130,13 @@ export default function UpdateProfileStep2() {
                                                                 <option value="true">Tự tin</option>
                                                                 <option value="false">Không tự tin</option>
                                                             </select>
-                                                            <button className="btn-icon btn-delete-icon" onClick={() => { const updated = form.technicalSkills.filter((_, i) => i !== globalIdx); updateField('technicalSkills', updated); }}>
+                                                            <button className="btn-icon btn-delete-icon" type="button" onClick={() => { const updated = form.technicalSkills.filter((_, i) => i !== globalIdx); updateField('technicalSkills', updated); }}>
                                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
                                                             </button>
                                                         </div>
                                                     );
                                                 })}
-                                                <button className="btn-add-text" style={{ color: '#8B4CFF' }} onClick={() => { const newSkill = { category: cat.key, name: '', yearsOfExperience: 0, confidence: true }; updateField('technicalSkills', [...form.technicalSkills, newSkill]); }}>+ {cat.addLabel}</button>
+                                                <button className="btn-add-text" type="button" style={{ color: '#8B4CFF' }} onClick={() => { const newSkill = { category: cat.key, name: '', yearsOfExperience: 0, confidence: true }; updateField('technicalSkills', [...form.technicalSkills, newSkill]); }}>+ {cat.addLabel}</button>
                                             </div>
                                         );
                                     })}
@@ -153,7 +155,7 @@ export default function UpdateProfileStep2() {
                                     {/* Custom soft skill input */}
                                     <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                                         <input type="text" className="field-input" placeholder="Nhập kỹ năng mềm..." style={{ flex: 1 }} value={newSoftSkill} onChange={(e) => setNewSoftSkill(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && newSoftSkill.trim()) { if (!form.softSkills.includes(newSoftSkill.trim())) { updateField('softSkills', [...form.softSkills, newSoftSkill.trim()]); } setNewSoftSkill(''); } }} />
-                                        <button className="btn-add-solid" onClick={() => { if (newSoftSkill.trim() && !form.softSkills.includes(newSoftSkill.trim())) { updateField('softSkills', [...form.softSkills, newSoftSkill.trim()]); setNewSoftSkill(''); } }}>
+                                        <button className="btn-add-solid" type="button" onClick={() => { if (newSoftSkill.trim() && !form.softSkills.includes(newSoftSkill.trim())) { updateField('softSkills', [...form.softSkills, newSoftSkill.trim()]); setNewSoftSkill(''); } }}>
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg>
                                             Thêm kỹ năng mềm
                                         </button>
@@ -171,7 +173,7 @@ export default function UpdateProfileStep2() {
                                 <div className="sub-section certificate-section">
                                     <div className="sub-section-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                                         <h3 className="sub-section-title">Chứng chỉ ngoại ngữ</h3>
-                                        <button className="btn-add-solid" onClick={() => { updateField('languages', [...form.languages, { certificateName: '', score: 0, issuedAt: '', expiresAt: '' }]); }}>
+                                        <button className="btn-add-solid" type="button" onClick={() => { updateField('languages', [...form.languages, { certificateName: '', score: 0, issuedAt: '', expiresAt: '' }]); }}>
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg>
                                             Thêm chứng chỉ
                                         </button>
@@ -185,7 +187,7 @@ export default function UpdateProfileStep2() {
                                         <div className="certificate-card" key={idx}>
                                             <div className="certificate-card-header" style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'12px'}}>
                                                 <h4 className="certificate-title" style={{margin:0,fontSize:'14px',fontWeight:600}}>Chứng chỉ {idx + 1}</h4>
-                                                <button className="btn-icon btn-delete-icon" onClick={() => { const updated = form.languages.filter((_, i) => i !== idx); updateField('languages', updated); }}>
+                                                <button className="btn-icon btn-delete-icon" type="button" onClick={() => { const updated = form.languages.filter((_, i) => i !== idx); updateField('languages', updated); }}>
                                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
                                                 </button>
                                             </div>
@@ -213,15 +215,15 @@ export default function UpdateProfileStep2() {
 
                                 {/* Action Buttons */}
                                 <div className="form-actions">
-                                    <button className="btn-back" onClick={() => navigate('/candidate/profile/update')}>
+                                    <button className="btn-back" type="button" onClick={() => navigate('/candidate/profile/update')}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                         Trở lại
                                     </button>
                                     <div className="form-actions-right">
-                                        <button className="btn-save" onClick={saveStep2} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
-                                        <button className="btn-next" disabled={saving} onClick={async () => {
+                                        <button className="btn-save" type="button" onClick={saveStep2} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
+                                        <button className="btn-next" type="button" disabled={saving} onClick={async () => {
                                             const success = await saveStep2();
                                             if (success) navigate('/candidate/profile/update/step3');
                                         }}>

@@ -3,6 +3,12 @@ import { useProfileForm } from './ProfileFormContext';
 const CIRCUMFERENCE = 2 * Math.PI * 56;
 
 const FIELD_LABELS: Record<string, string> = {
+    'basicInfo.fullName': 'Họ và tên',
+    'basicInfo.studentId': 'Mã số sinh viên',
+    'basicInfo.email': 'Email',
+    'basicInfo.phone': 'Số điện thoại',
+    'basicInfo.birthDate': 'Ngày sinh',
+    'basicInfo.gender': 'Giới tính',
     'academicInfo.university': 'Trường đại học',
     'academicInfo.major': 'Chuyên ngành',
     'academicInfo.graduationYear': 'Năm tốt nghiệp',

@@ -18,7 +18,7 @@ import RecruiterDashboard from '../pages/recruiter_dashboard/RecruiterDashboard'
 import RecruiterJobsPage from '../pages/jobs/Index';
 import RecruiterManagementPage from '../pages/recruiter_management/Index';
 import RecruiterCandidatesPage from '../pages/recruiter_candidates/Index';
-import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getStoredAccessTokenExpiry } from '../services/auth';
 import { useEffect } from 'react';
@@ -64,6 +64,14 @@ function AuthSessionGuard() {
   return null;
 }
 
+function CandidateProfileLayout() {
+  return (
+    <ProfileFormProvider>
+      <Outlet />
+    </ProfileFormProvider>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -75,10 +83,12 @@ function App() {
           <Route path="/login/*" element={<LoginPage />} />
           <Route path="/register/*" element={<RegisterPage />} />
           <Route path="/candidate/dashboard" element={<DashboardPage />} />
-          <Route path="/candidate/profile/update" element={<ProfileFormProvider><UpdateProfile /></ProfileFormProvider>} />
-          <Route path="/candidate/profile/update/step2" element={<ProfileFormProvider><UpdateProfileStep2 /></ProfileFormProvider>} />
-          <Route path="/candidate/profile/update/step3" element={<ProfileFormProvider><UpdateProfileStep3 /></ProfileFormProvider>} />
-          <Route path="/candidate/profile/update/step4" element={<ProfileFormProvider><UpdateProfileStep4 /></ProfileFormProvider>} />
+          <Route path="/candidate/profile/update" element={<CandidateProfileLayout />}>
+            <Route index element={<UpdateProfile />} />
+            <Route path="step2" element={<UpdateProfileStep2 />} />
+            <Route path="step3" element={<UpdateProfileStep3 />} />
+            <Route path="step4" element={<UpdateProfileStep4 />} />
+          </Route>
           <Route path="/candidate/jobs" element={<CandidateJobsPage />} />
 
           <Route path="/recruiter/company" element={<CompanyPage />} />

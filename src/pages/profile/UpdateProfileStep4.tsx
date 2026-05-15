@@ -5,14 +5,14 @@ import ProfileSidebar from './ProfileSidebar';
 import GlobalHeader from '../../components/GlobalHeader';
 
 const STEPS = [
-    { label: "Bước 1", sub: "Thông tin cơ bản" },
-    { label: "Bước 2", sub: "Học vấn và Kỹ năng" },
-    { label: "Bước 3", sub: "Dự án và Kinh nghiệm" },
-    { label: "Bước 4", sub: "Mục tiêu sự nghiệp" },
+    { label: "Bước 1", sub: "Thông tin cơ bản", path: "/candidate/profile/update" },
+    { label: "Bước 2", sub: "Học vấn và Kỹ năng", path: "/candidate/profile/update/step2" },
+    { label: "Bước 3", sub: "Dự án và Kinh nghiệm", path: "/candidate/profile/update/step3" },
+    { label: "Bước 4", sub: "Mục tiêu sự nghiệp", path: "/candidate/profile/update/step4" },
 ];
 
 export default function UpdateProfileStep4() {
-    const [activeStep] = useState(3);
+    const activeStep = 3;
     const navigate = useNavigate();
     const { form, updateField, completion, completionLoading, saveStep4, saveAllSteps, saving, saveError, saveSuccess } = useProfileForm();
     const [showToast, setShowToast] = useState(false);
@@ -56,7 +56,7 @@ export default function UpdateProfileStep4() {
                     <span style={{ fontWeight: 500 }}>{saveSuccess || 'Hồ sơ đã được nộp thành công!'}</span>
                 </div>
             )}
-            <GlobalHeader />
+            <GlobalHeader userName={form.fullName || undefined} />
 
             {/* Page Body */}
             <main className="profile-main">
@@ -86,6 +86,8 @@ export default function UpdateProfileStep4() {
                                         <button
                                             key={idx}
                                             className={`step-tab ${idx === activeStep ? "step-tab--active" : "step-tab--inactive"}`}
+                                            type="button"
+                                            onClick={() => navigate(step.path)}
                                         >
                                             <span className="step-tab-label">{step.label}</span>
                                             <span className="step-tab-sub">{step.sub}</span>
@@ -168,6 +170,46 @@ export default function UpdateProfileStep4() {
                                 </div>
 
                                 <div className="sub-section" style={{ marginTop: '2.5rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div>
+                                            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#101828', margin: 0 }}>Thành tích nổi bật</h3>
+                                            <p className="field-hint" style={{ marginTop: '4px' }}>Giải thưởng, học bổng, cuộc thi hoặc chứng nhận chuyên môn đáng chú ý.</p>
+                                        </div>
+                                        <button className="btn-add-solid" type="button" onClick={() => updateField('achievements', [...form.achievements, { title: '', achievedAt: '' }])}>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"></path></svg>
+                                            Thêm thành tích
+                                        </button>
+                                    </div>
+
+                                    {form.achievements.length === 0 && (
+                                        <p className="field-hint" style={{ textAlign: 'center', padding: '1.5rem', color: '#9CA3AF', border: '1px dashed #E5E7EB', borderRadius: '12px' }}>
+                                            Chưa có thành tích nào. Bạn có thể bỏ qua hoặc thêm thành tích để hồ sơ nổi bật hơn.
+                                        </p>
+                                    )}
+
+                                    {form.achievements.map((achievement, idx) => (
+                                        <div key={idx} style={{ border: '1px solid #E5E7EB', borderRadius: '12px', padding: '1.25rem', marginBottom: '1rem' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                                <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#101828', margin: 0 }}>Thành tích {idx + 1}</h4>
+                                                <button className="btn-icon btn-delete-icon" type="button" onClick={() => updateField('achievements', form.achievements.filter((_, i) => i !== idx))}>
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
+                                                </button>
+                                            </div>
+                                            <div className="form-grid" style={{ gap: '1rem' }}>
+                                                <div className="form-field">
+                                                    <label className="field-label">Tên thành tích</label>
+                                                    <input type="text" className="field-input" placeholder="VD: Giải nhất Hackathon, học bổng..." value={achievement.title} onChange={(e) => { const updated = [...form.achievements]; updated[idx] = { ...updated[idx], title: e.target.value }; updateField('achievements', updated); }} />
+                                                </div>
+                                                <div className="form-field">
+                                                    <label className="field-label">Ngày đạt được</label>
+                                                    <input type="date" className="field-input" value={achievement.achievedAt} onChange={(e) => { const updated = [...form.achievements]; updated[idx] = { ...updated[idx], achievedAt: e.target.value }; updateField('achievements', updated); }} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="sub-section" style={{ marginTop: '2.5rem' }}>
                                     <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#101828', marginBottom: '1rem' }}>Cài đặt hồ sơ</h3>
                                     
                                     <div style={{ border: '1px solid #E5E7EB', borderRadius: '12px', padding: '1.25rem' }}>
@@ -228,20 +270,20 @@ export default function UpdateProfileStep4() {
                                 )}
 
                                 <div className="form-actions" style={{ paddingTop: '1.5rem', marginTop: '2rem', borderTop: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <button className="btn-back" onClick={() => navigate('/candidate/profile/update/step3')}>
+                                    <button className="btn-back" type="button" onClick={() => navigate('/candidate/profile/update/step3')}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                         Quay lại
                                     </button>
                                     <div className="form-actions-right">
-                                        <button className="btn-save" onClick={saveStep4} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu nháp'}</button>
-                                        <button className="btn-next btn-submit" style={{ background: '#d946ef' }} disabled={saving} onClick={async () => {
+                                        <button className="btn-save" type="button" onClick={saveStep4} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu nháp'}</button>
+                                        <button className="btn-next btn-submit" type="button" style={{ background: '#d946ef' }} disabled={saving} onClick={async () => {
                                             const success = await saveAllSteps();
                                             if (success) {
                                                 // Wait 2 seconds for user to see the success toast before redirecting
                                                 setTimeout(() => {
-                                                    navigate('/candidate/profile/update/step4'); 
+                                                    navigate('/candidate/dashboard'); 
                                                 }, 2000);
                                             }
                                         }}>

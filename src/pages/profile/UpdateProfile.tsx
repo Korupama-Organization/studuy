@@ -1,20 +1,20 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfileForm } from './ProfileFormContext';
 import ProfileSidebar from './ProfileSidebar';
 import GlobalHeader from '../../components/GlobalHeader';
 
 const STEPS = [
-    { label: "Bước 1", sub: "Thông tin cơ bản" },
-    { label: "Bước 2", sub: "Học vấn và Kỹ năng" },
-    { label: "Bước 3", sub: "Dự án và Kinh nghiệm" },
-    { label: "Bước 4", sub: "Mục tiêu sự nghiệp" },
+    { label: "Bước 1", sub: "Thông tin cơ bản", path: "/candidate/profile/update" },
+    { label: "Bước 2", sub: "Học vấn và Kỹ năng", path: "/candidate/profile/update/step2" },
+    { label: "Bước 3", sub: "Dự án và Kinh nghiệm", path: "/candidate/profile/update/step3" },
+    { label: "Bước 4", sub: "Mục tiêu sự nghiệp", path: "/candidate/profile/update/step4" },
 ];
 
 export default function UpdateProfile() {
-    const [activeStep] = useState(0);
+    const activeStep = 0;
     const navigate = useNavigate();
-    const { form, updateField, completion, completionLoading, saving, saveStep2 } = useProfileForm();
+    const { form, updateField, completion, completionLoading, saving, saveStep1 } = useProfileForm();
 
     const progress = completion?.completionPercentage ?? 0;
 
@@ -24,7 +24,7 @@ export default function UpdateProfile() {
 
     return (
         <div className="profile-page">
-            <GlobalHeader />
+            <GlobalHeader userName={form.fullName || undefined} />
 
             {/* Page Body */}
             <main className="profile-main">
@@ -54,6 +54,8 @@ export default function UpdateProfile() {
                                         <button
                                             key={idx}
                                             className={`step-tab ${idx === activeStep ? "step-tab--active" : "step-tab--inactive"}`}
+                                            type="button"
+                                            onClick={() => navigate(step.path)}
                                         >
                                             <span className="step-tab-label">{step.label}</span>
                                             <span className="step-tab-sub">{step.sub}</span>
@@ -136,9 +138,9 @@ export default function UpdateProfile() {
                                         </label>
                                         <select className="field-input field-select" value={form.gender} onChange={(e) => updateField('gender', e.target.value)}>
                                             <option value="">-- Chọn giới tính --</option>
-                                            <option value="male">Nam</option>
-                                            <option value="female">Nữ</option>
-                                            <option value="other">Khác</option>
+                                            <option value="Nam">Nam</option>
+                                            <option value="Nữ">Nữ</option>
+                                            <option value="Khác">Khác</option>
                                         </select>
                                     </div>
                                 </div>
@@ -214,17 +216,17 @@ export default function UpdateProfile() {
 
                                 {/* Action Buttons */}
                                 <div className="form-actions">
-                                    <button className="btn-back" disabled style={{opacity:0.4,cursor:'not-allowed'}}>
+                                    <button className="btn-back" type="button" disabled style={{opacity:0.4,cursor:'not-allowed'}}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                         Trở lại
                                     </button>
                                     <div className="form-actions-right">
-                                        <button className="btn-save" onClick={saveStep2} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
-                                        <button className="btn-next" disabled={saving} onClick={async () => {
-                                            await saveStep2();
-                                            navigate('/candidate/profile/update/step2');
+                                        <button className="btn-save" type="button" onClick={saveStep1} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
+                                        <button className="btn-next" type="button" disabled={saving} onClick={async () => {
+                                            const success = await saveStep1();
+                                            if (success) navigate('/candidate/profile/update/step2');
                                         }}>
                                             Tiếp
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">

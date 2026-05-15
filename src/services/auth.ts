@@ -1,14 +1,28 @@
 import { encryptPassword } from 'uit-authenticator/browser';
 
+export type UserGender = 'Nam' | 'Nữ' | 'Khác';
+
+export interface AuthContactInfo {
+    email?: string;
+    phone?: string | null;
+    githubUrl?: string;
+    linkedinUrl?: string;
+    facebookUrl?: string;
+    portfolioUrl?: string;
+}
+
 export interface AuthUser {
     _id?: string;
     fullName?: string;
     role?: string;
     authMethod?: string;
     status?: string;
-    contactInfo?: {
-        email?: string;
-    };
+    studentID?: string;
+    studentId?: string;
+    dateOfBirth?: string;
+    gender?: UserGender | string;
+    avatarUrl?: string;
+    contactInfo?: AuthContactInfo;
 }
 
 export interface LoginResponse {
@@ -19,6 +33,34 @@ export interface LoginResponse {
 }
 
 export interface RegisterHrResponse {
+    message: string;
+    user: AuthUser;
+}
+
+export interface CurrentUserResponse {
+    user: AuthUser;
+    isNewbie?: boolean;
+    message?: string;
+    companyInfo?: unknown;
+    membershipRole?: string;
+    permissions?: unknown;
+}
+
+export interface UpdateCurrentUserPayload {
+    fullName?: string;
+    dateOfBirth?: string;
+    gender?: UserGender | string;
+    avatarUrl?: string;
+    contactInfo?: AuthContactInfo;
+    email?: string;
+    phone?: string;
+    githubUrl?: string;
+    linkedinUrl?: string;
+    facebookUrl?: string;
+    portfolioUrl?: string;
+}
+
+export interface UpdateCurrentUserResponse {
     message: string;
     user: AuthUser;
 }
@@ -117,6 +159,18 @@ const formatAuthFailureMessage = (response: Response, fallback: string, rawBody:
 
     const statusPart = response.status ? ` (${response.status}${response.statusText ? ` ${response.statusText}` : ''})` : '';
     return `${fallback}${statusPart}`;
+};
+
+const authHeaders = (): HeadersInit => {
+    const token = getStoredAccessToken();
+    return {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+};
+
+const storeCurrentUser = (user: AuthUser): void => {
+    localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(user));
 };
 
 export const loginNormalAuth = async (
@@ -223,13 +277,13 @@ export const checkHrEmailAvailability = async (email: string): Promise<void> => 
 
 export const createCompany = async (
     token: string,
-    payload: Record<string, any>
-): Promise<any> => {
+    payload: Record<string, unknown>,
+): Promise<unknown> => {
     const response = await fetch(buildApiUrl('api/companies'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
     });
@@ -247,7 +301,7 @@ export const createCompany = async (
 export const storeAuthSession = (result: LoginResponse): void => {
     localStorage.setItem(STORAGE_KEYS.accessToken, result.accessToken);
     localStorage.setItem(STORAGE_KEYS.refreshToken, result.refreshToken);
-    localStorage.setItem(STORAGE_KEYS.currentUser, JSON.stringify(result.user));
+    storeCurrentUser(result.user);
 };
 
 export const getStoredAccessToken = (): string => {
@@ -339,6 +393,49 @@ export const installAuthRedirectInterceptor = (): void => {
     };
 };
 
+export const getCurrentUserProfile = async (): Promise<CurrentUserResponse> => {
+    const response = await fetch(buildApiUrl('api/auth/me'), {
+        method: 'GET',
+        headers: authHeaders(),
+    });
+
+    const rawBody = await extractResponseText(response);
+
+    if (!response.ok) {
+        const message = formatAuthFailureMessage(response, 'Không thể lấy thông tin người dùng.', rawBody);
+        throw new Error(message || 'Không thể lấy thông tin người dùng.');
+    }
+
+    const result = JSON.parse(rawBody) as CurrentUserResponse;
+    if (result.user) {
+        storeCurrentUser(result.user);
+    }
+    return result;
+};
+
+export const updateCurrentUserProfile = async (
+    payload: UpdateCurrentUserPayload,
+): Promise<UpdateCurrentUserResponse> => {
+    const response = await fetch(buildApiUrl('api/auth/me'), {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+    });
+
+    const rawBody = await extractResponseText(response);
+
+    if (!response.ok) {
+        const message = formatAuthFailureMessage(response, 'Cập nhật thông tin cá nhân thất bại.', rawBody);
+        throw new Error(message || 'Cập nhật thông tin cá nhân thất bại.');
+    }
+
+    const result = JSON.parse(rawBody) as UpdateCurrentUserResponse;
+    if (result.user) {
+        storeCurrentUser(result.user);
+    }
+    return result;
+};
+
 export const refreshAuthSession = async (): Promise<boolean> => {
     const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken);
     if (!refreshToken) {
@@ -347,7 +444,7 @@ export const refreshAuthSession = async (): Promise<boolean> => {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+        const response = await fetch(buildApiUrl('api/auth/refresh'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -356,7 +453,7 @@ export const refreshAuthSession = async (): Promise<boolean> => {
         });
 
         if (response.ok) {
-            const result = await response.json();
+            const result = await response.json() as Partial<LoginResponse>;
             if (result.accessToken) {
                 localStorage.setItem(STORAGE_KEYS.accessToken, result.accessToken);
                 if (result.refreshToken) {
@@ -375,9 +472,9 @@ export const refreshAuthSession = async (): Promise<boolean> => {
 
 export const hasValidStoredAccessToken = (): boolean => {
     const token = getStoredAccessToken();
-    
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken);
+
     if (!token) {
-        clearAuthSession();
         return false;
     }
 
@@ -391,7 +488,11 @@ export const hasValidStoredAccessToken = (): boolean => {
     const isTokenValid = payload.exp > nowInSeconds;
 
     if (!isTokenValid) {
-        clearAuthSession();
+        // If we have a refresh token, we don't clear the session yet, we return false
+        // so the caller can attempt to refresh it.
+        if (!refreshToken) {
+            clearAuthSession();
+        }
     }
 
     return isTokenValid;

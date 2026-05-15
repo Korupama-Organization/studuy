@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfileForm } from './ProfileFormContext';
 import ProfileSidebar from './ProfileSidebar';
 import GlobalHeader from '../../components/GlobalHeader';
 
 const STEPS = [
-    { label: "Bước 1", sub: "Thông tin cơ bản" },
-    { label: "Bước 2", sub: "Học vấn và Kỹ năng" },
-    { label: "Bước 3", sub: "Dự án và Kinh nghiệm" },
-    { label: "Bước 4", sub: "Mục tiêu sự nghiệp" },
+    { label: "Bước 1", sub: "Thông tin cơ bản", path: "/candidate/profile/update" },
+    { label: "Bước 2", sub: "Học vấn và Kỹ năng", path: "/candidate/profile/update/step2" },
+    { label: "Bước 3", sub: "Dự án và Kinh nghiệm", path: "/candidate/profile/update/step3" },
+    { label: "Bước 4", sub: "Mục tiêu sự nghiệp", path: "/candidate/profile/update/step4" },
 ];
 
 export default function UpdateProfileStep3() {
-    const [activeStep] = useState(2);
+    const activeStep = 2;
     const navigate = useNavigate();
     const { form, updateField, completion, completionLoading, saveStep3, saving } = useProfileForm();
 
@@ -24,7 +24,7 @@ export default function UpdateProfileStep3() {
 
     return (
         <div className="profile-page">
-            <GlobalHeader />
+            <GlobalHeader userName={form.fullName || undefined} />
 
             {/* Page Body */}
             <main className="profile-main">
@@ -54,6 +54,8 @@ export default function UpdateProfileStep3() {
                                         <button
                                             key={idx}
                                             className={`step-tab ${idx === activeStep ? "step-tab--active" : "step-tab--inactive"}`}
+                                            type="button"
+                                            onClick={() => navigate(step.path)}
                                         >
                                             <span className="step-tab-label">{step.label}</span>
                                             <span className="step-tab-sub">{step.sub}</span>
@@ -72,7 +74,7 @@ export default function UpdateProfileStep3() {
                                 {/* DỰ ÁN */}
                                 <div className="section-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                     <h3 style={{ fontSize: '18px', fontWeight: 600, margin: 0, color: '#101828' }}>Dự án</h3>
-                                    <button className="btn-add-solid" onClick={() => updateField('projects', [...form.projects, { name: '', description: '', role: '', contribution: '', startDate: '', endDate: '', teamSize: 1, technologies: [], repositoryUrl: '', reportUrl: '' }])}>
+                                    <button className="btn-add-solid" type="button" onClick={() => updateField('projects', [...form.projects, { name: '', description: '', role: '', contribution: '', startDate: '', endDate: '', teamSize: 1, technologies: [], repositoryUrl: '', reportUrl: '' }])}>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
                                         Thêm dự án
                                     </button>
@@ -86,7 +88,7 @@ export default function UpdateProfileStep3() {
                                     <div key={idx} className="item-card project-card" style={{ background: '#F5F3FF', borderRadius: '8px', padding: '1.5rem', marginBottom: '2rem', border: '1px solid #E0D4FF' }}>
                                         <div className="item-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                             <h4 style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#101828' }}>Dự án {idx + 1}</h4>
-                                            <button className="btn-icon btn-delete-icon" onClick={() => { const updated = form.projects.filter((_, i) => i !== idx); updateField('projects', updated); }}>
+                                            <button className="btn-icon btn-delete-icon" type="button" onClick={() => { const updated = form.projects.filter((_, i) => i !== idx); updateField('projects', updated); }}>
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
                                             </button>
                                         </div>
@@ -145,7 +147,7 @@ export default function UpdateProfileStep3() {
                                 {/* KINH NGHIỆM */}
                                 <div className="section-header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', paddingTop: '1rem' }}>
                                     <h3 style={{ fontSize: '18px', fontWeight: 600, margin: 0, color: '#101828' }}>Kinh nghiệm làm việc</h3>
-                                    <button className="btn-add-solid" onClick={() => updateField('workExperiences', [...form.workExperiences, { companyName: '', position: '', startDate: '', endDate: '', description: '', technologiesUsed: [] }])}>
+                                    <button className="btn-add-solid" type="button" onClick={() => updateField('workExperiences', [...form.workExperiences, { companyName: '', position: '', startDate: '', endDate: '', description: '', technologiesUsed: [] }])}>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6M16 8V6a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 8h16v5H4z"></path></svg>
                                         Thêm kinh nghiệm
                                     </button>
@@ -159,7 +161,7 @@ export default function UpdateProfileStep3() {
                                     <div key={idx} className="item-card experience-card" style={{ background: '#FAFAFA', borderRadius: '8px', padding: '1.5rem', border: '1px solid #E5E7EB', marginBottom: '1.5rem' }}>
                                         <div className="item-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                                             <h4 style={{ fontSize: '16px', fontWeight: 600, margin: 0, color: '#101828' }}>Kinh nghiệm {idx + 1}</h4>
-                                            <button className="btn-icon btn-delete-icon" onClick={() => { const updated = form.workExperiences.filter((_, i) => i !== idx); updateField('workExperiences', updated); }}>
+                                            <button className="btn-icon btn-delete-icon" type="button" onClick={() => { const updated = form.workExperiences.filter((_, i) => i !== idx); updateField('workExperiences', updated); }}>
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path></svg>
                                             </button>
                                         </div>
@@ -193,7 +195,7 @@ export default function UpdateProfileStep3() {
                                             </div>
                                             <div className="form-field">
                                                 <label className="field-label">Ngày kết thúc</label>
-                                                <input type="date" className="field-input" style={{background: '#FFF'}} value={exp.endDate} onChange={(e) => { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], endDate: e.target.value }; updateField('workExperiences', updated); }} />
+                                                <input type="date" className="field-input" style={{background: '#FFF'}} value={exp.endDate || ''} onChange={(e) => { const updated = [...form.workExperiences]; updated[idx] = { ...updated[idx], endDate: e.target.value }; updateField('workExperiences', updated); }} />
                                                 <p className="field-hint" style={{ marginTop: '4px', textAlign: 'left' }}>Để trống nếu đang làm việc</p>
                                             </div>
                                         </div>
@@ -202,15 +204,15 @@ export default function UpdateProfileStep3() {
 
                                 {/* Action Buttons */}
                                 <div className="form-actions" style={{ background: '#FFF', padding: '1.25rem', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <button className="btn-back" onClick={() => navigate('/candidate/profile/update/step2')}>
+                                    <button className="btn-back" type="button" onClick={() => navigate('/candidate/profile/update/step2')}>
                                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                             <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                         </svg>
                                         Trở lại
                                     </button>
                                     <div className="form-actions-right">
-                                        <button className="btn-save" onClick={saveStep3} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
-                                        <button className="btn-next" disabled={saving} onClick={async () => {
+                                        <button className="btn-save" type="button" onClick={saveStep3} disabled={saving}>{saving ? 'Đang lưu...' : 'Lưu bản nháp'}</button>
+                                        <button className="btn-next" type="button" disabled={saving} onClick={async () => {
                                             const success = await saveStep3();
                                             if (success) navigate('/candidate/profile/update/step4');
                                         }}>
