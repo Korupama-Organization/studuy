@@ -56,8 +56,20 @@ test("normalizes API headCount and minMonthsExperience values for rendering", as
   const source = await readFile(new URL("../src/pages/jobs/Index.tsx", import.meta.url), "utf8");
 
   assert.match(source, /basicInfo\?\.headCount/);
+  assert.match(source, /basicInfo\?\.headcount/);
+  assert.match(source, /raw\.location/);
   assert.match(source, /requirements\?\.minMonthsExperience/);
   assert.match(source, /requirements\?\.requiredSkills/);
+});
+
+test("enriches job list summaries with detail endpoint values before rendering", async () => {
+  const source = await readFile(new URL("../src/pages/jobs/Index.tsx", import.meta.url), "utf8");
+
+  assert.match(source, /const fetchJobDetail = useCallback/);
+  assert.match(source, /fetch\(`\/api\/jobs\/\$\{encodeURIComponent\(id\)\}`/);
+  assert.match(source, /const listJobs = extractJobs\(payload\)\.map\(normalizeJob\)/);
+  assert.match(source, /Promise\.all\(listJobs\.map/);
+  assert.match(source, /setJobs\(enrichedJobs\)/);
 });
 
 test("job create and update forms expose required edit-value fields", async () => {

@@ -319,6 +319,19 @@ const extractJobs = (payload: unknown): Record<string, unknown>[] => {
   return [];
 };
 
+const extractObjectPayload = (payload: unknown): Record<string, unknown> | null => {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return null;
+  }
+
+  const objectPayload = payload as Record<string, unknown>;
+  if (objectPayload.data && typeof objectPayload.data === "object" && !Array.isArray(objectPayload.data)) {
+    return objectPayload.data as Record<string, unknown>;
+  }
+
+  return objectPayload;
+};
+
 const getStringId = (value: unknown): string => {
   if (typeof value === "string" && value.trim()) {
     return value.trim();
@@ -411,6 +424,26 @@ export default function RecruiterJobsPage() {
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
 
+  const fetchJobDetail = useCallback(async (id: string): Promise<JobRow | null> => {
+    try {
+      const response = await fetch(`/api/jobs/${encodeURIComponent(id)}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const payload = (await response.json()) as unknown;
+      const detailPayload = extractObjectPayload(payload);
+
+      return detailPayload ? normalizeJob(detailPayload) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const loadJobs = useCallback(async (sort: "newest" | "oldest" = "newest") => {
     setIsLoading(true);
     setError("");
@@ -432,14 +465,32 @@ export default function RecruiterJobsPage() {
         throw new Error("Không thể tải danh sách việc làm.");
       }
 
-      setJobs(extractJobs(payload).map(normalizeJob));
+      const listJobs = extractJobs(payload).map(normalizeJob);
+      const enrichedJobs = await Promise.all(listJobs.map(async (job) => {
+        if (!job.id || job.id === "N/A") {
+          return job;
+        }
+
+        const detailJob = await fetchJobDetail(job.id);
+        return detailJob
+          ? {
+              ...job,
+              ...detailJob,
+              slug: job.slug || detailJob.slug,
+              status: detailJob.status || job.status,
+              createdAt: detailJob.createdAt || job.createdAt,
+            }
+          : job;
+      }));
+
+      setJobs(enrichedJobs);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Không thể tải danh sách việc làm.");
       setJobs([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchJobDetail]);
 
   useEffect(() => {
     void loadJobs(sortBy);
