@@ -8,95 +8,126 @@ import JobMatchesSection from "./components/JobMatchesSection";
 import AIReportsSection from "./components/AIReportsSection";
 import RecentMockSection from "./components/RecentMockSection";
 import Footer from "./components/Footer";
+import {
+  getCandidateDashboard,
+  type CandidateDashboardData,
+} from "../../services/candidateProfile";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-  (typeof window !== "undefined" ? window.location.origin : "");
-
-const buildApiUrl = (path: string): string => {
-  return new URL(
-    path,
-    API_BASE_URL.endsWith("/") ? API_BASE_URL : `${API_BASE_URL}/`,
-  ).toString();
+const fallbackDashboardData: CandidateDashboardData = {
+  profile: {
+    id: "",
+    fullName: "Ứng viên",
+    avatarUrl: null,
+    role: "candidate",
+    hasProfile: false,
+    completionPercentage: 0,
+    status: "incomplete",
+    nextRecommendedFields: [],
+  },
+  quickStats: {
+    appliedJobs: 0,
+    matchedJobs: 0,
+    profileCompletion: 0,
+    interviews: 0,
+    savedJobs: 0,
+  },
+  jobMatches: [],
+  aiInterviewReports: [],
+  recentMockInterview: null,
 };
 
-const Dashboard: React.FC = () => {
-  // Fetch dashboard data
-  // Note: We use useQuery to fetch from the API. We mock the base URL depending on your setup.
-  // The endpoint is /api/candidate-profiles/me/dashboard
-  
-  const fetchDashboardData = async () => {
-    // Fetch dashboard data from the real API with Bearer token authentication
-    const token = localStorage.getItem("accessToken") || "";
-    
-    if (!token) {
-      throw new Error("Không tìm thấy token truy cập.");
-    }
-    
-    const response = await fetch(buildApiUrl("api/candidate-profiles/me/dashboard"), {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error("Không thể tải dữ liệu bảng điều khiển.");
-    }
-
-    const json = await response.json();
-    return json.data;
-  };
-
-  const { data } = useQuery({
-    queryKey: ['candidate-dashboard'],
-    queryFn: fetchDashboardData,
-    initialData: {
-      profile: {
-        id: "",
-        fullName: "Ứng viên",
-        avatarUrl: null,
-        role: "candidate",
-        hasProfile: false,
-        completionPercentage: 0,
-        status: "incomplete",
-        nextRecommendedFields: []
-      },
-      quickStats: {
-        appliedJobs: 0,
-        matchedJobs: 0,
-        profileCompletion: 0
-      },
-      jobMatches: []
-    }
+const CandidateDashboard: React.FC = () => {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["candidate-dashboard"],
+    queryFn: () => getCandidateDashboard(),
+    select: (res) => res.data,
+    retry: 1,
   });
+
+  const dashboardData = data ?? fallbackDashboardData;
+  const profile = dashboardData.profile;
+  const stats = dashboardData.quickStats;
+  const jobMatches = dashboardData.jobMatches ?? [];
+  const firstName = profile.fullName.split(" ").pop() || "ỨNG VIÊN";
+
+  if (isLoading) {
+    return (
+      <div className="dashboard-container">
+        <GlobalHeader userName="Ứng viên" />
+        <main className="dashboard-main">
+          <div
+            className="dashboard-content-wrapper"
+            style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}
+          >
+            <div style={{ textAlign: "center", color: "#94a3b8" }}>
+              <svg
+                style={{ margin: "0 auto 1rem", display: "block", animation: "cd-spin 1s linear infinite" }}
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#6366f1"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              <style>{`@keyframes cd-spin { to { transform: rotate(360deg); } }`}</style>
+              <p style={{ fontSize: "0.9rem" }}>Đang tải dữ liệu...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="dashboard-container">
+        <GlobalHeader userName="Ứng viên" />
+        <main className="dashboard-main">
+          <div
+            className="dashboard-content-wrapper"
+            style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>⚠️</div>
+              <p style={{ color: "#ef4444", fontSize: "0.9rem" }}>
+                {error instanceof Error ? error.message : "Không thể tải dữ liệu bảng điều khiển."}
+              </p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-container">
-      <GlobalHeader userName={data?.profile?.fullName || "Ứng viên"} />
-      
+      <GlobalHeader userName={profile.fullName} />
+
       <main className="dashboard-main">
         <div className="dashboard-content-wrapper">
-          <WelcomeSection 
-            profile={data?.profile || { fullName: "Ứng viên", avatarUrl: null, completionPercentage: 0 }} 
-            stats={data?.quickStats || { appliedJobs: 0, matchedJobs: 0, profileCompletion: 0 }} 
+          <WelcomeSection profile={profile} stats={stats} />
+
+          <JobMatchesSection
+            jobs={jobMatches}
+            firstName={firstName}
+            overallScore={stats.profileCompletion ?? profile.completionPercentage}
           />
-          
-          <JobMatchesSection 
-            jobs={data?.jobMatches || []} 
-            firstName={data?.profile?.fullName?.split(" ").pop() || "ỨNG VIÊN"} 
-            overallScore={84} // Hardcoded for design consistency, could be computed
-          />
-          
-          <AIReportsSection reports={data?.aiInterviewReports || []} />
-          
-          <RecentMockSection mockData={data?.recentMockInterview || null} />
+
+          <AIReportsSection reports={dashboardData.aiInterviewReports ?? []} />
+
+          <RecentMockSection mockData={dashboardData.recentMockInterview ?? null} />
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
 };
 
-export default Dashboard;
+export default CandidateDashboard;

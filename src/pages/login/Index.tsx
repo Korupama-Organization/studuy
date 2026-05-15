@@ -37,7 +37,7 @@ export default function LoginPage() {
 
             if (user?.role === "candidate") {
                 navigate("/candidate/dashboard", { replace: true });
-            } else if (user?.role === "recruiter") {
+            } else if (user?.role === "recruiter" || user?.role === "hr") {
                 navigate("/recruiter/dashboard", { replace: true });
             } else {
                 navigate("/", { replace: true });
@@ -52,19 +52,12 @@ export default function LoginPage() {
             setIsDesktop(event.matches);
         };
 
-        setIsDesktop(mediaQuery.matches);
         mediaQuery.addEventListener("change", onMediaChange);
 
         return () => {
             mediaQuery.removeEventListener("change", onMediaChange);
         };
     }, []);
-
-    useEffect(() => {
-        if (isDesktop) {
-            setMobileStep("form");
-        }
-    }, [isDesktop]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -94,7 +87,7 @@ export default function LoginPage() {
 
             if (userRole === "candidate") {
                 navigate("/candidate/dashboard", { replace: true });
-            } else if (userRole === "recruiter" || isEmailLogin) {
+            } else if (userRole === "recruiter" || userRole === "hr" || (!userRole && isEmailLogin)) {
                 navigate("/recruiter/dashboard", { replace: true });
             } else {
                 navigate("/", { replace: true });
