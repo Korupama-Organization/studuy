@@ -9,7 +9,9 @@ import UpdateProfileStep3 from '../pages/profile/UpdateProfileStep3';
 import UpdateProfileStep4 from '../pages/profile/UpdateProfileStep4';
 import { ProfileFormProvider } from '../pages/profile/ProfileFormContext';
 
+
 import NotFound from '../pages/not-found/Index';
+
 
 import CompanyPage from '../pages/company/Index';
 import RecruiterDashboard from '../pages/recruiter_dashboard/RecruiterDashboard';
