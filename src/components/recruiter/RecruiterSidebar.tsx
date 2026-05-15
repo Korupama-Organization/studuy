@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { buildApiUrl } from "../../services/api";
 import { clearAuthSession } from "../../services/auth";
 
 export interface RecruiterSidebarItem {
@@ -32,12 +33,6 @@ const defaultItems: RecruiterSidebarItem[] = [
 ];
 
 const COMPANY_STORAGE_KEY = "recruiterCompany";
-
-const API_BASE_URL =
-  (
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    (typeof window !== "undefined" ? window.location.origin : "")
-  ).replace(/\/+$/, "");
 
 const readCachedCompany = (): RecruiterSidebarCompany | null => {
   if (typeof window === "undefined") return null;
@@ -83,7 +78,7 @@ export default function RecruiterSidebar({
   }, [company]);
 
   useEffect(() => {
-    if (hasCompanyProp || companyData || !API_BASE_URL) return;
+    if (hasCompanyProp || companyData) return;
 
     const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
     if (!token) return;
@@ -92,7 +87,7 @@ export default function RecruiterSidebar({
 
     const fetchCompany = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/companies/me`, {
+        const response = await fetch(buildApiUrl("/api/companies/me"), {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

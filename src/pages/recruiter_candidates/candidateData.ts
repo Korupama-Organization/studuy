@@ -1,3 +1,4 @@
+import { API_BASE_URL, buildApiUrl } from "../../services/api";
 import type {
   Notification as DashboardNotification,
   RecentApplication,
@@ -38,17 +39,6 @@ const defaultSkills = [
 
 const defaultTimeline = [{ phase: "Chưa có dữ liệu trạng thái", date: "-" }];
 const missingJobTitle = "Vị trí chưa cập nhật";
-
-const API_BASE_URL =
-  (
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    (typeof window !== "undefined" ? window.location.origin : "")
-  ).replace(/\/+$/, "");
-
-const buildApiUrl = (path: string): string => {
-  const normalizedPath = path.replace(/^\/+/, "");
-  return `${API_BASE_URL}/${normalizedPath}`;
-};
 
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";

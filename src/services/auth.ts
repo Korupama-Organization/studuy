@@ -1,4 +1,6 @@
 import { encryptPassword } from 'uit-authenticator/browser';
+import { buildApiUrl } from './api';
+export { buildApiUrl } from './api';
 
 export type UserGender = 'Nam' | 'Nữ' | 'Khác';
 
@@ -88,14 +90,6 @@ interface ApiErrorShape {
     statusCode?: number;
     status?: number;
 }
-
-const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    (typeof window !== 'undefined' ? window.location.origin : '');
-
-export const buildApiUrl = (path: string): string => {
-    return new URL(path, API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`).toString();
-};
 
 const UIT_AUTH_SECRET =
     import.meta.env.VITE_UIT_AUTH_SECRET?.toString().trim();

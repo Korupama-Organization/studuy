@@ -1,18 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCurrentRecruiter } from "../../hooks/useCurrentRecruiter";
+import { buildApiUrl } from "../../services/api";
 import { useRecruiterActivity } from "../../hooks/useRecruiterActivity";
 import RecruiterSidebar from "../recruiter_dashboard/components/RecruiterSidebar";
 import RecruiterTopBar from "../recruiter_dashboard/components/RecruiterTopBar";
 import ActivityPanel from "../recruiter_dashboard/components/ActivityPanel";
 import "../recruiter_dashboard/recruiter.css";
 import "./company.css";
-
-const API_BASE_URL =
-  (
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    "http://localhost:3000"
-  ).replace(/\/+$/, "");
 
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
@@ -144,7 +139,7 @@ export default function CompanyPage() {
   // ── Fetch company data ──────────────────────────────────────────────────────
   const fetchCompany = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/companies/me`, {
+      const res = await fetch(buildApiUrl("/api/companies/me"), {
         headers: getAuthHeaders(),
       });
       if (res.status === 401 || res.status === 403) {
@@ -216,7 +211,7 @@ export default function CompanyPage() {
         delete (payload as Partial<CompanyForm>).partnerStatus;
       }
 
-      const res = await fetch(`${API_BASE_URL}/api/companies/me`, {
+      const res = await fetch(buildApiUrl("/api/companies/me"), {
         method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify(payload),

@@ -5,17 +5,12 @@
  * API trả về toàn bộ dữ liệu dashboard trong một response duy nhất.
  */
 
+import { buildApiUrl } from './api';
 import { getStoredAccessToken } from './auth';
 
 // ══════════════════════════════════════════════════════════════
 // Config
 // ══════════════════════════════════════════════════════════════
-
-const API_BASE_URL =
-  (
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    (typeof window !== 'undefined' ? window.location.origin : '')
-  ).replace(/\/+$/, '');
 
 // ══════════════════════════════════════════════════════════════
 // Interfaces — shapes used by the Dashboard component
@@ -209,7 +204,7 @@ const authFetch = async (endpoint: string): Promise<Response> => {
     throw new DashboardApiError('Chưa đăng nhập. Vui lòng đăng nhập lại.', 401);
   }
 
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = buildApiUrl(endpoint);
   const response = await fetch(url, {
     method: 'GET',
     headers: {

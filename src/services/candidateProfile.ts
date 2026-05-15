@@ -1,3 +1,4 @@
+import { buildApiUrl } from './api';
 import { getStoredAccessToken } from './auth';
 
 // ── Types ──
@@ -212,14 +213,6 @@ interface ApiErrorShape {
     message?: string | string[];
     error?: string | string[];
 }
-
-const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    (typeof window !== 'undefined' ? window.location.origin : '');
-
-const buildApiUrl = (path: string): string => {
-    return new URL(path, API_BASE_URL.endsWith('/') ? API_BASE_URL : `${API_BASE_URL}/`).toString();
-};
 
 const firstText = (value?: string | string[]): string => {
     if (Array.isArray(value)) {

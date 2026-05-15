@@ -50,9 +50,11 @@ The app will be available at **http://localhost:5173** (Vite default port).
 Vite only exposes client env vars that start with `VITE_`. For UIT login, define:
 
 ```env
-VITE_API_BASE_URL=http://localhost:3000/
+VITE_API_BASE_URL=http://localhost:3000
 VITE_UIT_AUTH_SECRET=your-secret-here
 ```
+
+When deploying to Vercel, set `VITE_API_BASE_URL` in **Project Settings → Environment Variables** to the real backend origin, then redeploy. Without this variable, the production app intentionally refuses to call `/api/...` on the Vercel frontend domain.
 
 ---
 

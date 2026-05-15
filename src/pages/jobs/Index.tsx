@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCurrentRecruiter } from "../../hooks/useCurrentRecruiter";
 import { useRecruiterActivity } from "../../hooks/useRecruiterActivity";
+import { buildApiUrl } from "../../services/api";
 import RecruiterSidebar from "../recruiter_dashboard/components/RecruiterSidebar";
 import RecruiterTopBar from "../recruiter_dashboard/components/RecruiterTopBar";
 import ActivityPanel from "../recruiter_dashboard/components/ActivityPanel";
@@ -433,7 +434,7 @@ export default function RecruiterJobsPage() {
 
   const fetchJobDetail = useCallback(async (id: string): Promise<JobRow | null> => {
     try {
-      const response = await fetch(`/api/jobs/${encodeURIComponent(id)}`, {
+      const response = await fetch(buildApiUrl(`/api/jobs/${encodeURIComponent(id)}`), {
         method: "GET",
         headers: getAuthHeaders(),
       });
@@ -461,7 +462,7 @@ export default function RecruiterJobsPage() {
         limit: "100",
       });
 
-      const response = await fetch(`/api/jobs?${query.toString()}`, {
+      const response = await fetch(buildApiUrl(`/api/jobs?${query.toString()}`), {
         method: "GET",
         headers: getAuthHeaders(),
       });
@@ -571,7 +572,7 @@ export default function RecruiterJobsPage() {
     async (payload: SaveJobPayload) => {
       const nestedPayload = toNestedPayload(payload);
 
-      const response = await fetch("/api/jobs", {
+      const response = await fetch(buildApiUrl("/api/jobs"), {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(nestedPayload),
@@ -596,7 +597,7 @@ export default function RecruiterJobsPage() {
         throw new Error("Tạo việc làm thành công nhưng không nhận được mã job để publish.");
       }
 
-      const publishResponse = await fetch(`/api/jobs/${encodeURIComponent(createdJobId)}/publish`, {
+      const publishResponse = await fetch(buildApiUrl(`/api/jobs/${encodeURIComponent(createdJobId)}/publish`), {
         method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify({}),
@@ -616,7 +617,7 @@ export default function RecruiterJobsPage() {
     async (id: string, payload: SaveJobPayload) => {
       const nestedPayload = toNestedPayload(payload);
 
-      const response = await fetch(`/api/jobs/${encodeURIComponent(id)}`, {
+      const response = await fetch(buildApiUrl(`/api/jobs/${encodeURIComponent(id)}`), {
         method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify(nestedPayload),
@@ -633,7 +634,7 @@ export default function RecruiterJobsPage() {
 
   const handleDeleteJob = useCallback(
     async (id: string) => {
-      const closeResponse = await fetch(`/api/jobs/${encodeURIComponent(id)}/close`, {
+      const closeResponse = await fetch(buildApiUrl(`/api/jobs/${encodeURIComponent(id)}/close`), {
         method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify({}),
@@ -643,7 +644,7 @@ export default function RecruiterJobsPage() {
         throw new Error(await getResponseErrorMessage(closeResponse, "Đóng việc làm thất bại."));
       }
 
-      const response = await fetch(`/api/jobs/${encodeURIComponent(id)}`, {
+      const response = await fetch(buildApiUrl(`/api/jobs/${encodeURIComponent(id)}`), {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
