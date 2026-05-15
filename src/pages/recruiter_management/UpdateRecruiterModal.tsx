@@ -7,7 +7,7 @@ interface UpdateRecruiterModalProps {
   isOpen: boolean;
   onClose: () => void;
   recruiter?: Recruiter;
-  onUpdate: (payload: UpdateProfilePayload) => Promise<void>;
+  onUpdate: (id: string, payload: UpdateProfilePayload) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   isSelf?: boolean;
 }
@@ -358,12 +358,12 @@ export default function UpdateRecruiterModal({
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!recruiter) return;
+    if (!recruiter?._id) return;
 
     setError("");
     setIsSubmitting(true);
     try {
-      await onUpdate(formData);
+      await onUpdate(recruiter._id, formData);
       handleClose();
     } catch (updateError) {
       setError(

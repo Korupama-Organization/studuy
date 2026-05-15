@@ -6,7 +6,7 @@ import type { Recruiter, UpdateProfilePayload } from "./Index";
 interface RecruiterTableProps {
   recruiters: Recruiter[];
   isLoading: boolean;
-  onUpdateRecruiter: (payload: UpdateProfilePayload) => Promise<void>;
+  onUpdateRecruiter: (id: string, payload: UpdateProfilePayload) => Promise<void>;
   onDeleteRecruiter: (id: string) => Promise<void>;
   isCurrentRecruiter: (recruiter: Recruiter) => boolean;
 }

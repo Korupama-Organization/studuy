@@ -56,6 +56,36 @@ export interface UpdateProfilePayload {
   membershipRole?: string;
 }
 
+const buildRecruiterUpdateBody = (payload: UpdateProfilePayload) => {
+  const contactInfo = {
+    phone: payload.phone || "",
+    linkedinUrl: payload.linkedinUrl || "",
+    githubUrl: payload.githubUrl || "",
+    facebookUrl: payload.facebookUrl || "",
+  };
+
+  return {
+    ...payload,
+    contactInfo,
+    user: {
+      fullName: payload.fullName,
+      gender: payload.gender || "",
+      dateOfBirth: payload.dateOfBirth || "",
+      avatarUrl: payload.avatarUrl || "",
+      jobTitle: payload.jobTitle || "",
+      contactInfo,
+    },
+    profile: {
+      fullName: payload.fullName,
+      gender: payload.gender || "",
+      dateOfBirth: payload.dateOfBirth || "",
+      avatarUrl: payload.avatarUrl || "",
+      jobTitle: payload.jobTitle || "",
+      contactInfo,
+    },
+  };
+};
+
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
   if (!token) {
@@ -387,13 +417,13 @@ export default function RecruiterManagementPage() {
   );
 
   const handleUpdateRecruiter = useCallback(
-    async (payload: UpdateProfilePayload) => {
+    async (id: string, payload: UpdateProfilePayload) => {
       const response = await fetch(
-        buildApiUrl("/api/company-members/profile"),
+        buildApiUrl(`/api/company-members/${encodeURIComponent(id)}`),
         {
           method: "PATCH",
           headers: getAuthHeaders(),
-          body: JSON.stringify(payload),
+          body: JSON.stringify(buildRecruiterUpdateBody(payload)),
         },
       );
       if (!response.ok) {

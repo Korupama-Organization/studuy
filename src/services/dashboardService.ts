@@ -49,12 +49,21 @@ export interface StatusOverview {
 
 export interface RecentApplication {
   id: string;
+  candidateId: string;
+  candidateEmail: string | null;
+  jobId: string;
+  jobTitle: string;
+  jobRoleType: string;
   name: string;
   position: string;
   recruiter: string;
   recruiterAvatar: string;
   date: string;
-  status: 'Review' | 'Interview' | 'Pending' | 'Hired' | 'Offered';
+  status: 'Review' | 'Interview' | 'Pending' | 'Hired' | 'Offered' | 'Rejected';
+  rawStatus: string;
+  statusLabel: string;
+  appliedAt: string | null;
+  updatedAt: string | null;
 }
 
 export interface UpcomingInterview {
@@ -228,6 +237,8 @@ const mapStatusToDisplay = (status: string): RecentApplication['status'] => {
       return 'Offered';
     case 'hired':
       return 'Hired';
+    case 'rejected':
+      return 'Rejected';
     default:
       return 'Pending';
   }
@@ -293,12 +304,21 @@ const mapChartData = (chartPoints: ApiChartDataPoint[]): ApplicationStat[] => {
 const mapRecentApplications = (apps: ApiRecentApplication[]): RecentApplication[] => {
   return apps.map((app) => ({
     id: app.id,
+    candidateId: app.candidate.id,
+    candidateEmail: app.candidate.email ?? null,
+    jobId: app.job.id,
+    jobTitle: app.job.title,
+    jobRoleType: app.job.roleType,
     name: app.candidate.fullName || 'N/A',
     position: app.job.roleType || app.job.title || 'N/A',
     recruiter: '',
     recruiterAvatar: app.candidate.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${app.candidate.id}`,
     date: formatDate(app.appliedAt),
     status: mapStatusToDisplay(app.status),
+    rawStatus: app.status,
+    statusLabel: app.statusLabel,
+    appliedAt: app.appliedAt,
+    updatedAt: app.updatedAt,
   }));
 };
 
