@@ -331,7 +331,7 @@ export const installAuthRedirectInterceptor = (): void => {
                 ? input.toString()
                 : input.url;
 
-        if ((response.status === 401 || response.status === 403) && !isAuthErrorEndpoint(requestUrl)) {
+        if (response.status === 401 && !isAuthErrorEndpoint(requestUrl)) {
             redirectToLogin();
         }
 

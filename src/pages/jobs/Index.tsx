@@ -51,19 +51,20 @@ const API_BASE_URL =
 
 const PAGE_SIZE = 6;
 
-const getAuthHeaders = (): HeadersInit => {
+const getAuthHeaders = (includeJsonContentType = true): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
+  const headers: Record<string, string> = {};
 
-  if (!token) {
-    return {
-      "Content-Type": "application/json",
-    };
+  if (includeJsonContentType) {
+    headers["Content-Type"] = "application/json";
   }
 
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  };
+  if (!token) {
+    return headers;
+  }
+
+  headers.Authorization = `Bearer ${token}`;
+  return headers;
 };
 
 const parseDate = (value: unknown): string => {
@@ -258,22 +259,101 @@ const extractJobs = (payload: unknown): Record<string, unknown>[] => {
   return [];
 };
 
-const getResponseErrorMessage = async (response: Response, fallback: string): Promise<string> => {
-  try {
-    const payload = (await response.json()) as { message?: string; error?: string };
-
-    if (typeof payload.message === "string" && payload.message.trim()) {
-      return payload.message;
-    }
-
-    if (typeof payload.error === "string" && payload.error.trim()) {
-      return payload.error;
-    }
-  } catch {
-    return fallback;
+const getStringId = (value: unknown): string => {
+  if (typeof value === "string" && value.trim()) {
+    return value;
   }
 
-  return fallback;
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+
+  if (value && typeof value === "object") {
+    const objectValue = value as Record<string, unknown>;
+    if (typeof objectValue.$oid === "string" && objectValue.$oid.trim()) {
+      return objectValue.$oid;
+    }
+  }
+
+  return "";
+};
+
+const extractCreatedJobId = (payload: unknown): string => {
+  if (!payload || typeof payload !== "object") {
+    return "";
+  }
+
+  const objectPayload = payload as Record<string, unknown>;
+  const directId =
+    getStringId(objectPayload._id) ||
+    getStringId(objectPayload.id) ||
+    getStringId(objectPayload.jobId);
+
+  if (directId) {
+    return directId;
+  }
+
+  const nestedKeys = ["data", "job", "createdJob", "result", "payload", "item"];
+
+  for (const key of nestedKeys) {
+    const nestedValue = objectPayload[key];
+    const nestedId = extractCreatedJobId(nestedValue);
+
+    if (nestedId) {
+      return nestedId;
+    }
+  }
+
+  for (const value of Object.values(objectPayload)) {
+    if (value && typeof value === "object") {
+      const nestedId = extractCreatedJobId(value);
+
+      if (nestedId) {
+        return nestedId;
+      }
+    }
+  }
+
+  return "";
+};
+
+const getResponseErrorMessage = async (response: Response, fallback: string): Promise<string> => {
+  const statusPart = response.status ? ` (${response.status}${response.statusText ? ` ${response.statusText}` : ""})` : "";
+
+  try {
+    const rawBody = (await response.text()).trim();
+
+    if (!rawBody) {
+      return `${fallback}${statusPart}`;
+    }
+
+    let payload: { message?: string | string[]; error?: string | string[] };
+    try {
+      payload = JSON.parse(rawBody) as { message?: string | string[]; error?: string | string[] };
+    } catch {
+      return rawBody;
+    }
+
+    const message = Array.isArray(payload.message)
+      ? payload.message.find((item) => typeof item === "string" && item.trim())
+      : payload.message;
+
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+
+    const error = Array.isArray(payload.error)
+      ? payload.error.find((item) => typeof item === "string" && item.trim())
+      : payload.error;
+
+    if (typeof error === "string" && error.trim()) {
+      return error;
+    }
+  } catch {
+    return `${fallback}${statusPart}`;
+  }
+
+  return `${fallback}${statusPart}`;
 };
 
 export default function RecruiterJobsPage() {
@@ -368,6 +448,23 @@ export default function RecruiterJobsPage() {
         throw new Error(await getResponseErrorMessage(response, "Tạo việc làm thất bại."));
       }
 
+      const createPayload = (await response.json()) as unknown;
+      const createdJobId = extractCreatedJobId(createPayload);
+
+      if (!createdJobId) {
+        throw new Error("Tạo việc làm thành công nhưng không nhận được mã job để publish.");
+      }
+
+      const publishResponse = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(createdJobId)}/publish`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({}),
+      });
+
+      if (!publishResponse.ok) {
+        throw new Error(await getResponseErrorMessage(publishResponse, "Publish việc làm thất bại."));
+      }
+
       await loadJobs(sortBy);
       setCurrentPage(1);
     },
@@ -379,7 +476,7 @@ export default function RecruiterJobsPage() {
       const nestedPayload = toNestedPayload(payload);
 
       const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify(nestedPayload),
       });
@@ -395,6 +492,16 @@ export default function RecruiterJobsPage() {
 
   const handleDeleteJob = useCallback(
     async (id: string) => {
+      const closeResponse = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}/close`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({}),
+      });
+
+      if (!closeResponse.ok) {
+        throw new Error(await getResponseErrorMessage(closeResponse, "Đóng việc làm thất bại."));
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
