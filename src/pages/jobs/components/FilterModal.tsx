@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getStoredUser } from "../../../services/auth";
 
 interface FilterModalProps {
   isOpen: boolean;
@@ -11,26 +12,7 @@ interface FilterState {
   status: string[];
 }
 
-const createdByOptions = [
-  {
-    id: "oscar1",
-    name: "Nguyễn Văn A",
-    avatar:
-      "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
-  },
-  {
-    id: "oscar2",
-    name: "Trần Thị B",
-    avatar:
-      "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
-  },
-  {
-    id: "oscar3",
-    name: "Lê Văn C",
-    avatar:
-      "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
-  },
-];
+// createdByOptions: moved into component so we can prefer the current user when available
 
 const statusOptions = [
   { value: "Opening", label: "Đang tuyển" },
@@ -42,6 +24,27 @@ export default function FilterModal({
   onClose,
   onApply,
 }: FilterModalProps) {
+  const stored = getStoredUser();
+  const createdByOptions = [
+    {
+      id: "me",
+      name: stored?.fullName ?? "Bạn",
+      avatar: (stored as any)?.avatarUrl ||
+        "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
+    },
+    {
+      id: "oscar2",
+      name: "Trần Thị B",
+      avatar:
+        "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
+    },
+    {
+      id: "oscar3",
+      name: "Lê Văn C",
+      avatar:
+        "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80",
+    },
+  ];
   const [filters, setFilters] = useState<FilterState>({
     createdBy: ["oscar1"],
     status: ["Opening"],

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/Logo.png";
+import { getStoredUser } from "../services/auth";
 
 interface GlobalHeaderProps {
   userName?: string;
@@ -12,9 +13,24 @@ const navLinks = [
   { to: "/candidate/jobs", label: "Việc làm" },
 ];
 
-export default function GlobalHeader({ userName = "Nguyễn Văn A" }: GlobalHeaderProps) {
+export default function GlobalHeader({ userName }: GlobalHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const [loadedName, setLoadedName] = useState<string | null>(() => (userName ? userName : null));
+
+  useEffect(() => {
+    if (userName) return;
+    // small async tick to allow a loading skeleton render
+    const stored = getStoredUser();
+    const id = window.setTimeout(() => {
+      setLoadedName(stored?.fullName ?? "Nguyễn Văn A");
+    }, 50);
+
+    return () => window.clearTimeout(id);
+  }, [userName]);
+
+  const effectiveUserName = userName ?? loadedName;
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -65,7 +81,13 @@ export default function GlobalHeader({ userName = "Nguyễn Văn A" }: GlobalHea
               <path d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>
-          <span>{userName}</span>
+          <span>
+            {effectiveUserName === null ? (
+              <span className="candidate-jobs-user__skeleton" style={{display: 'inline-block', width: 120, height: 14, background: '#eef0ff', borderRadius: 6}} />
+            ) : (
+              effectiveUserName
+            )}
+          </span>
           <span className="candidate-jobs-user__chevron" aria-hidden="true">⌃</span>
         </button>
 

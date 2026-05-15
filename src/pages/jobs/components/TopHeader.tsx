@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getStoredUser } from "../../../services/auth";
 import FilterModal from "./FilterModal";
 import CreateJobModal from "./CreateJobModal";
 import type { SaveJobPayload } from "../Index";
@@ -33,18 +34,7 @@ export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps)
             type="button">
             <span className="material-symbols-outlined text-[18px]">notifications</span>
           </button>
-          <div className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-sm">
-            <img
-              alt="Ảnh đại diện người dùng"
-              className="h-8 w-8 rounded-full object-cover"
-              src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80"
-            />
-            <div>
-              <p className="text-xs font-semibold text-slate-900">Nguyễn Văn A</p>
-              <p className="text-[10px] text-slate-400">Quản lý nhân sự</p>
-            </div>
-            <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
-          </div>
+          <UserBadge />
         </div>
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -123,5 +113,24 @@ export default function TopHeader({ onCreateJob, onSortChange }: TopHeaderProps)
         onCreate={onCreateJob}
       />
     </>
+  );
+}
+
+function UserBadge() {
+  const stored = getStoredUser();
+  const name = stored?.fullName ?? "Người dùng";
+  const role = stored?.role ?? "Người dùng";
+  const avatar = (stored as any)?.avatarUrl ||
+    "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=facearea&w=80&h=80";
+
+  return (
+    <div className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 shadow-sm">
+      <img alt="Ảnh đại diện người dùng" className="h-8 w-8 rounded-full object-cover" src={avatar} />
+      <div>
+        <p className="text-xs font-semibold text-slate-900">{name}</p>
+        <p className="text-[10px] text-slate-400">{role}</p>
+      </div>
+      <span className="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
+    </div>
   );
 }
