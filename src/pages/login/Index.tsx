@@ -78,7 +78,15 @@ export default function LoginPage() {
                 : await loginWithUIT(normalizedIdentifier, normalizedPassword);
 
             storeAuthSession(result);
-            navigate("/", { replace: true });
+            // Redirect theo role
+            const role = result.user?.role;
+            if (role === 'candidate') {
+                navigate('/dashboard', { replace: true });
+            } else if (role === 'recruiter' || role === 'hr') {
+                navigate('/recruiter/dashboard', { replace: true });
+            } else {
+                navigate('/', { replace: true });
+            }
         } catch (error) {
             const fallbackMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
             setErrorMessage(

@@ -5,120 +5,100 @@ import "./dashboard.css";
 import Header from "./components/Header";
 import WelcomeSection from "./components/WelcomeSection";
 import JobMatchesSection from "./components/JobMatchesSection";
-import AIReportsSection from "./components/AIReportsSection";
-import RecentMockSection from "./components/RecentMockSection";
 import Footer from "./components/Footer";
+import { getCandidateDashboard } from "../../services/candidateProfile";
 
-const Dashboard: React.FC = () => {
-  // Fetch dashboard data
-  // Note: We use useQuery to fetch from the API. We mock the base URL depending on your setup.
-  // The endpoint is /api/candidate-profiles/me/dashboard
-  
-  const fetchDashboardData = async () => {
-    // In a real app, you would have an interceptor to add the Bearer token.
-    // For this UI demo, we will check if there's a token or just mock the request if it fails.
-    const token = localStorage.getItem("token") || ""; // Adjust based on your auth implementation
-    
-    const response = await fetch("http://localhost:3000/api/candidate-profiles/me/dashboard", {
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-    });
+const CandidateDashboard: React.FC = () => {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["candidate-dashboard"],
+    queryFn: () => getCandidateDashboard(),
+    select: (res) => res.data,
+    retry: 1,
+  });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch dashboard data");
-    }
+  if (isLoading) {
+    return (
+      <div className="dashboard-container">
+        <Header userName="..." />
+        <main className="dashboard-main">
+          <div
+            className="dashboard-content-wrapper"
+            style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}
+          >
+            <div style={{ textAlign: "center", color: "#94a3b8" }}>
+              <svg
+                style={{ margin: "0 auto 1rem", display: "block", animation: "cd-spin 1s linear infinite" }}
+                width="36" height="36" viewBox="0 0 24 24" fill="none"
+                stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+              >
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              <style>{`@keyframes cd-spin { to { transform: rotate(360deg); } }`}</style>
+              <p style={{ fontSize: "0.9rem" }}>Đang tải dữ liệu...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
-    const json = await response.json();
-    return json.data;
+  if (isError) {
+    return (
+      <div className="dashboard-container">
+        <Header userName="Ứng viên" />
+        <main className="dashboard-main">
+          <div
+            className="dashboard-content-wrapper"
+            style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>⚠️</div>
+              <p style={{ color: "#ef4444", fontSize: "0.9rem" }}>
+                {error instanceof Error ? error.message : "Không thể tải dữ liệu bảng điều khiển."}
+              </p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const profile = data?.profile ?? {
+    fullName: "Ứng viên",
+    avatarUrl: null,
+    completionPercentage: 0,
   };
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['candidate-dashboard'],
-    queryFn: fetchDashboardData,
-    // Add some fallback data if the API is not ready or user is not logged in properly during UI review
-    initialData: {
-      profile: {
-        fullName: "Nguyễn Văn A",
-        avatarUrl: null,
-        completionPercentage: 45,
-      },
-      quickStats: {
-        appliedJobs: 10,
-        matchedJobs: 3,
-        profileCompletion: 45,
-        interviews: 2,
-        savedJobs: 5
-      },
-      jobMatches: [
-        {
-          jobId: "1",
-          title: "Senior Backend Engineer (Python)",
-          company: { name: "CodeQuest Solutions", logoUrl: null },
-          location: "Hanoi, Vietnam",
-          matchScore: 85
-        },
-        {
-          jobId: "2",
-          title: "Full Stack Developer",
-          company: { name: "TechVision Inc.", logoUrl: null },
-          location: "Ho Chi Minh City, Vietnam",
-          matchScore: 78
-        },
-        {
-          jobId: "3",
-          title: "DevOps Engineer",
-          company: { name: "CloudNine Systems", logoUrl: null },
-          location: "Da Nang, Vietnam",
-          matchScore: 72
-        }
-      ],
-      aiInterviewReports: [
-        { id: "APP-2024-001", comment: "Excellent problem-solving skills and strong technical knowledge.", status: "Passed", videoUrl: null },
-        { id: "APP-2024-002", comment: "Demonstrates potential but lacks depth in advanced algorithms.", status: "Pending", videoUrl: null }
-      ],
-      recentMockInterview: {
-        id: "mock-1",
-        overallScore: 84,
-        scores: {
-          "Experience": 8.5,
-          "Technical": 9.0,
-          "Domain": 7.5,
-          "Problem solving": 8.0,
-          "Communication": 7.0,
-          "Motivation": 9.0
-        },
-        summary: "The candidate demonstrates strong technical proficiency and exceptional motivation for the role."
-      }
-    }
-  });
+  const stats = data?.quickStats ?? {
+    appliedJobs: 0,
+    matchedJobs: 0,
+    profileCompletion: 0,
+  };
+
+  const jobMatches = data?.jobMatches ?? [];
+  const firstName = profile.fullName.split(" ").pop() || "ỨNG VIÊN";
 
   return (
     <div className="dashboard-container">
-      <Header userName={data?.profile?.fullName || "Candidate"} />
-      
+      <Header userName={profile.fullName} />
+
       <main className="dashboard-main">
         <div className="dashboard-content-wrapper">
-          <WelcomeSection 
-            profile={data?.profile || { fullName: "Candidate", avatarUrl: null, completionPercentage: 0 }} 
-            stats={data?.quickStats || { appliedJobs: 0, matchedJobs: 0, profileCompletion: 0 }} 
+          <WelcomeSection profile={profile} stats={stats} />
+
+          <JobMatchesSection
+            jobs={jobMatches}
+            firstName={firstName}
+            overallScore={stats.profileCompletion ?? 0}
           />
-          
-          <JobMatchesSection 
-            jobs={data?.jobMatches || []} 
-            firstName={data?.profile?.fullName?.split(" ").pop() || "CANDIDATE"} 
-            overallScore={84} // Hardcoded for design consistency, could be computed
-          />
-          
-          <AIReportsSection reports={data?.aiInterviewReports || []} />
-          
-          <RecentMockSection mockData={data?.recentMockInterview || null} />
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
 };
 
-export default Dashboard;
+export default CandidateDashboard;
