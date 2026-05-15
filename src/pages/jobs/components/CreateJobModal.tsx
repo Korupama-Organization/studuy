@@ -14,40 +14,40 @@ interface SelectOption {
 }
 
 const WORK_MODEL_OPTIONS: SelectOption[] = [
-  { value: "remote", label: "Remote" },
-  { value: "onsite", label: "On-site" },
-  { value: "hybrid", label: "Hybrid" },
+  { value: "Remote", label: "Remote" },
+  { value: "On-site", label: "On-site" },
+  { value: "Hybrid", label: "Hybrid" },
 ];
 
 const LEVEL_OPTIONS: SelectOption[] = [
-  { value: "intern", label: "Intern" },
-  { value: "fresher", label: "Fresher" },
-  { value: "junior", label: "Junior" },
-  { value: "middle", label: "Middle" },
-  { value: "senior", label: "Senior" },
-  { value: "lead", label: "Lead" },
-  { value: "manager", label: "Manager" },
+  { value: "Intern", label: "Intern" },
+  { value: "Fresher", label: "Fresher" },
+  { value: "Junior", label: "Junior" },
+  { value: "Middle", label: "Middle" },
+  { value: "Senior", label: "Senior" },
+  { value: "Lead", label: "Lead" },
+  { value: "Manager", label: "Manager" },
 ];
 
 const JOB_TYPE_OPTIONS: SelectOption[] = [
-  { value: "fulltime", label: "Full-time" },
-  { value: "parttime", label: "Part-time" },
-  { value: "contract", label: "Contract" },
-  { value: "internship", label: "Internship" },
-  { value: "freelance", label: "Freelance" },
+  { value: "Full-time", label: "Full-time" },
+  { value: "Part-time", label: "Part-time" },
+  { value: "Contract", label: "Contract" },
+  { value: "Internship", label: "Internship" },
+  { value: "Freelance", label: "Freelance" },
 ];
 
 const ROLE_TYPE_OPTIONS: SelectOption[] = [
-  { value: "backend", label: "Backend" },
-  { value: "frontend", label: "Frontend" },
-  { value: "fullstack", label: "Fullstack" },
-  { value: "mobile", label: "Mobile" },
-  { value: "devops", label: "DevOps" },
-  { value: "data", label: "Data" },
-  { value: "design", label: "Design" },
-  { value: "qa", label: "QA" },
-  { value: "pm", label: "PM" },
-  { value: "ba", label: "BA" },
+  { value: "Backend", label: "Backend" },
+  { value: "Frontend", label: "Frontend" },
+  { value: "Fullstack", label: "Fullstack" },
+  { value: "Mobile", label: "Mobile" },
+  { value: "DevOps", label: "DevOps" },
+  { value: "Data", label: "Data" },
+  { value: "Design", label: "Design" },
+  { value: "QA", label: "QA" },
+  { value: "PM", label: "PM" },
+  { value: "BA", label: "BA" },
 ];
 
 const emptyForm: SaveJobPayload = {
@@ -56,14 +56,30 @@ const emptyForm: SaveJobPayload = {
   shortDescription: "",
   location: "",
   requiredEducation: "",
-  salary: "",
-  client: "",
   workModel: "",
   level: "",
   jobType: "",
   headcount: 1,
   roleType: "",
   minMonthsExperience: 0,
+  requiredSkills: [],
+  preferredSkills: [],
+  minGpa: 0,
+  requiredLanguages: [],
+  portfolioExpected: "",
+};
+
+const parseSkillsText = (value: string): string[] => {
+  const uniqueSkills = new Set<string>();
+
+  value.split(",").forEach((skill) => {
+    const normalized = skill.trim().replace(/\s+/g, " ");
+    if (normalized) {
+      uniqueSkills.add(normalized);
+    }
+  });
+
+  return [...uniqueSkills];
 };
 
 export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobModalProps) {
@@ -71,6 +87,9 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState<SaveJobPayload>(emptyForm);
+  const [requiredSkillsText, setRequiredSkillsText] = useState("");
+  const [preferredSkillsText, setPreferredSkillsText] = useState("");
+  const [requiredLanguagesText, setRequiredLanguagesText] = useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -85,10 +104,23 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    const parsedRequiredSkills = parseSkillsText(requiredSkillsText);
+    const parsedPreferredSkills = parseSkillsText(preferredSkillsText);
+    const parsedRequiredLanguages = parseSkillsText(requiredLanguagesText);
+    if (!parsedRequiredSkills.length) {
+      setError("Vui lòng nhập ít nhất một skill.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await onCreate(formData);
+      await onCreate({
+        ...formData,
+        requiredSkills: parsedRequiredSkills,
+        preferredSkills: parsedPreferredSkills,
+        requiredLanguages: parsedRequiredLanguages,
+      });
       setShowSuccess(true);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Tao job that bai.");
@@ -100,6 +132,9 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
   const handleCloseSuccess = () => {
     setShowSuccess(false);
     setFormData(emptyForm);
+    setRequiredSkillsText("");
+    setPreferredSkillsText("");
+    setRequiredLanguagesText("");
     onClose();
   };
 
@@ -177,7 +212,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Location
+                Location <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -186,12 +221,13 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                 onChange={handleInputChange}
                 placeholder="TP.HCM"
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+                required
               />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Required Education
+                Required Education <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="requiredEducation"
@@ -199,17 +235,21 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                 onChange={handleInputChange}
                 rows={4}
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none resize-none"
+                required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Work Model</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Work Model <span className="text-red-500">*</span>
+                </label>
                 <select
                   name="workModel"
                   value={formData.workModel}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required>
                   <option value="">Select work model</option>
                   {WORK_MODEL_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -217,12 +257,15 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Level</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Level <span className="text-red-500">*</span>
+                </label>
                 <select
                   name="level"
                   value={formData.level}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required>
                   <option value="">Select level</option>
                   {LEVEL_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -233,12 +276,15 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Job Type</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Job Type <span className="text-red-500">*</span>
+                </label>
                 <select
                   name="jobType"
                   value={formData.jobType}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required>
                   <option value="">Select job type</option>
                   {JOB_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -246,12 +292,15 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Role Type</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Role Type <span className="text-red-500">*</span>
+                </label>
                 <select
                   name="roleType"
                   value={formData.roleType}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required>
                   <option value="">Select role type</option>
                   {ROLE_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -262,7 +311,9 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Headcount</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Headcount <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="number"
                   name="headcount"
@@ -276,11 +327,12 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                   }}
                   min={1}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+                  required
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Min Experience (months)
+                  Min Experience (months) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -295,33 +347,83 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                   }}
                   min={0}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+                  required
                 />
               </div>
             </div>
 
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Required Skills <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="requiredSkillsText"
+                value={requiredSkillsText}
+                onChange={(e) => setRequiredSkillsText(e.target.value)}
+                placeholder="React, TypeScript, Node.js"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Preferred Skills
+              </label>
+              <input
+                type="text"
+                name="preferredSkillsText"
+                value={preferredSkillsText}
+                onChange={(e) => setPreferredSkillsText(e.target.value)}
+                placeholder="Docker, GraphQL"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Salary</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Min GPA</label>
                 <input
-                  type="text"
-                  name="salary"
-                  value={formData.salary || ""}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 1000-1500 USD"
+                  type="number"
+                  name="minGpa"
+                  value={formData.minGpa}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setFormData((prev) => ({ ...prev, minGpa: isNaN(val) ? 0 : val }));
+                  }}
+                  min={0}
+                  step="0.01"
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Client (Optional)</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Required Languages
+                </label>
                 <input
                   type="text"
-                  name="client"
-                  value={formData.client || ""}
-                  onChange={handleInputChange}
-                  placeholder="Client name"
+                  name="requiredLanguagesText"
+                  value={requiredLanguagesText}
+                  onChange={(e) => setRequiredLanguagesText(e.target.value)}
+                  placeholder="English, Japanese"
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Portfolio Expected
+              </label>
+              <input
+                type="text"
+                name="portfolioExpected"
+                value={formData.portfolioExpected || ""}
+                onChange={handleInputChange}
+                placeholder="GitHub, portfolio website, or project demo"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+              />
             </div>
 
             <div className="flex gap-3 pt-2">

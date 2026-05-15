@@ -18,6 +18,7 @@ interface JobRow {
   roleType: string;
   requiredEducation: string;
   minMonthsExperience: number;
+  skills: string[];
   salary?: string;
   client?: string;
   createdAt: string;

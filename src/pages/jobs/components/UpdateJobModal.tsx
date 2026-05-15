@@ -17,6 +17,7 @@ interface JobRow {
   roleType: string;
   requiredEducation: string;
   minMonthsExperience: number;
+  skills: string[];
   salary?: string;
   client?: string;
   createdAt: string;
@@ -38,40 +39,40 @@ interface SelectOption {
 }
 
 const WORK_MODEL_OPTIONS: SelectOption[] = [
-  { value: "remote", label: "Remote" },
-  { value: "onsite", label: "On-site" },
-  { value: "hybrid", label: "Hybrid" },
+  { value: "Remote", label: "Remote" },
+  { value: "On-site", label: "On-site" },
+  { value: "Hybrid", label: "Hybrid" },
 ];
 
 const LEVEL_OPTIONS: SelectOption[] = [
-  { value: "intern", label: "Intern" },
-  { value: "fresher", label: "Fresher" },
-  { value: "junior", label: "Junior" },
-  { value: "middle", label: "Middle" },
-  { value: "senior", label: "Senior" },
-  { value: "lead", label: "Lead" },
-  { value: "manager", label: "Manager" },
+  { value: "Intern", label: "Intern" },
+  { value: "Fresher", label: "Fresher" },
+  { value: "Junior", label: "Junior" },
+  { value: "Middle", label: "Middle" },
+  { value: "Senior", label: "Senior" },
+  { value: "Lead", label: "Lead" },
+  { value: "Manager", label: "Manager" },
 ];
 
 const JOB_TYPE_OPTIONS: SelectOption[] = [
-  { value: "fulltime", label: "Full-time" },
-  { value: "parttime", label: "Part-time" },
-  { value: "contract", label: "Contract" },
-  { value: "internship", label: "Internship" },
-  { value: "freelance", label: "Freelance" },
+  { value: "Full-time", label: "Full-time" },
+  { value: "Part-time", label: "Part-time" },
+  { value: "Contract", label: "Contract" },
+  { value: "Internship", label: "Internship" },
+  { value: "Freelance", label: "Freelance" },
 ];
 
 const ROLE_TYPE_OPTIONS: SelectOption[] = [
-  { value: "backend", label: "Backend" },
-  { value: "frontend", label: "Frontend" },
-  { value: "fullstack", label: "Fullstack" },
-  { value: "mobile", label: "Mobile" },
-  { value: "devops", label: "DevOps" },
-  { value: "data", label: "Data" },
-  { value: "design", label: "Design" },
-  { value: "qa", label: "QA" },
-  { value: "pm", label: "PM" },
-  { value: "ba", label: "BA" },
+  { value: "Backend", label: "Backend" },
+  { value: "Frontend", label: "Frontend" },
+  { value: "Fullstack", label: "Fullstack" },
+  { value: "Mobile", label: "Mobile" },
+  { value: "DevOps", label: "DevOps" },
+  { value: "Data", label: "Data" },
+  { value: "Design", label: "Design" },
+  { value: "QA", label: "QA" },
+  { value: "PM", label: "PM" },
+  { value: "BA", label: "BA" },
 ];
 
 const makeInitialForm = (job?: JobRow): SaveJobPayload => ({
@@ -80,24 +81,46 @@ const makeInitialForm = (job?: JobRow): SaveJobPayload => ({
   shortDescription: job?.shortDescription || job?.summary || "",
   location: job?.locations?.join(", ") || "",
   requiredEducation: job?.requiredEducation || "",
-  salary: job?.salary || "",
-  client: job?.client || "",
   workModel: job?.workModel || "",
   level: job?.level || "",
   jobType: job?.jobType || "",
   headcount: job?.headcount || 1,
   roleType: job?.roleType || "",
   minMonthsExperience: job?.minMonthsExperience || 0,
+  requiredSkills: job?.skills || [],
+  preferredSkills: [],
+  minGpa: 0,
+  requiredLanguages: [],
+  portfolioExpected: "",
 });
+
+const parseSkillsText = (value: string): string[] => {
+  const uniqueSkills = new Set<string>();
+
+  value.split(",").forEach((skill) => {
+    const normalized = skill.trim().replace(/\s+/g, " ");
+    if (normalized) {
+      uniqueSkills.add(normalized);
+    }
+  });
+
+  return [...uniqueSkills];
+};
 
 export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelete }: UpdateJobModalProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState<SaveJobPayload>(makeInitialForm(job));
+  const [requiredSkillsText, setRequiredSkillsText] = useState(job?.skills?.join(", ") || "");
+  const [preferredSkillsText, setPreferredSkillsText] = useState("");
+  const [requiredLanguagesText, setRequiredLanguagesText] = useState("");
 
   useEffect(() => {
     setFormData(makeInitialForm(job));
+    setRequiredSkillsText(job?.skills?.join(", ") || "");
+    setPreferredSkillsText("");
+    setRequiredLanguagesText("");
     setError("");
   }, [job]);
 
@@ -117,10 +140,23 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
     }
 
     setError("");
+    const parsedRequiredSkills = parseSkillsText(requiredSkillsText);
+    const parsedPreferredSkills = parseSkillsText(preferredSkillsText);
+    const parsedRequiredLanguages = parseSkillsText(requiredLanguagesText);
+    if (!parsedRequiredSkills.length) {
+      setError("Vui lòng nhập ít nhất một skill.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await onUpdate(job.id, formData);
+      await onUpdate(job.id, {
+        ...formData,
+        requiredSkills: parsedRequiredSkills,
+        preferredSkills: parsedPreferredSkills,
+        requiredLanguages: parsedRequiredLanguages,
+      });
       onClose();
     } catch (updateError) {
       setError(updateError instanceof Error ? updateError.message : "Cap nhat job that bai.");
@@ -210,36 +246,17 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Salary</label>
-              <input
-                type="text"
-                name="salary"
-                value={formData.salary || ""}
-                onChange={handleInputChange}
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">Client (Optional)</label>
-              <input
-                type="text"
-                name="client"
-                value={formData.client || ""}
-                onChange={handleInputChange}
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
-              />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Work Model</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Work Model <span className="text-red-500">*</span>
+                </label>
                 <select
                   name="workModel"
                   value={formData.workModel}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required>
                   <option value="">Select work model</option>
                   {WORK_MODEL_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -247,12 +264,15 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Level</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Level <span className="text-red-500">*</span>
+                </label>
                 <select
                   name="level"
                   value={formData.level}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required>
                   <option value="">Select level</option>
                   {LEVEL_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -263,12 +283,15 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Job Type</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Job Type <span className="text-red-500">*</span>
+                </label>
                 <select
                   name="jobType"
                   value={formData.jobType}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required>
                   <option value="">Select job type</option>
                   {JOB_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -276,12 +299,15 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Role Type</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Role Type <span className="text-red-500">*</span>
+                </label>
                 <select
                   name="roleType"
                   value={formData.roleType}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none">
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required>
                   <option value="">Select role type</option>
                   {ROLE_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -292,7 +318,9 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Headcount</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Headcount <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="number"
                   name="headcount"
@@ -306,10 +334,13 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                   }}
                   min={1}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Min Experience (months)</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Min Experience (months) <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="number"
                   name="minMonthsExperience"
@@ -323,8 +354,83 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                   }}
                   min={0}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                  required
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Required Skills <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="requiredSkillsText"
+                value={requiredSkillsText}
+                onChange={(e) => setRequiredSkillsText(e.target.value)}
+                placeholder="React, TypeScript, Node.js"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Preferred Skills
+              </label>
+              <input
+                type="text"
+                name="preferredSkillsText"
+                value={preferredSkillsText}
+                onChange={(e) => setPreferredSkillsText(e.target.value)}
+                placeholder="Docker, GraphQL"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Min GPA</label>
+                <input
+                  type="number"
+                  name="minGpa"
+                  value={formData.minGpa}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setFormData((prev) => ({ ...prev, minGpa: isNaN(val) ? 0 : val }));
+                  }}
+                  min={0}
+                  step="0.01"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Required Languages
+                </label>
+                <input
+                  type="text"
+                  name="requiredLanguagesText"
+                  value={requiredLanguagesText}
+                  onChange={(e) => setRequiredLanguagesText(e.target.value)}
+                  placeholder="English, Japanese"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
+                Portfolio Expected
+              </label>
+              <input
+                type="text"
+                name="portfolioExpected"
+                value={formData.portfolioExpected || ""}
+                onChange={handleInputChange}
+                placeholder="GitHub, portfolio website, or project demo"
+                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#5B5BF6] focus:outline-none"
+              />
             </div>
 
             <div className="flex justify-end gap-3 pt-2">

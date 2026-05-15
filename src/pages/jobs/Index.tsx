@@ -25,8 +25,7 @@ interface JobRow {
   roleType: string;
   requiredEducation: string;
   minMonthsExperience: number;
-  salary?: string;
-  client?: string;
+  skills: string[];
   createdAt: string;
   createdBy: string;
   status: string;
@@ -38,21 +37,18 @@ export interface SaveJobPayload {
   shortDescription: string;
   location?: string;
   requiredEducation?: string;
-  salary?: string;
-  client?: string;
   workModel?: string;
   level?: string;
   jobType?: string;
   headcount?: number;
   roleType?: string;
   minMonthsExperience?: number;
+  requiredSkills?: string[];
+  preferredSkills?: string[];
+  minGpa?: number;
+  requiredLanguages?: string[];
+  portfolioExpected?: string;
 }
-
-const API_BASE_URL =
-  (
-    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-    (typeof window !== "undefined" ? window.location.origin : "")
-  ).replace(/\/+$/, "");
 
 const PAGE_SIZE = 6;
 
@@ -84,6 +80,53 @@ const parseDate = (value: unknown): string => {
 
   return date.toLocaleDateString("vi-VN");
 };
+
+const normalizeSkillNames = (skills: unknown): string[] => {
+  if (!Array.isArray(skills)) {
+    return [];
+  }
+
+  const uniqueSkills = new Set<string>();
+
+  skills.forEach((skill) => {
+    const skillName =
+      typeof skill === "string"
+        ? skill
+        : skill && typeof skill === "object" && typeof (skill as Record<string, unknown>).name === "string"
+          ? ((skill as Record<string, unknown>).name as string)
+          : "";
+    const normalized = skillName.trim().replace(/\s+/g, " ");
+
+    if (normalized) {
+      uniqueSkills.add(normalized);
+    }
+  });
+
+  return [...uniqueSkills];
+};
+
+const normalizeLocations = (location: unknown): string[] => {
+  if (Array.isArray(location)) {
+    return location
+      .filter((item): item is string => typeof item === "string")
+      .map((item) => item.trim().replace(/\s+/g, " "))
+      .filter(Boolean);
+  }
+
+  if (typeof location !== "string") {
+    return [];
+  }
+
+  return location
+    .split(",")
+    .map((item) => item.trim().replace(/\s+/g, " "))
+    .filter(Boolean);
+};
+
+const normalizeTextList = (items: unknown): string[] => normalizeLocations(items);
+
+const normalizeOptionalText = (value: unknown, fallback: string): string =>
+  typeof value === "string" && value.trim() ? value.trim().replace(/\s+/g, " ") : fallback;
 
 const normalizeJob = (raw: Record<string, unknown>): JobRow => {
   const basicInfo = raw.basicInfo as Record<string, unknown> | undefined;
@@ -173,18 +216,30 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
       (typeof raw.jobType === "string" && raw.jobType) ||
       (typeof raw.jobtype === "string" && raw.jobtype) ||
       "",
-    headcount:
-      typeof basicInfo?.headcount === "number"
-        ? basicInfo.headcount
-        : 0,
+    headcount: (() => {
+      const headCountCandidates: unknown[] = [
+        basicInfo?.headCount,
+        basicInfo?.headcount,
+        raw.headCount,
+        raw.headcount,
+      ];
+
+      for (const candidate of headCountCandidates) {
+        if (typeof candidate === "number" && Number.isFinite(candidate)) {
+          return candidate;
+        }
+        if (typeof candidate === "string" && candidate.trim()) {
+          const parsed = Number(candidate);
+          if (!Number.isNaN(parsed)) {
+            return parsed;
+          }
+        }
+      }
+
+      return 0;
+    })(),
     roleType:
       (typeof basicInfo?.roleType === "string" && basicInfo.roleType) ||
-      "",
-    salary:
-      (typeof raw.salary === "string" && raw.salary) ||
-      "",
-    client:
-      (typeof raw.client === "string" && raw.client) ||
       "",
     requiredEducation:
       (typeof requirements?.requiredEducation === "string" &&
@@ -231,6 +286,11 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
 
       return 0;
     })(),
+    skills: normalizeSkillNames(
+      Array.isArray(requirements?.requiredSkills)
+        ? requirements.requiredSkills
+        : requirements?.skills,
+    ),
     createdAt: parseDateField(raw.createdAt),
     createdBy,
     status: (typeof raw.status === "string" && raw.status) || "Đang tuyển",
@@ -264,9 +324,22 @@ const extractJobs = (payload: unknown): Record<string, unknown>[] => {
   return [];
 };
 
+const extractObjectPayload = (payload: unknown): Record<string, unknown> | null => {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return null;
+  }
+
+  const objectPayload = payload as Record<string, unknown>;
+  if (objectPayload.data && typeof objectPayload.data === "object" && !Array.isArray(objectPayload.data)) {
+    return objectPayload.data as Record<string, unknown>;
+  }
+
+  return objectPayload;
+};
+
 const getStringId = (value: unknown): string => {
   if (typeof value === "string" && value.trim()) {
-    return value;
+    return value.trim();
   }
 
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -276,7 +349,7 @@ const getStringId = (value: unknown): string => {
   if (value && typeof value === "object") {
     const objectValue = value as Record<string, unknown>;
     if (typeof objectValue.$oid === "string" && objectValue.$oid.trim()) {
-      return objectValue.$oid;
+      return objectValue.$oid.trim();
     }
   }
 
@@ -299,23 +372,10 @@ const extractCreatedJobId = (payload: unknown): string => {
   }
 
   const nestedKeys = ["data", "job", "createdJob", "result", "payload", "item"];
-
   for (const key of nestedKeys) {
-    const nestedValue = objectPayload[key];
-    const nestedId = extractCreatedJobId(nestedValue);
-
+    const nestedId = extractCreatedJobId(objectPayload[key]);
     if (nestedId) {
       return nestedId;
-    }
-  }
-
-  for (const value of Object.values(objectPayload)) {
-    if (value && typeof value === "object") {
-      const nestedId = extractCreatedJobId(value);
-
-      if (nestedId) {
-        return nestedId;
-      }
     }
   }
 
@@ -371,16 +431,37 @@ export default function RecruiterJobsPage() {
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
 
+  const fetchJobDetail = useCallback(async (id: string): Promise<JobRow | null> => {
+    try {
+      const response = await fetch(`/api/jobs/${encodeURIComponent(id)}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const payload = (await response.json()) as unknown;
+      const detailPayload = extractObjectPayload(payload);
+
+      return detailPayload ? normalizeJob(detailPayload) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
   const loadJobs = useCallback(async (sort: "newest" | "oldest" = "newest") => {
     setIsLoading(true);
     setError("");
 
     try {
-      const url = new URL(`${API_BASE_URL}/api/jobs`);
-      url.searchParams.set("sort", sort);
-      url.searchParams.set("limit", "100");
+      const query = new URLSearchParams({
+        sort,
+        limit: "100",
+      });
 
-      const response = await fetch(url.toString(), {
+      const response = await fetch(`/api/jobs?${query.toString()}`, {
         method: "GET",
         headers: getAuthHeaders(),
       });
@@ -391,14 +472,32 @@ export default function RecruiterJobsPage() {
         throw new Error("Không thể tải danh sách việc làm.");
       }
 
-      setJobs(extractJobs(payload).map(normalizeJob));
+      const listJobs = extractJobs(payload).map(normalizeJob);
+      const enrichedJobs = await Promise.all(listJobs.map(async (job) => {
+        if (!job.id || job.id === "N/A") {
+          return job;
+        }
+
+        const detailJob = await fetchJobDetail(job.id);
+        return detailJob
+          ? {
+              ...job,
+              ...detailJob,
+              slug: job.slug || detailJob.slug,
+              status: detailJob.status || job.status,
+              createdAt: detailJob.createdAt || job.createdAt,
+            }
+          : job;
+      }));
+
+      setJobs(enrichedJobs);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Không thể tải danh sách việc làm.");
       setJobs([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [fetchJobDetail]);
 
   useEffect(() => {
     let isActive = true;
@@ -439,48 +538,65 @@ export default function RecruiterJobsPage() {
     setSortBy(newSort);
   }, []);
 
-  const toNestedPayload = (flat: SaveJobPayload) => ({
-    basicInfo: {
-      title: flat.jobTitle,
-      summary: flat.shortDescription,
-      jobDescription: flat.jobDescription,
-      location: flat.location || "",
-      workModel: flat.workModel || "",
-      level: flat.level || "",
-      jobType: flat.jobType || "",
-      headcount: flat.headcount || 0,
-      roleType: flat.roleType || "",
-    },
-    requirements: {
-      requiredEducation: flat.requiredEducation || "",
-      minMonthsExperience: flat.minMonthsExperience || 0,
-    },
-    salary: flat.salary || "",
-    client: flat.client || "",
-  });
+  const toNestedPayload = (flat: SaveJobPayload) => {
+    const normalizedRequiredSkills = normalizeSkillNames(flat.requiredSkills);
+    const normalizedPreferredSkills = normalizeSkillNames(flat.preferredSkills);
+    const normalizedRequiredLanguages = normalizeTextList(flat.requiredLanguages);
+
+    return {
+      basicInfo: {
+        title: flat.jobTitle,
+        summary: flat.shortDescription,
+        jobDescription: flat.jobDescription,
+        locations: normalizeLocations(flat.location),
+        workModel: flat.workModel || "",
+        level: flat.level || "",
+        jobType: flat.jobType || "",
+        headcount: flat.headcount ?? 0,
+        roleType: flat.roleType || "",
+      },
+      requirements: {
+        requiredSkills: normalizedRequiredSkills,
+        preferredSkills: normalizedPreferredSkills.length ? normalizedPreferredSkills : normalizedRequiredSkills,
+        requiredEducation: flat.requiredEducation || "",
+        minGpa: flat.minGpa ?? 0,
+        requiredLanguages: normalizedRequiredLanguages.length ? normalizedRequiredLanguages : ["Không yêu cầu"],
+        minMonthsExperience: flat.minMonthsExperience ?? 0,
+        portfolioExpected: normalizeOptionalText(flat.portfolioExpected, "Không yêu cầu"),
+      },
+    };
+  };
 
   const handleCreateJob = useCallback(
     async (payload: SaveJobPayload) => {
       const nestedPayload = toNestedPayload(payload);
 
-      const response = await fetch(`${API_BASE_URL}/api/jobs`, {
+      const response = await fetch("/api/jobs", {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(nestedPayload),
       });
 
       if (!response.ok) {
-        throw new Error(await getResponseErrorMessage(response, "Tạo việc làm thất bại."));
+        const message = await getResponseErrorMessage(response, "Tạo việc làm thất bại.");
+        const diagnostic = {
+          status: response.status,
+          statusText: response.statusText,
+          payload: nestedPayload,
+          message,
+        };
+        console.error(`Create job failed: ${JSON.stringify(diagnostic, null, 2)}`);
+        throw new Error(`Tạo việc làm thất bại (${response.status}${response.statusText ? ` ${response.statusText}` : ""}): ${message}`);
       }
 
-      const createPayload = (await response.json()) as unknown;
+      const createPayload = (await response.json().catch(() => null)) as unknown;
       const createdJobId = extractCreatedJobId(createPayload);
 
       if (!createdJobId) {
         throw new Error("Tạo việc làm thành công nhưng không nhận được mã job để publish.");
       }
 
-      const publishResponse = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(createdJobId)}/publish`, {
+      const publishResponse = await fetch(`/api/jobs/${encodeURIComponent(createdJobId)}/publish`, {
         method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify({}),
@@ -500,7 +616,7 @@ export default function RecruiterJobsPage() {
     async (id: string, payload: SaveJobPayload) => {
       const nestedPayload = toNestedPayload(payload);
 
-      const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
+      const response = await fetch(`/api/jobs/${encodeURIComponent(id)}`, {
         method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify(nestedPayload),
@@ -517,7 +633,7 @@ export default function RecruiterJobsPage() {
 
   const handleDeleteJob = useCallback(
     async (id: string) => {
-      const closeResponse = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}/close`, {
+      const closeResponse = await fetch(`/api/jobs/${encodeURIComponent(id)}/close`, {
         method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify({}),
@@ -527,7 +643,7 @@ export default function RecruiterJobsPage() {
         throw new Error(await getResponseErrorMessage(closeResponse, "Đóng việc làm thất bại."));
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
+      const response = await fetch(`/api/jobs/${encodeURIComponent(id)}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
       });
