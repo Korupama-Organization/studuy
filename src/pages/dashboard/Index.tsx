@@ -19,7 +19,7 @@ const CandidateDashboard: React.FC = () => {
   if (isLoading) {
     return (
       <div className="dashboard-container">
-        <Header userName="..." />
+        <GlobalHeader userName="..." />
         <main className="dashboard-main">
           <div
             className="dashboard-content-wrapper"
@@ -46,7 +46,7 @@ const CandidateDashboard: React.FC = () => {
   if (isError) {
     return (
       <div className="dashboard-container">
-        <Header userName="Ứng viên" />
+        <GlobalHeader userName="Ứng viên" />
         <main className="dashboard-main">
           <div
             className="dashboard-content-wrapper"
@@ -82,7 +82,7 @@ const CandidateDashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <Header userName={profile.fullName} />
+      <GlobalHeader userName={profile.fullName} />
 
       <main className="dashboard-main">
         <div className="dashboard-content-wrapper">
