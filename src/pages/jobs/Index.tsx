@@ -492,6 +492,16 @@ export default function RecruiterJobsPage() {
 
   const handleDeleteJob = useCallback(
     async (id: string) => {
+      const closeResponse = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}/close`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({}),
+      });
+
+      if (!closeResponse.ok) {
+        throw new Error(await getResponseErrorMessage(closeResponse, "Đóng việc làm thất bại."));
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/jobs/${encodeURIComponent(id)}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
