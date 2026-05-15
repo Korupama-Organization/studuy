@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { buildApiUrl } from "../../services/auth";
+import { buildApiUrl, getStoredUser } from "../../services/auth";
 import { useCurrentRecruiter } from "../../hooks/useCurrentRecruiter";
 import { useRecruiterActivity } from "../../hooks/useRecruiterActivity";
 import RecruiterSidebar from "../recruiter_dashboard/components/RecruiterSidebar";
@@ -11,6 +11,7 @@ import "../recruiter_dashboard/recruiter.css";
 
 export interface Recruiter {
   _id?: string;
+  userId?: string;
   fullName: string;
   email: string;
   phone?: string;
@@ -115,6 +116,9 @@ const readString = (...values: unknown[]): string | undefined => {
   return undefined;
 };
 
+const normalizeIdentity = (value?: string | null): string =>
+  typeof value === "string" ? value.trim().toLowerCase() : "";
+
 const toRawDateString = (value: unknown): string | undefined => {
   if (!value) return undefined;
 
@@ -174,6 +178,7 @@ const normalizeRecruiter = (raw: Record<string, unknown>): Recruiter => {
 
   return {
     _id: readString(raw._id, raw.id),
+    userId: readString(raw.userId, user?._id, user?.id),
     fullName:
       readString(raw.fullName, raw.fullname, raw.name, user?.fullName, profile?.fullName) ||
       "-",
@@ -278,6 +283,35 @@ export default function RecruiterManagementPage() {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const currentRecruiterKeys = useMemo(() => {
+    const storedUser = getStoredUser();
+    return new Set(
+      [
+        topbarRecruiter?.id,
+        topbarRecruiter?.email,
+        storedUser?._id,
+        storedUser?.contactInfo?.email,
+      ]
+        .map(normalizeIdentity)
+        .filter(Boolean),
+    );
+  }, [topbarRecruiter]);
+
+  const isCurrentRecruiter = useCallback(
+    (recruiter: Recruiter) => {
+      const recruiterKeys = [
+        recruiter._id,
+        recruiter.userId,
+        recruiter.email,
+      ]
+        .map(normalizeIdentity)
+        .filter(Boolean);
+
+      return recruiterKeys.some((key) => currentRecruiterKeys.has(key));
+    },
+    [currentRecruiterKeys],
+  );
+
   const loadRecruiters = useCallback(
     async (sort: "newest" | "oldest" = "newest") => {
       setIsLoading(true);
@@ -377,6 +411,20 @@ export default function RecruiterManagementPage() {
 
   const handleDeleteRecruiter = useCallback(
     async (id: string) => {
+      const normalizedId = normalizeIdentity(id);
+      const targetRecruiter = recruiters.find(
+        (recruiter) =>
+          normalizeIdentity(recruiter._id) === normalizedId ||
+          normalizeIdentity(recruiter.userId) === normalizedId,
+      );
+
+      if (
+        (targetRecruiter && isCurrentRecruiter(targetRecruiter)) ||
+        currentRecruiterKeys.has(normalizedId)
+      ) {
+        throw new Error("Bạn không thể xóa chính tài khoản đang đăng nhập.");
+      }
+
       const response = await fetch(
         buildApiUrl(`/api/company-members/${encodeURIComponent(id)}`),
         {
@@ -391,7 +439,7 @@ export default function RecruiterManagementPage() {
       }
       await loadRecruiters();
     },
-    [loadRecruiters],
+    [currentRecruiterKeys, isCurrentRecruiter, loadRecruiters, recruiters],
   );
 
   return (
@@ -428,6 +476,7 @@ export default function RecruiterManagementPage() {
                     isLoading={isLoading}
                     onUpdateRecruiter={handleUpdateRecruiter}
                     onDeleteRecruiter={handleDeleteRecruiter}
+                    isCurrentRecruiter={isCurrentRecruiter}
                   />
                 </div>
               ) : null}

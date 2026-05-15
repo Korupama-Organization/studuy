@@ -9,6 +9,7 @@ interface UpdateRecruiterModalProps {
   recruiter?: Recruiter;
   onUpdate: (payload: UpdateProfilePayload) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  isSelf?: boolean;
 }
 
 const GENDER_OPTIONS = ["Nam", "Nữ", "Khác"];
@@ -214,6 +215,7 @@ export default function UpdateRecruiterModal({
   recruiter,
   onUpdate,
   onDelete,
+  isSelf = false,
 }: UpdateRecruiterModalProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -376,6 +378,11 @@ export default function UpdateRecruiterModal({
 
   const handleDeleteConfirm = async () => {
     if (!recruiter || !recruiter._id) return;
+    if (isSelf) {
+      setShowDeleteConfirm(false);
+      setError("Bạn không thể xóa chính tài khoản đang đăng nhập.");
+      return;
+    }
 
     setError("");
     setIsSubmitting(true);
@@ -415,6 +422,11 @@ export default function UpdateRecruiterModal({
 
           <form onSubmit={handleUpdate} className="space-y-6 p-6">
             {error ? <p className="text-sm text-red-500">{error}</p> : null}
+            {isSelf ? (
+              <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+                Bạn đang chỉnh sửa tài khoản của chính mình. Hệ thống không cho phép tự xóa tài khoản đang đăng nhập.
+              </p>
+            ) : null}
 
             <div className="mb-4 border-b border-slate-100 pb-4">
               <p className="text-sm font-semibold text-slate-500">Editing</p>
@@ -586,7 +598,12 @@ export default function UpdateRecruiterModal({
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
                 className="rounded-2xl bg-red-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
-                disabled={isSubmitting}>
+                disabled={isSubmitting || isSelf}
+                title={
+                  isSelf
+                    ? "Không thể xóa chính tài khoản đang đăng nhập"
+                    : "Delete"
+                }>
                 Delete
               </button>
               <button

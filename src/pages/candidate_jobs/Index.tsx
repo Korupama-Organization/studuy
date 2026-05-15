@@ -9,6 +9,8 @@ import {
 } from "./candidateApplications";
 import "./candidateJobs.css";
 
+type CandidateApplicationSort = "newest" | "oldest";
+
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
 
@@ -240,6 +242,11 @@ const formatLogTime = (value: string): string => {
   }).format(date);
 };
 
+const getApplicationSortTime = (application: CandidateApplicationCard): number => {
+  const timestamp = new Date(application.currentStageLoggedAt).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
 function ProcessBars({ application }: { application: CandidateApplicationCard }) {
   return (
     <div className="candidate-job-process" aria-label={`Tiến trình ứng tuyển: ${application.status}`}>
@@ -391,6 +398,8 @@ export default function CandidateJobsPage() {
   const queryClient = useQueryClient();
   const [applyMessage, setApplyMessage] = useState("");
   const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<CandidateApplicationSort>("newest");
+  const [isSortOpen, setIsSortOpen] = useState(false);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["candidate-applications"],
@@ -505,8 +514,30 @@ export default function CandidateJobsPage() {
     },
   });
 
-  const applications = data ?? [];
+  const applications = useMemo(() => data ?? [], [data]);
   const errorMessage = error instanceof Error ? error.message : "";
+  const sortedApplications = useMemo(() => {
+    return applications
+      .map((application, index) => ({
+        application,
+        index,
+        timestamp: getApplicationSortTime(application),
+      }))
+      .sort((left, right) => {
+        const byTime =
+          sortOrder === "newest"
+            ? right.timestamp - left.timestamp
+            : left.timestamp - right.timestamp;
+
+        return byTime || left.index - right.index;
+      })
+      .map((item) => item.application);
+  }, [applications, sortOrder]);
+
+  const handleSortChange = (nextSortOrder: CandidateApplicationSort) => {
+    setSortOrder(nextSortOrder);
+    setIsSortOpen(false);
+  };
 
   return (
     <div className="candidate-jobs-page">
@@ -514,7 +545,48 @@ export default function CandidateJobsPage() {
 
       <main className="candidate-jobs-main">
         <div className="candidate-jobs-shell">
-          <h1>Tìm kiếm việc làm</h1>
+          <div className="candidate-jobs-heading">
+            <h1>Tìm kiếm việc làm</h1>
+            <div className="candidate-jobs-sort">
+              <button
+                className="candidate-jobs-sort__trigger"
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded={isSortOpen}
+                onClick={() => setIsSortOpen((current) => !current)}
+              >
+                {sortOrder === "newest" ? "Mới nhất" : "Cũ nhất"}
+                <span className="candidate-jobs-sort__chevron" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </span>
+              </button>
+
+              {isSortOpen ? (
+                <div className="candidate-jobs-sort__menu" role="listbox" aria-label="Sắp xếp application">
+                  <button
+                    className={`candidate-jobs-sort__option${sortOrder === "newest" ? " candidate-jobs-sort__option--active" : ""}`}
+                    type="button"
+                    role="option"
+                    aria-selected={sortOrder === "newest"}
+                    onClick={() => handleSortChange("newest")}
+                  >
+                    Mới nhất
+                  </button>
+                  <button
+                    className={`candidate-jobs-sort__option${sortOrder === "oldest" ? " candidate-jobs-sort__option--active" : ""}`}
+                    type="button"
+                    role="option"
+                    aria-selected={sortOrder === "oldest"}
+                    onClick={() => handleSortChange("oldest")}
+                  >
+                    Cũ nhất
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
 
           {isLoading ? <p className="candidate-jobs-loading">Đang tải danh sách ứng tuyển...</p> : null}
           {errorMessage ? <p className="candidate-jobs-notice">{errorMessage}</p> : null}
@@ -527,9 +599,9 @@ export default function CandidateJobsPage() {
             </div>
           ) : null}
 
-          {applications.length > 0 ? (
+          {sortedApplications.length > 0 ? (
             <div className="candidate-jobs-list">
-              {applications.map((application) => (
+              {sortedApplications.map((application) => (
                 <CandidateJobCard
                   key={application.id}
                   application={application}

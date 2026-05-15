@@ -39,6 +39,7 @@ interface CandidateItem {
   profileSummary?: ApiCandidateProfileSummary | null;
   cvUrl?: string;
   cvFileName?: string;
+  sortDate?: string;
 }
 
 interface CandidateDetail extends CandidateItem {
@@ -80,6 +81,8 @@ interface ApiCandidateSummary {
   userId: string;
   fullName: string;
   avatarUrl?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   cvUrl?: string | null;
   resumeUrl?: string | null;
   cv?: unknown;
@@ -617,6 +620,26 @@ const formatDateShort = (value?: string | null): string => {
   return date.toLocaleDateString("vi-VN");
 };
 
+const getSortTimestamp = (value?: string | null): number => {
+  if (!value) return 0;
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
+const sortCandidates = (
+  items: CandidateItem[],
+  sortOrder: "newest" | "oldest",
+): CandidateItem[] => {
+  return [...items].sort((left, right) => {
+    const leftTime = getSortTimestamp(left.sortDate);
+    const rightTime = getSortTimestamp(right.sortDate);
+    const byTime =
+      sortOrder === "newest" ? rightTime - leftTime : leftTime - rightTime;
+
+    return byTime || left.name.localeCompare(right.name, "vi");
+  });
+};
+
 const normalizeScore = (score: unknown): number => {
   if (typeof score !== "number" || !Number.isFinite(score)) {
     return 8;
@@ -750,6 +773,11 @@ const mapCandidateSummaryToItem = (candidate: ApiCandidateSummary): CandidateIte
     profileSummary: candidate.profile || null,
     cvUrl: extractCvUrl(candidate, candidate.profile),
     cvFileName: extractCvFileName(candidate, candidate.profile),
+    sortDate:
+      candidate.updatedAt ||
+      candidate.createdAt ||
+      candidate.profile?.updatedAt ||
+      undefined,
   };
 };
 
@@ -768,6 +796,14 @@ const mapApplicantToItem = (applicant: ApiJobApplicant): CandidateItem | null =>
     screeningScore: applicant.screeningResults?.score ?? null,
     cvUrl: extractCvUrl(applicant, applicant.candidate, mapped.cvUrl),
     cvFileName: extractCvFileName(applicant, applicant.candidate) || mapped.cvFileName,
+    sortDate:
+      applicant.updatedAt ||
+      applicant.createdAt ||
+      applicant.currentStatus?.updatedAt ||
+      applicant.currentStatus?.createdAt ||
+      applicant.applicationStatus?.at(-1)?.updatedAt ||
+      applicant.applicationStatus?.at(-1)?.createdAt ||
+      mapped.sortDate,
   };
 };
 
@@ -1173,6 +1209,8 @@ export default function RecruiterCandidatesPage() {
     null,
   );
   const [candidates, setCandidates] = useState<CandidateItem[]>([]);
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const [pagination, setPagination] = useState<PaginationData>({
     page: 1,
     limit: 6,
@@ -1202,7 +1240,7 @@ export default function RecruiterCandidatesPage() {
     return () => {
       isActive = false;
     };
-  }, [searchQuery, jobIdParam]);
+  }, [searchQuery, jobIdParam, sortOrder]);
 
   useEffect(() => {
     let isActive = true;
@@ -1221,6 +1259,7 @@ export default function RecruiterCandidatesPage() {
         if (searchQuery.trim()) {
           url.searchParams.set("search", searchQuery.trim());
         }
+        url.searchParams.set("sort", sortOrder);
 
         const response = await fetch(url.toString(), {
           method: "GET",
@@ -1258,7 +1297,7 @@ export default function RecruiterCandidatesPage() {
 
         if (!isActive) return;
 
-        setCandidates(items as CandidateItem[]);
+        setCandidates(sortCandidates(items as CandidateItem[], sortOrder));
         setPagination({
           page: payload?.pagination?.page ?? currentPage,
           limit: payload?.pagination?.limit ?? pageSize,
@@ -1286,7 +1325,7 @@ export default function RecruiterCandidatesPage() {
     return () => {
       isActive = false;
     };
-  }, [currentPage, jobIdParam, pageSize, searchQuery]);
+  }, [currentPage, jobIdParam, pageSize, searchQuery, sortOrder]);
 
   const totalPages = Math.max(1, pagination.totalPages || 1);
 
@@ -1315,6 +1354,11 @@ export default function RecruiterCandidatesPage() {
       null
     );
   }, [candidates, selectedCandidateId]);
+
+  const handleSortChange = (nextSortOrder: "newest" | "oldest") => {
+    setSortOrder(nextSortOrder);
+    setIsSortOpen(false);
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -1497,17 +1541,57 @@ export default function RecruiterCandidatesPage() {
                       search
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    className="flex h-[54px] w-full max-w-[143px] items-center justify-between rounded-[12px] border border-[rgba(63,76,247,0.11)] bg-white px-4 shadow-[0_4px_6px_rgba(62,73,84,0.04)]"
-                  >
-                    <span className="text-[16px] font-medium text-[#141515]">
-                      Mới nhất
-                    </span>
-                    <span className="material-symbols-outlined text-[20px] text-[#141515]">
-                      expand_more
-                    </span>
-                  </button>
+                  <div className="relative w-full max-w-[143px]">
+                    <button
+                      type="button"
+                      aria-haspopup="listbox"
+                      aria-expanded={isSortOpen}
+                      onClick={() => setIsSortOpen((current) => !current)}
+                      className="flex h-[54px] w-full items-center justify-between rounded-[12px] border border-[rgba(63,76,247,0.11)] bg-white px-4 shadow-[0_4px_6px_rgba(62,73,84,0.04)]"
+                    >
+                      <span className="text-[16px] font-medium text-[#141515]">
+                        {sortOrder === "newest" ? "Mới nhất" : "Cũ nhất"}
+                      </span>
+                      <span className="material-symbols-outlined text-[20px] text-[#141515]">
+                        expand_more
+                      </span>
+                    </button>
+
+                    {isSortOpen ? (
+                      <div
+                        className="absolute right-0 top-[calc(100%+8px)] z-20 w-full overflow-hidden rounded-[12px] border border-[rgba(63,76,247,0.11)] bg-white shadow-[0_12px_28px_rgba(62,73,84,0.14)]"
+                        role="listbox"
+                        aria-label="Sắp xếp ứng viên"
+                      >
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={sortOrder === "newest"}
+                          onClick={() => handleSortChange("newest")}
+                          className={`w-full px-4 py-3 text-left text-[14px] font-medium transition ${
+                            sortOrder === "newest"
+                              ? "bg-[rgba(63,76,247,0.11)] text-[#3f4cf7]"
+                              : "text-[#141515] hover:bg-[#f8fafc]"
+                          }`}
+                        >
+                          Mới nhất
+                        </button>
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={sortOrder === "oldest"}
+                          onClick={() => handleSortChange("oldest")}
+                          className={`w-full px-4 py-3 text-left text-[14px] font-medium transition ${
+                            sortOrder === "oldest"
+                              ? "bg-[rgba(63,76,247,0.11)] text-[#3f4cf7]"
+                              : "text-[#141515] hover:bg-[#f8fafc]"
+                          }`}
+                        >
+                          Cũ nhất
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
 
                 {error ? <p className="text-sm text-red-500">{error}</p> : null}
