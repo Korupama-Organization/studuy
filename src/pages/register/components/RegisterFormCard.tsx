@@ -347,7 +347,7 @@ export default function RegisterFormCard({
                                     onChange={onFullNameChange}
                                     placeholder="Nhập họ và tên"
                                     iconUrl={USER_ICON_CDN}
-                                    iconAlt="full name icon"
+                                    iconAlt="Biểu tượng họ tên"
                                     autoComplete="name"
                                     autoCapitalize="words"
                                     compact
@@ -360,7 +360,7 @@ export default function RegisterFormCard({
                                     onChange={onIdentifierChange}
                                     placeholder="Nhập email công việc"
                                     iconUrl={EMAIL_ICON_CDN}
-                                    iconAlt="Email icon"
+                                    iconAlt="Biểu tượng email"
                                     autoComplete="username"
                                     autoCapitalize="none"
                                     labelClassName="pl-1.5"
@@ -378,7 +378,7 @@ export default function RegisterFormCard({
                                     onChange={onPasswordChange}
                                     placeholder="Nhập mật khẩu"
                                     iconUrl={PASSWORD_ICON_CDN}
-                                    iconAlt="password icon"
+                                    iconAlt="Biểu tượng mật khẩu"
                                     autoComplete="new-password"
                                     compact
                                 />
@@ -390,7 +390,7 @@ export default function RegisterFormCard({
                                     onChange={onConfirmPasswordChange}
                                     placeholder="Nhập lại mật khẩu"
                                     iconUrl={PASSWORD_ICON_CDN}
-                                    iconAlt="confirm password icon"
+                                    iconAlt="Biểu tượng xác nhận mật khẩu"
                                     autoComplete="new-password"
                                     compact
                                 />
@@ -402,7 +402,7 @@ export default function RegisterFormCard({
                                     onChange={onPhoneChange}
                                     placeholder="Ví dụ: 0901234567"
                                     iconUrl={PHONE_ICON_CDN}
-                                    iconAlt="phone icon"
+                                    iconAlt="Biểu tượng số điện thoại"
                                     autoComplete="tel"
                                     compact
                                 />
@@ -443,7 +443,7 @@ export default function RegisterFormCard({
                                     onChange={onAvatarUrlChange}
                                     placeholder="https://..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="avatar url icon"
+                                    iconAlt="Biểu tượng URL ảnh đại diện"
                                     autoComplete="url"
                                     autoCapitalize="none"
                                     compact
@@ -456,7 +456,7 @@ export default function RegisterFormCard({
                                     onChange={onLinkedinUrlChange}
                                     placeholder="https://linkedin.com/in/..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="linkedin url icon"
+                                    iconAlt="Biểu tượng URL LinkedIn"
                                     autoComplete="url"
                                     autoCapitalize="none"
                                     compact
@@ -469,7 +469,7 @@ export default function RegisterFormCard({
                                     onChange={onGithubUrlChange}
                                     placeholder="https://github.com/..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="github url icon"
+                                    iconAlt="Biểu tượng URL GitHub"
                                     autoComplete="url"
                                     autoCapitalize="none"
                                     compact
@@ -482,7 +482,7 @@ export default function RegisterFormCard({
                                     onChange={onFacebookUrlChange}
                                     placeholder="https://facebook.com/..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="facebook url icon"
+                                    iconAlt="Biểu tượng URL Facebook"
                                     autoComplete="url"
                                     autoCapitalize="none"
                                     compact
@@ -499,7 +499,7 @@ export default function RegisterFormCard({
                                     onChange={onCompanyNameChange}
                                     placeholder="Nhập tên doanh nghiệp"
                                     iconUrl={USER_ICON_CDN}
-                                    iconAlt="company name icon"
+                                    iconAlt="Biểu tượng tên công ty"
                                     compact
                                 />
 
@@ -510,7 +510,7 @@ export default function RegisterFormCard({
                                     onChange={onCompanyWebsiteChange}
                                     placeholder="https://..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="company website icon"
+                                    iconAlt="Biểu tượng website công ty"
                                     compact
                                 />
 
@@ -521,7 +521,7 @@ export default function RegisterFormCard({
                                     onChange={onCompanyShortNameChange}
                                     placeholder="Ví dụ: SEeds"
                                     iconUrl={USER_ICON_CDN}
-                                    iconAlt="short name icon"
+                                    iconAlt="Biểu tượng tên viết tắt"
                                     compact
                                 />
 
@@ -532,7 +532,7 @@ export default function RegisterFormCard({
                                     onChange={onCompanyAddressChange}
                                     placeholder="Nhập địa chỉ trụ sở"
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="company address icon"
+                                    iconAlt="Biểu tượng địa chỉ công ty"
                                     compact
                                 />
 
@@ -543,35 +543,39 @@ export default function RegisterFormCard({
                                     onChange={onCompanyDescriptionChange}
                                     placeholder="Giới thiệu về công ty..."
                                     iconUrl={USER_ICON_CDN}
-                                    iconAlt="description icon"
+                                    iconAlt="Biểu tượng mô tả"
                                     compact
                                 />
 
                                 <div className="flex flex-col gap-2 pb-1">
                                     <label className="text-[#0A0A0A] font-inter font-light" style={{ fontSize: 'clamp(0.82rem, 2.1vw, 0.95rem)' }}>Hình thức làm việc</label>
                                     <div className="grid grid-cols-3 gap-2">
-                                        {(['On-site', 'Remote', 'Hybrid'] as const).map((type) => (
+                                        {([
+                                            { value: 'On-site', label: 'Tại văn phòng' },
+                                            { value: 'Remote', label: 'Từ xa' },
+                                            { value: 'Hybrid', label: 'Linh hoạt' },
+                                        ] as const).map((type) => (
                                             <button
-                                                key={type}
+                                                key={type.value}
                                                 type="button"
-                                                onClick={() => onCompanyTypeChange(type)}
-                                                className={`h-[38px] rounded-full border text-center transition-colors ${companyType === type ? 'border-[#5E52D9] bg-[#E9E8FE] text-[#3D30B9]' : 'border-[#D5D8E8] bg-white text-[#6C728C]'}`}
+                                                onClick={() => onCompanyTypeChange(type.value)}
+                                                className={`h-[38px] rounded-full border text-center transition-colors ${companyType === type.value ? 'border-[#5E52D9] bg-[#E9E8FE] text-[#3D30B9]' : 'border-[#D5D8E8] bg-white text-[#6C728C]'}`}
                                                 style={{ fontSize: 'clamp(0.75rem, 2vw, 0.85rem)' }}
                                             >
-                                                {type}
+                                                {type.label}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
                                 <CredentialInput
-                                    label="Tech Stack (cách nhau bởi dấu phẩy)"
+                                    label="Ngăn xếp công nghệ (cách nhau bởi dấu phẩy)"
                                     type="text"
                                     value={companyTechStack}
                                     onChange={onCompanyTechStackChange}
                                     placeholder="Node.js, TypeScript, ..."
                                     iconUrl={LINK_ICON_CDN}
-                                    iconAlt="tech stack icon"
+                                    iconAlt="Biểu tượng ngăn xếp công nghệ"
                                     compact
                                 />
 

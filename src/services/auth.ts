@@ -147,7 +147,7 @@ export const loginNormalAuth = async (
 
 export const loginWithUIT = async (identifier: string, password: string): Promise<LoginResponse> => {
     if (!UIT_AUTH_SECRET) {
-        throw new Error('VITE_UIT_AUTH_SECRET is not defined in environment variables.');
+        throw new Error('Biến môi trường VITE_UIT_AUTH_SECRET chưa được thiết lập.');
     }
     const encryptedPassword = await encryptPassword(password, UIT_AUTH_SECRET);
     const response = await fetch(buildApiUrl('api/auth/login'), {
@@ -191,7 +191,7 @@ export const registerHrUser = async (
     }
 
     if (!response.ok) {
-        throw new Error(toErrorMessage('Dang ky tai khoan HR that bai.', responsePayload as ApiErrorShape));
+        throw new Error(toErrorMessage('Đăng ký tài khoản HR thất bại.', responsePayload as ApiErrorShape));
     }
 
     return responsePayload as RegisterHrResponse;
@@ -217,7 +217,7 @@ export const checkHrEmailAvailability = async (email: string): Promise<void> => 
     }
 
     if (!response.ok) {
-        throw new Error(toErrorMessage('Khong the kiem tra email.', payload as ApiErrorShape));
+        throw new Error(toErrorMessage('Không thể kiểm tra email.', payload as ApiErrorShape));
     }
 };
 

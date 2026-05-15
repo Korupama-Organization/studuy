@@ -168,17 +168,17 @@ const RecruiterDashboard: React.FC = () => {
             <div className="flex items-center gap-3 border-l border-gray-200 pl-6">
               <div className="text-right">
                 <p className="text-sm font-bold text-gray-900 leading-none">
-                  {recruiter.fullName || currentUser?.fullName || 'User'}
+                  {recruiter.fullName || currentUser?.fullName || 'Người dùng'}
                 </p>
                 <p className="text-[11px] font-bold text-indigo-500 bg-indigo-50 px-2 py-1 rounded-md mt-1 inline-block">
-                  {recruiter.jobTitle || currentUser?.role || 'HR'}
+                  {recruiter.jobTitle || currentUser?.role || 'Nhân sự'}
                 </p>
               </div>
               <div className="w-11 h-11 rounded-full shadow-sm bg-indigo-500 text-white flex items-center justify-center font-bold text-lg overflow-hidden">
                 {recruiter.avatarUrl ? (
-                    <img src={recruiter.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                    <img src={recruiter.avatarUrl} alt="Ảnh đại diện" className="w-full h-full object-cover" />
                 ) : (
-                    (recruiter.fullName || currentUser?.fullName || 'U').charAt(0).toUpperCase()
+                    (recruiter.fullName || currentUser?.fullName || 'N').charAt(0).toUpperCase()
                 )}
               </div>
             </div>
@@ -414,7 +414,7 @@ const RecruiterDashboard: React.FC = () => {
                     Phỏng vấn {interview.candidateName}
                   </h4>
                   <div className="flex items-center gap-2">
-                    <img src={interview.interviewerAvatar} alt="Candidate" className="w-6 h-6 rounded-full object-cover" />
+                    <img src={interview.interviewerAvatar} alt="Ứng viên" className="w-6 h-6 rounded-full object-cover" />
                     <span className="text-[11px] font-bold text-gray-500">{interview.candidateName}</span>
                   </div>
                 </motion.div>

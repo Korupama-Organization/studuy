@@ -100,47 +100,6 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     return [];
   };
 
-  const parseNumberValue = (value: unknown): number | null => {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value;
-    }
-
-    if (typeof value === "string") {
-      const trimmed = value.trim();
-      const numericMatch = trimmed.match(/[-+]?[0-9]*\.?[0-9]+/);
-      if (numericMatch) {
-        const parsed = Number(numericMatch[0]);
-        if (!Number.isNaN(parsed)) {
-          return parsed;
-        }
-      }
-    }
-
-    if (typeof value === "object" && value !== null) {
-      const obj = value as Record<string, unknown>;
-      if (typeof obj.$numberInt === "string") {
-        const parsed = Number(obj.$numberInt);
-        if (!Number.isNaN(parsed)) {
-          return parsed;
-        }
-      }
-      if (typeof obj.$numberLong === "string") {
-        const parsed = Number(obj.$numberLong);
-        if (!Number.isNaN(parsed)) {
-          return parsed;
-        }
-      }
-      if (typeof obj.$numberDecimal === "string") {
-        const parsed = Number(obj.$numberDecimal);
-        if (!Number.isNaN(parsed)) {
-          return parsed;
-        }
-      }
-    }
-
-    return null;
-  };
-
   const locationsFromBasicInfo = toStringArray(basicInfo?.locations);
   const locationsFromBasicInfoSingle = toStringArray(basicInfo?.location);
   const locationsFromRoot = toStringArray(raw.locations);
@@ -173,11 +132,6 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     (typeof raw._id === "string" && raw._id) ||
     (typeof raw.id === "string" && raw.id) ||
     "";
-  const rawSlug =
-    (typeof raw.slug === "string" && raw.slug) ||
-    (typeof raw.jobSlug === "string" && raw.jobSlug) ||
-    "";
-
   return {
     id: rawId || "N/A",
     slug: rawId ? `JOB-${rawId.slice(-5).toUpperCase()}` : "",
@@ -272,7 +226,7 @@ const normalizeJob = (raw: Record<string, unknown>): JobRow => {
     })(),
     createdAt: parseDateField(raw.createdAt),
     createdBy,
-    status: (typeof raw.status === "string" && raw.status) || "Opening",
+    status: (typeof raw.status === "string" && raw.status) || "Đang tuyển",
   };
 };
 
@@ -345,12 +299,12 @@ export default function RecruiterJobsPage() {
       const payload = (await response.json()) as unknown;
 
       if (!response.ok) {
-        throw new Error("Khong the tai danh sach jobs.");
+        throw new Error("Không thể tải danh sách việc làm.");
       }
 
       setJobs(extractJobs(payload).map(normalizeJob));
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Khong the tai danh sach jobs.");
+      setError(loadError instanceof Error ? loadError.message : "Không thể tải danh sách việc làm.");
       setJobs([]);
     } finally {
       setIsLoading(false);
@@ -409,7 +363,7 @@ export default function RecruiterJobsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await getResponseErrorMessage(response, "Tao job that bai."));
+        throw new Error(await getResponseErrorMessage(response, "Tạo việc làm thất bại."));
       }
 
       await loadJobs(sortBy);
@@ -429,7 +383,7 @@ export default function RecruiterJobsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await getResponseErrorMessage(response, "Cap nhat job that bai."));
+        throw new Error(await getResponseErrorMessage(response, "Cập nhật việc làm thất bại."));
       }
 
       await loadJobs(sortBy);
@@ -445,7 +399,7 @@ export default function RecruiterJobsPage() {
       });
 
       if (!response.ok) {
-        throw new Error(await getResponseErrorMessage(response, "Xoa job that bai."));
+        throw new Error(await getResponseErrorMessage(response, "Xóa việc làm thất bại."));
       }
 
       await loadJobs();

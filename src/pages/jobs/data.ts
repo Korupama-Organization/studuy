@@ -1,10 +1,10 @@
 export const jobRows = Array.from({ length: 6 }).map((_, index) => ({
   id: `JOB-00${index + 1}`,
-  title: "Middle Back End Developer (Java)",
+  title: "Lập trình viên Backend trung cấp (Java)",
   salary: "1000-2000 USD",
   createdAt: "22/10/2025",
   createdBy: "Adam",
-  status: "Opening",
+  status: "Đang tuyển",
 }));
 
 export const navItems = [
@@ -16,10 +16,10 @@ export const navItems = [
 ];
 
 export const columns = [
-  { key: "id", label: "Job ID", width: "100px" },
-  { key: "title", label: "Job title", width: "1.7fr" },
-  { key: "salary", label: "Salary", width: "1fr" },
-  { key: "createdAt", label: "Created At", width: "1fr" },
-  { key: "createdBy", label: "Created By", width: "1fr" },
-  { key: "status", label: "Status", width: "120px" },
+  { key: "id", label: "Mã việc làm", width: "100px" },
+  { key: "title", label: "Tên việc làm", width: "1.7fr" },
+  { key: "salary", label: "Mức lương", width: "1fr" },
+  { key: "createdAt", label: "Ngày tạo", width: "1fr" },
+  { key: "createdBy", label: "Người tạo", width: "1fr" },
+  { key: "status", label: "Trạng thái", width: "120px" },
 ];

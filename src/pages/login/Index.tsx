@@ -75,7 +75,7 @@ export default function LoginPage() {
         setErrorMessage("");
 
         if (!normalizedIdentifier || !normalizedPassword) {
-            setErrorMessage("Vui lòng nhập Email và mật khẩu.");
+            setErrorMessage("Vui lòng nhập email và mật khẩu.");
             return;
         }
 

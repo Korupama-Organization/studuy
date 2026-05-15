@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
     const token = localStorage.getItem("accessToken") || "";
     
     if (!token) {
-      throw new Error("No access token found");
+      throw new Error("Không tìm thấy token truy cập.");
     }
     
     const response = await fetch(buildApiUrl("api/candidate-profiles/me/dashboard"), {
@@ -41,20 +41,20 @@ const Dashboard: React.FC = () => {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch dashboard data");
+      throw new Error("Không thể tải dữ liệu bảng điều khiển.");
     }
 
     const json = await response.json();
     return json.data;
   };
 
-  const { data, isLoading, error } = useQuery({
+  const { data } = useQuery({
     queryKey: ['candidate-dashboard'],
     queryFn: fetchDashboardData,
     initialData: {
       profile: {
         id: "",
-        fullName: "Candidate",
+        fullName: "Ứng viên",
         avatarUrl: null,
         role: "candidate",
         hasProfile: false,
@@ -73,18 +73,18 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <GlobalHeader userName={data?.profile?.fullName || "Candidate"} />
+      <GlobalHeader userName={data?.profile?.fullName || "Ứng viên"} />
       
       <main className="dashboard-main">
         <div className="dashboard-content-wrapper">
           <WelcomeSection 
-            profile={data?.profile || { fullName: "Candidate", avatarUrl: null, completionPercentage: 0 }} 
+            profile={data?.profile || { fullName: "Ứng viên", avatarUrl: null, completionPercentage: 0 }} 
             stats={data?.quickStats || { appliedJobs: 0, matchedJobs: 0, profileCompletion: 0 }} 
           />
           
           <JobMatchesSection 
             jobs={data?.jobMatches || []} 
-            firstName={data?.profile?.fullName?.split(" ").pop() || "CANDIDATE"} 
+            firstName={data?.profile?.fullName?.split(" ").pop() || "ỨNG VIÊN"} 
             overallScore={84} // Hardcoded for design consistency, could be computed
           />
           

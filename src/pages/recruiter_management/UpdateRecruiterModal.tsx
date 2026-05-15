@@ -187,7 +187,7 @@ export default function UpdateRecruiterModal({
               </div>
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-900">
-                  Date of Birth
+                  Ngày sinh
                 </label>
                 <input
                   type="date"
@@ -201,7 +201,7 @@ export default function UpdateRecruiterModal({
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-900">
-                Avatar URL
+                URL ảnh đại diện
               </label>
               <input
                 type="text"
@@ -215,7 +215,7 @@ export default function UpdateRecruiterModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-900">
-                  Job Title
+                  Chức danh
                 </label>
                 <input
                   type="text"
@@ -227,7 +227,7 @@ export default function UpdateRecruiterModal({
               </div>
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-900">
-                  Membership Role
+                  Vai trò thành viên
                 </label>
                 <input
                   type="text"
@@ -241,7 +241,7 @@ export default function UpdateRecruiterModal({
 
             <div>
               <label className="mb-2 block text-sm font-semibold text-slate-900">
-                LinkedIn URL
+                URL LinkedIn
               </label>
               <input
                 type="text"
