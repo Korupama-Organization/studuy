@@ -1,15 +1,30 @@
 ﻿export interface CandidateApplicationCard {
   id: string;
+  jobId: string;
+  companyId: string;
   companyName: string;
   companyDetail: string;
+  companyDescription: string;
   jobTitle: string;
   location: string;
   logoUrl?: string;
   status: string;
   currentProcessIndex: number;
+  currentStageNote: string;
+  currentStageLoggedAt: string;
+  currentStageLabel: string;
   summary: string;
+  jobDescription: string;
   requirements: string;
   processLabels: string[];
+}
+
+interface ApplicationStatusLog {
+  status: string;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+  processIndex: number;
 }
 
 const PROCESS_LABELS = [
@@ -56,6 +71,13 @@ const getString = (...values: unknown[]): string => {
     if (typeof value === "string" && value.trim()) {
       return value.trim();
     }
+
+    if (isRecord(value)) {
+      const objectId = value.$oid;
+      if (typeof objectId === "string" && objectId.trim()) {
+        return objectId.trim();
+      }
+    }
   }
 
   return "";
@@ -64,6 +86,19 @@ const getString = (...values: unknown[]): string => {
 const getNestedRecord = (record: Record<string, unknown>, key: string): Record<string, unknown> => {
   const value = record[key];
   return isRecord(value) ? value : {};
+};
+
+const getRecordArray = (...values: unknown[]): Record<string, unknown>[] => {
+  for (const value of values) {
+    if (Array.isArray(value)) {
+      const records = value.filter(isRecord);
+      if (records.length > 0) {
+        return records;
+      }
+    }
+  }
+
+  return [];
 };
 
 const getLocation = (job: Record<string, unknown>, basicInfo: Record<string, unknown>): string => {
@@ -101,6 +136,53 @@ const getProcessIndex = (record: Record<string, unknown>, status: string): numbe
   return STATUS_INDEX[normalizedStatus] ?? 0;
 };
 
+const getTimestamp = (value: string): number => {
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
+const normalizeStatusLogs = (records: Record<string, unknown>[]): ApplicationStatusLog[] => {
+  return records
+    .map((record) => {
+      const status = getString(record.status, record.stage, record.process, "Ứng tuyển");
+
+      return {
+        status,
+        note: getString(record.note, record.notes, record.message, record.description),
+        createdAt: getString(record.createdAt, record.created_at, record.loggedAt, record.logTime),
+        updatedAt: getString(record.updatedAt, record.updated_at),
+        processIndex: getProcessIndex(record, status),
+      };
+    })
+    .sort((left, right) => getTimestamp(left.createdAt || left.updatedAt) - getTimestamp(right.createdAt || right.updatedAt));
+};
+
+const getCurrentStatusLog = (
+  logs: ApplicationStatusLog[],
+  currentProcessIndex: number,
+  currentStatus: Record<string, unknown>,
+): ApplicationStatusLog | null => {
+  const matchingLogs = logs.filter((log) => log.processIndex === currentProcessIndex);
+
+  if (matchingLogs.length > 0) {
+    return matchingLogs[matchingLogs.length - 1];
+  }
+
+  if (Object.keys(currentStatus).length > 0) {
+    const status = getString(currentStatus.status, currentStatus.stage, currentStatus.process, "Ứng tuyển");
+
+    return {
+      status,
+      note: getString(currentStatus.note, currentStatus.notes, currentStatus.message, currentStatus.description),
+      createdAt: getString(currentStatus.createdAt, currentStatus.created_at, currentStatus.loggedAt, currentStatus.logTime),
+      updatedAt: getString(currentStatus.updatedAt, currentStatus.updated_at),
+      processIndex: currentProcessIndex,
+    };
+  }
+
+  return logs.length > 0 ? logs[logs.length - 1] : null;
+};
+
 export const extractCandidateApplications = (payload: unknown): Record<string, unknown>[] => {
   if (Array.isArray(payload)) {
     return payload.filter(isRecord);
@@ -131,25 +213,55 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
   const job = Object.keys(jobInfo).length > 0 ? jobInfo : getNestedRecord(raw, "job");
   const basicInfo = getNestedRecord(job, "basicInfo");
   const company = getNestedRecord(raw, "company");
+  const rawCompanyId = getNestedRecord(raw, "companyId");
   const companyId = getNestedRecord(job, "companyId");
   const jobCompany = Object.keys(companyId).length > 0 ? companyId : getNestedRecord(job, "company");
   const requirements = getNestedRecord(job, "requirements");
-  const status = getString(raw.applicationStatus, raw.status, raw.stage, raw.process, "Ứng tuyển");
+  const currentStatus = getNestedRecord(raw, "currentStatus");
+  const statusLogs = normalizeStatusLogs(getRecordArray(raw.applicationStatus, raw.statusHistory, raw.logs));
+  const status = getString(currentStatus.status, raw.status, raw.stage, raw.process, statusLogs.at(-1)?.status, "Ứng tuyển");
+  const companyDescription = getString(
+    company.description,
+    jobCompany.description,
+    raw.companyDescription,
+    "Thông tin công ty sẽ được cập nhật sau.",
+  );
+  const jobDescription = getString(
+    basicInfo.jobDescription,
+    job.jobDescription,
+    job.description,
+    raw.jobDescription,
+    "Mô tả công việc sẽ được cập nhật sau.",
+  );
   const summary = getString(
     raw.summary,
     job.summary,
     basicInfo.summary,
     basicInfo.shortDescription,
-    basicInfo.jobDescription,
-    "Thông tin mô tả công việc sẽ được cập nhật sau.",
+    jobDescription,
+    "Tóm tắt công việc sẽ được cập nhật sau.",
   );
+  const jobId = getString(raw.jobId, job._id, job.id, raw._id, raw.id, job.slug);
+  const resolvedCompanyId = getString(
+    job.companyId,
+    jobCompany._id,
+    jobCompany.id,
+    company._id,
+    company.id,
+    raw.companyId,
+    rawCompanyId._id,
+    rawCompanyId.id,
+  );
+  const currentProcessIndex = getProcessIndex(Object.keys(currentStatus).length > 0 ? currentStatus : raw, status);
+  const currentStatusLog = getCurrentStatusLog(statusLogs, currentProcessIndex, currentStatus);
 
   return {
-    id: getString(raw.applicationId, raw._id, raw.id, raw.jobId, job.slug, crypto.randomUUID()),
+    id: getString(raw.applicationId, raw._id, raw.id, jobId, crypto.randomUUID()),
+    jobId,
+    companyId: resolvedCompanyId,
     companyName: getString(company.name, jobCompany.name, raw.companyName, job.companyName, "Tên công ty"),
+    companyDescription,
     companyDetail: getString(
-      company.description,
-      jobCompany.description,
       company.industry,
       jobCompany.industry,
       basicInfo.roleType,
@@ -160,8 +272,12 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
     location: getLocation(job, basicInfo) || "Vị trí",
     logoUrl: getString(company.logoUrl, company.logo, jobCompany.logoUrl, jobCompany.logo) || undefined,
     status,
-    currentProcessIndex: getProcessIndex(raw, status),
+    currentProcessIndex,
+    currentStageNote: currentStatusLog?.note || "Chưa có ghi chú cho giai đoạn này.",
+    currentStageLoggedAt: currentStatusLog?.createdAt || currentStatusLog?.updatedAt || getString(raw.createdAt, raw.created_at),
+    currentStageLabel: PROCESS_LABELS[currentProcessIndex] || status,
     summary,
+    jobDescription,
     requirements: getString(
       raw.requirements,
       requirements.requiredEducation,
