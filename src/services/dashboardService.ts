@@ -29,6 +29,7 @@ export interface DashboardStats {
 }
 
 export interface ApplicationStat {
+  key?: string;
   day: string;
   count: number;
   secondaryCount: number;
@@ -273,15 +274,19 @@ const mapStats = (summaryCards: ApiSummaryCard[]): DashboardStats => {
   };
 };
 
+const normalizeCount = (value: unknown): number => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
+};
+
 const mapChartData = (chartPoints: ApiChartDataPoint[]): ApplicationStat[] => {
   if (chartPoints.length === 0) return [];
-  const maxReceived = Math.max(...chartPoints.map((p) => p.received), 1);
-  const maxQualified = Math.max(...chartPoints.map((p) => p.qualified), 1);
 
   return chartPoints.map((point) => ({
+    key: point.key,
     day: point.label,
-    count: Math.round((point.received / maxReceived) * 100),
-    secondaryCount: Math.round((point.qualified / maxQualified) * 100),
+    count: normalizeCount(point.received),
+    secondaryCount: normalizeCount(point.qualified),
   }));
 };
 

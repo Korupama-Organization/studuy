@@ -13,20 +13,66 @@ dayjs.locale("vi");
 interface ActivityPanelProps {
   notifications: Notification[];
   upcomingInterviews: UpcomingInterview[];
+  isLoading?: boolean;
+  error?: string;
+  unreadCount?: number;
+  onMarkAllAsRead?: () => void;
+  onClose?: () => void;
 }
 
 const ActivityPanel: React.FC<ActivityPanelProps> = ({
   notifications,
   upcomingInterviews,
+  isLoading = false,
+  error = "",
+  unreadCount = 0,
+  onMarkAllAsRead,
+  onClose,
 }) => {
   return (
     <aside className="rd-activity">
-      <div className="rd-activity-header">Hoạt động</div>
+      <div className="rd-activity-header">
+        <span>Hoạt động</span>
+        {onClose ? (
+          <button
+            type="button"
+            className="rd-activity-close"
+            aria-label="Đóng bảng thông báo"
+            onClick={onClose}
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        ) : null}
+      </div>
+
+      {isLoading ? (
+        <p className="rd-empty" style={{ padding: "1rem 1.25rem" }}>
+          Đang tải thông báo...
+        </p>
+      ) : null}
+
+      {error ? (
+        <p className="rd-activity-error">
+          {error}
+        </p>
+      ) : null}
 
       {/* Notifications */}
       <div className="rd-activity-section">
-        <p className="rd-activity-section-label">Thông báo</p>
-        {notifications.length === 0 ? (
+        <div className="rd-activity-section-heading">
+          <p className="rd-activity-section-label">Thông báo</p>
+          {onMarkAllAsRead ? (
+            <button
+              type="button"
+              className="rd-mark-read-btn"
+              disabled={unreadCount === 0 || notifications.length === 0}
+              onClick={onMarkAllAsRead}
+            >
+              Mark all as read
+            </button>
+          ) : null}
+        </div>
+        {!isLoading && notifications.length === 0 ? (
           <p className="rd-empty" style={{ padding: "0.5rem 0" }}>
             Chưa có thông báo.
           </p>
@@ -65,7 +111,7 @@ const ActivityPanel: React.FC<ActivityPanelProps> = ({
       {/* Upcoming Interviews */}
       <div className="rd-activity-section" style={{ marginTop: "1.25rem" }}>
         <p className="rd-activity-section-label">Phỏng vấn sắp tới</p>
-        {upcomingInterviews.length === 0 ? (
+        {!isLoading && upcomingInterviews.length === 0 ? (
           <p className="rd-empty" style={{ padding: "0.5rem 0" }}>
             Không có lịch phỏng vấn sắp tới.
           </p>

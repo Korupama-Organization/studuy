@@ -208,6 +208,7 @@ export default function RecruiterTable({
       </div>
 
       <UpdateRecruiterModal
+        key={selectedRecruiter?._id || selectedRecruiter?.email || "update-recruiter-modal"}
         isOpen={isUpdateModalOpen}
         onClose={() => setIsUpdateModalOpen(false)}
         recruiter={selectedRecruiter || undefined}

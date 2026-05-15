@@ -9,7 +9,7 @@ interface RecruiterSidebarProps {
 const NAV_ITEMS = [
   {
     key: "dashboard",
-    label: "Main Dashboard",
+    label: "Bảng điều khiển",
     to: "/recruiter/dashboard",
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -21,7 +21,7 @@ const NAV_ITEMS = [
   {
     key: "employees",
     label: "Nhân viên",
-    to: "/recruiter/employees",
+    to: "/recruiter/management",
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -54,9 +54,9 @@ const NAV_ITEMS = [
     ),
   },
   {
-    key: "interviews",
-    label: "Phỏng vấn",
-    to: "/recruiter/interviews",
+    key: "candidates",
+    label: "Ứng viên",
+    to: "/recruiter/candidates",
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />

@@ -1,6 +1,5 @@
 import React from 'react';
 import LandingPage from '../pages/landing/Index';
-import JobsPage from '../pages/jobs/Index';
 import LoginPage from '../pages/login/Index';
 import RegisterPage from '../pages/register/Index';
 import CandidateDashboard from '../pages/dashboard/Index';
@@ -126,7 +125,6 @@ function App() {
             }
           />
 
-          <Route path="/jobs" element={<JobsPage />} />
           <Route path="/login/*" element={<LoginPage />} />
           <Route path="/register/*" element={<RegisterPage />} />
           <Route path="/candidate/dashboard" element={<CandidateDashboard />} />

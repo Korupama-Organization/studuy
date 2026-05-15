@@ -1,6 +1,7 @@
 ﻿import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import GlobalHeader from "../../components/GlobalHeader";
+import { buildApiUrl } from "../../services/auth";
 import {
   extractCandidateApplications,
   normalizeCandidateApplication,
@@ -116,7 +117,7 @@ export default function CandidateJobsPage() {
   const { data, error, isLoading } = useQuery({
     queryKey: ["candidate-applications"],
     queryFn: async () => {
-      const response = await fetch("/api/applications", {
+      const response = await fetch(buildApiUrl("/api/applications"), {
         method: "GET",
         headers: getAuthHeaders(),
       });

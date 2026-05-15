@@ -1,11 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import RecruiterSidebar from "../../components/recruiter/RecruiterSidebar";
+import { useCurrentRecruiter } from "../../hooks/useCurrentRecruiter";
+import { useRecruiterActivity } from "../../hooks/useRecruiterActivity";
+import RecruiterSidebar from "../recruiter_dashboard/components/RecruiterSidebar";
+import RecruiterTopBar from "../recruiter_dashboard/components/RecruiterTopBar";
+import ActivityPanel from "../recruiter_dashboard/components/ActivityPanel";
+import "../recruiter_dashboard/recruiter.css";
 import "./company.css";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
-  "http://localhost:3000";
+  (
+    import.meta.env.VITE_API_BASE_URL?.toString().trim() ||
+    "http://localhost:3000"
+  ).replace(/\/+$/, "");
 
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
@@ -125,6 +132,8 @@ function TagInput({ tags, onChange, placeholder = "Thêm...", buttonLabel = "Th�
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function CompanyPage() {
   const navigate = useNavigate();
+  const topbarRecruiter = useCurrentRecruiter();
+  const recruiterActivity = useRecruiterActivity();
   const [form, setForm] = useState<CompanyForm>(EMPTY_FORM);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -177,7 +186,17 @@ export default function CompanyPage() {
   }, [navigate]);
 
   useEffect(() => {
-    void fetchCompany();
+    let isActive = true;
+
+    void Promise.resolve().then(() => {
+      if (isActive) {
+        void fetchCompany();
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [fetchCompany]);
 
   // ── Save handler ──────────────────────────────────────────────────────────
@@ -250,15 +269,20 @@ export default function CompanyPage() {
   };
 
   return (
-    <div className="company-page-root">
-      {/* Ambient blobs */}
-      <div className="ambient-blob blob-1" />
-      <div className="ambient-blob blob-2" />
+    <div className="rd-layout">
+      <RecruiterSidebar activeItem="company" />
 
-      <div className="company-layout">
-        <RecruiterSidebar activePath="/recruiter/company" />
+      <div className="rd-body">
+        <div className="rd-content-area">
+          <RecruiterTopBar
+            recruiter={topbarRecruiter}
+            company={null}
+            notificationCount={recruiterActivity.notificationCount}
+            isActivityPanelOpen={recruiterActivity.isActivityPanelOpen}
+            onToggleActivityPanel={recruiterActivity.toggleActivityPanel}
+          />
 
-        <main className="company-main">
+          <main className="company-main rd-main">
           {/* ── Page header ── */}
           <div className="company-page-header">
             <div>
@@ -593,7 +617,20 @@ export default function CompanyPage() {
               {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
             </button>
           </div>
-        </main>
+          </main>
+        </div>
+
+        {recruiterActivity.isActivityPanelOpen ? (
+          <ActivityPanel
+            notifications={recruiterActivity.notifications}
+            upcomingInterviews={recruiterActivity.upcomingInterviews}
+            isLoading={recruiterActivity.isActivityLoading}
+            error={recruiterActivity.activityError}
+            unreadCount={recruiterActivity.unreadNotificationCount}
+            onMarkAllAsRead={recruiterActivity.markAllNotificationsAsRead}
+            onClose={recruiterActivity.closeActivityPanel}
+          />
+        ) : null}
       </div>
     </div>
   );
