@@ -74,7 +74,7 @@ const DemoSection: React.FC = () => {
               <iframe
                 width="100%"
                 height="100%"
-                src="https://www.youtube.com/embed/PD61lIYrG-M?autoplay=1&mute=1&playsinline=1&rel=0"
+                src="https://www.youtube.com/embed/pS0Itxk4W9M?si=tH4LmQHWoaXQtdcZ"
                 title="Demo phỏng vấn với AI"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
