@@ -1,5 +1,5 @@
 import { buildApiUrl } from './api';
-import { getStoredAccessToken } from './auth';
+import { getStoredAccessToken, getStoredUser } from './auth';
 
 interface ApiErrorShape {
   message?: string | string[];
@@ -7,8 +7,8 @@ interface ApiErrorShape {
 }
 
 export interface CreateMockInterviewSessionPayload {
-  jobId: string;
-  candidateId: string;
+  jobId?: string | null;
+  candidateId?: string | null;
   interviewMode?: 'technical' | 'hr' | string;
   startTime?: string;
   endTime?: string;
@@ -62,11 +62,16 @@ const readObjectId = (...values: unknown[]): string => {
   return '';
 };
 
-const parseJsonOrNull = async <T>(response: Response): Promise<T | null> => {
-  try {
-    return (await response.json()) as T;
-  } catch {
+const readResponseBody = async (response: Response): Promise<unknown> => {
+  const rawText = (await response.text()).trim();
+  if (!rawText) {
     return null;
+  }
+
+  try {
+    return JSON.parse(rawText) as unknown;
+  } catch {
+    return rawText;
   }
 };
 
@@ -78,6 +83,18 @@ const getDefaultSchedule = (): Pick<CreateMockInterviewSessionPayload, 'startTim
     startTime: startTime.toISOString(),
     endTime: endTime.toISOString(),
   };
+};
+
+const resolveStoredCandidateId = (): string => {
+  type StoredUserWithExtraIds = NonNullable<ReturnType<typeof getStoredUser>> & {
+    id?: string;
+    userId?: string;
+    candidateId?: string;
+  };
+
+  const storedUser = getStoredUser() as StoredUserWithExtraIds | null;
+
+  return readObjectId(storedUser?.candidateId, storedUser?._id, storedUser?.id, storedUser?.userId);
 };
 
 export const buildInterviewRoomUrl = (interviewSessionId: string): string => {
@@ -114,30 +131,30 @@ const extractInterviewSessionId = (payload: unknown): string => {
 };
 
 export const createMockInterviewSession = async ({
-  jobId,
+  jobId = null,
   candidateId,
   interviewMode = 'technical',
   startTime,
   endTime,
-}: CreateMockInterviewSessionPayload): Promise<CreatedInterviewSession> => {
-  const normalizedJobId = jobId.trim();
-  const normalizedCandidateId = candidateId.trim();
-
-  if (!normalizedJobId) {
-    throw new Error('Không tìm thấy mã job để tạo mock interview.');
-  }
+}: CreateMockInterviewSessionPayload = {}): Promise<CreatedInterviewSession> => {
+  const normalizedJobId = typeof jobId === 'string' && jobId.trim() ? jobId.trim() : null;
+  const normalizedCandidateId = readObjectId(candidateId, resolveStoredCandidateId());
 
   if (!normalizedCandidateId) {
     throw new Error('Không tìm thấy mã candidate để tạo mock interview.');
   }
 
-  const schedule = getDefaultSchedule();
   const accessToken = getStoredAccessToken();
+  if (!accessToken) {
+    throw new Error('Chưa đăng nhập. Vui lòng đăng nhập lại để tạo mock interview.');
+  }
+
+  const schedule = getDefaultSchedule();
   const response = await fetch(buildApiUrl('/api/interview-sessions'), {
     method: 'POST',
     headers: {
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
     body: JSON.stringify({
       jobId: normalizedJobId,
@@ -150,7 +167,7 @@ export const createMockInterviewSession = async ({
     }),
   });
 
-  const payload = await parseJsonOrNull<unknown>(response);
+  const payload = await readResponseBody(response);
 
   if (!response.ok) {
     throw new Error(toErrorMessage('Tạo mock interview thất bại.', payload as ApiErrorShape | null));

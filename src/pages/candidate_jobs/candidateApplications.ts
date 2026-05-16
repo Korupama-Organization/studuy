@@ -1,7 +1,6 @@
 ﻿export interface CandidateApplicationCard {
   id: string;
   jobId: string;
-  candidateId: string;
   companyId: string;
   companyName: string;
   companyDetail: string;
@@ -214,10 +213,6 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
   const job = Object.keys(jobInfo).length > 0 ? jobInfo : getNestedRecord(raw, "job");
   const basicInfo = getNestedRecord(job, "basicInfo");
   const company = getNestedRecord(raw, "company");
-  const candidate = getNestedRecord(raw, "candidate");
-  const candidateUser = getNestedRecord(raw, "candidateUserId");
-  const rawCandidateId = getNestedRecord(raw, "candidateId");
-  const rawJobId = getNestedRecord(raw, "jobId");
   const rawCompanyId = getNestedRecord(raw, "companyId");
   const companyId = getNestedRecord(job, "companyId");
   const jobCompany = Object.keys(companyId).length > 0 ? companyId : getNestedRecord(job, "company");
@@ -246,17 +241,7 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
     jobDescription,
     "Tóm tắt công việc sẽ được cập nhật sau.",
   );
-  const jobId = getString(raw.jobId, rawJobId._id, rawJobId.id, job._id, job.id, raw._id, raw.id, job.slug);
-  const candidateId = getString(
-    raw.candidateId,
-    rawCandidateId._id,
-    rawCandidateId.id,
-    raw.candidateUserId,
-    candidateUser._id,
-    candidateUser.id,
-    candidate._id,
-    candidate.id,
-  );
+  const jobId = getString(raw.jobId, job._id, job.id, raw._id, raw.id, job.slug);
   const resolvedCompanyId = getString(
     job.companyId,
     jobCompany._id,
@@ -273,7 +258,6 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
   return {
     id: getString(raw.applicationId, raw._id, raw.id, jobId, crypto.randomUUID()),
     jobId,
-    candidateId,
     companyId: resolvedCompanyId,
     companyName: getString(company.name, jobCompany.name, raw.companyName, job.companyName, "Tên công ty"),
     companyDescription,

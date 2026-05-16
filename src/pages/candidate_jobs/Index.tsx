@@ -1,8 +1,8 @@
 ﻿import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import GlobalHeader from "../../components/GlobalHeader";
+import { useMockInterviewLauncher } from "../../hooks/useMockInterviewLauncher";
 import { buildApiUrl, getStoredUser } from "../../services/auth";
-import { createMockInterviewSession } from "../../services/interview";
 import {
   extractCandidateApplications,
   normalizeCandidateApplication,
@@ -318,15 +318,11 @@ function DetailDialog({
 function CandidateJobCard({
   application,
   isApplying,
-  isStartingMockInterview,
   onApply,
-  onStartMockInterview,
 }: {
   application: CandidateApplicationCard;
   isApplying: boolean;
-  isStartingMockInterview: boolean;
   onApply: (application: CandidateApplicationCard) => void;
-  onStartMockInterview: (application: CandidateApplicationCard) => void;
 }) {
   const [dialogContent, setDialogContent] = useState<{ title: string; content: string } | null>(null);
   const initials = useMemo(() => {
@@ -350,24 +346,14 @@ function CandidateJobCard({
           <p className="candidate-job-company__detail">{application.companyDetail}</p>
           <h3>{application.jobTitle}</h3>
           <p className="candidate-job-company__location">{application.location}</p>
-          <div className="candidate-job-actions">
-            <button
-              className="candidate-job-apply"
-              type="button"
-              onClick={() => onApply(application)}
-              disabled={isApplying || !application.jobId}
-            >
-              {isApplying ? "Đang apply..." : "Apply"}
-            </button>
-            <button
-              className="candidate-job-apply candidate-job-apply--mock"
-              type="button"
-              onClick={() => onStartMockInterview(application)}
-              disabled={isStartingMockInterview || !application.jobId}
-            >
-              {isStartingMockInterview ? "Đang tạo..." : "Mock Interview"}
-            </button>
-          </div>
+          <button
+            className="candidate-job-apply"
+            type="button"
+            onClick={() => onApply(application)}
+            disabled={isApplying || !application.jobId}
+          >
+            {isApplying ? "Đang apply..." : "Apply"}
+          </button>
         </div>
 
         <ProcessBars application={application} />
@@ -412,11 +398,14 @@ function CandidateJobCard({
 export default function CandidateJobsPage() {
   const queryClient = useQueryClient();
   const [applyMessage, setApplyMessage] = useState("");
-  const [mockInterviewMessage, setMockInterviewMessage] = useState("");
   const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
-  const [startingMockInterviewJobId, setStartingMockInterviewJobId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<CandidateApplicationSort>("newest");
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const {
+    startMockInterview,
+    isStartingMockInterview,
+    mockInterviewMessage,
+  } = useMockInterviewLauncher();
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["candidate-applications"],
@@ -531,32 +520,6 @@ export default function CandidateJobsPage() {
     },
   });
 
-  const mockInterviewMutation = useMutation({
-    mutationFn: async (application: CandidateApplicationCard) => {
-      const candidateId = application.candidateId || getCandidateUserId();
-
-      return createMockInterviewSession({
-        jobId: application.jobId,
-        candidateId,
-        interviewMode: "technical",
-      });
-    },
-    onMutate: (application) => {
-      setMockInterviewMessage("");
-      setStartingMockInterviewJobId(application.jobId);
-    },
-    onSuccess: (session) => {
-      setMockInterviewMessage("Đã tạo mock interview. Đang chuyển tới phòng phỏng vấn...");
-      window.location.assign(session.roomUrl);
-    },
-    onError: (mutationError) => {
-      setMockInterviewMessage(mutationError instanceof Error ? mutationError.message : "Tạo mock interview thất bại.");
-    },
-    onSettled: () => {
-      setStartingMockInterviewJobId(null);
-    },
-  });
-
   const applications = useMemo(() => data ?? [], [data]);
   const errorMessage = error instanceof Error ? error.message : "";
   const sortedApplications = useMemo(() => {
@@ -584,7 +547,10 @@ export default function CandidateJobsPage() {
 
   return (
     <div className="candidate-jobs-page">
-      <GlobalHeader />
+      <GlobalHeader
+        onMockInterviewClick={startMockInterview}
+        isStartingMockInterview={isStartingMockInterview}
+      />
 
       <main className="candidate-jobs-main">
         <div className="candidate-jobs-shell">
@@ -650,11 +616,7 @@ export default function CandidateJobsPage() {
                   key={application.id}
                   application={application}
                   isApplying={applyMutation.isPending && applyingJobId === application.jobId}
-                  isStartingMockInterview={
-                    mockInterviewMutation.isPending && startingMockInterviewJobId === application.jobId
-                  }
                   onApply={(selectedApplication) => applyMutation.mutate(selectedApplication)}
-                  onStartMockInterview={(selectedApplication) => mockInterviewMutation.mutate(selectedApplication)}
                 />
               ))}
             </div>

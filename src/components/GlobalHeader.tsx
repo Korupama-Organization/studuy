@@ -5,15 +5,21 @@ import { clearAuthSession, getStoredUser } from "../services/auth";
 
 interface GlobalHeaderProps {
   userName?: string;
+  onMockInterviewClick?: () => void;
+  isStartingMockInterview?: boolean;
 }
 
 const navLinks = [
-  { to: "/candidate/dashboard", label: "Bảng điều khiển" },
-  { to: "#", label: "Phỏng vấn thử" },
-  { to: "/candidate/jobs", label: "Việc làm" },
-];
+  { to: "/candidate/dashboard", label: "Bảng điều khiển", isMockInterview: false },
+  { to: "#", label: "Phỏng vấn thử", isMockInterview: true },
+  { to: "/candidate/jobs", label: "Việc làm", isMockInterview: false },
+] as const;
 
-export default function GlobalHeader({ userName }: GlobalHeaderProps) {
+export default function GlobalHeader({
+  userName,
+  onMockInterviewClick,
+  isStartingMockInterview = false,
+}: GlobalHeaderProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -46,10 +52,18 @@ export default function GlobalHeader({ userName }: GlobalHeaderProps) {
 
       <nav className="candidate-jobs-nav" aria-label="Candidate navigation">
         {navLinks.map((link) =>
-          link.to === "#" ? (
-            <span key={link.label} className="candidate-jobs-nav__link candidate-jobs-nav__link--disabled">
-              {link.label}
-            </span>
+          link.isMockInterview ? (
+            <button
+              key={link.label}
+              className={`candidate-jobs-nav__link candidate-jobs-nav__link--button${
+                onMockInterviewClick ? "" : " candidate-jobs-nav__link--disabled"
+              }`}
+              type="button"
+              onClick={onMockInterviewClick}
+              disabled={!onMockInterviewClick || isStartingMockInterview}
+            >
+              {isStartingMockInterview ? "Đang tạo..." : link.label}
+            </button>
           ) : (
             <NavLink
               key={link.label}

@@ -72,6 +72,18 @@
   cursor: default;
 }
 
+.candidate-jobs-nav__link--button {
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.candidate-jobs-nav__link--button:disabled {
+  cursor: default;
+  opacity: 0.64;
+}
+
 .candidate-jobs-nav__link--active {
   color: #ffffff;
   background: linear-gradient(180deg, #7a58e8 0%, #df6be4 100%);
@@ -378,18 +390,10 @@
   font-style: italic;
 }
 
-.candidate-job-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: 18px;
-  gap: 10px;
-}
-
 .candidate-job-apply {
   width: min(160px, 100%);
   min-height: 42px;
+  margin-top: 18px;
   border: 0;
   border-radius: 8px;
   background: linear-gradient(90deg, #6251e8 0%, #d74491 100%);
@@ -402,13 +406,6 @@
     opacity 160ms ease,
     transform 160ms ease,
     box-shadow 160ms ease;
-}
-
-.candidate-job-apply--mock {
-  border: 1px solid rgba(98, 81, 232, 0.55);
-  background: #ffffff;
-  color: #6251e8;
-  box-shadow: 0 8px 18px rgba(98, 81, 232, 0.12);
 }
 
 .candidate-job-apply:hover:not(:disabled) {

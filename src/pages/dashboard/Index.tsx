@@ -8,6 +8,7 @@ import JobMatchesSection from "./components/JobMatchesSection";
 import AIReportsSection from "./components/AIReportsSection";
 import RecentMockSection from "./components/RecentMockSection";
 import Footer from "./components/Footer";
+import { useMockInterviewLauncher } from "../../hooks/useMockInterviewLauncher";
 import {
   getCandidateDashboard,
   type CandidateDashboardData,
@@ -49,6 +50,11 @@ const CandidateDashboard: React.FC = () => {
   const stats = dashboardData.quickStats;
   const jobMatches = dashboardData.jobMatches ?? [];
   const firstName = profile.fullName.split(" ").pop() || "ỨNG VIÊN";
+  const {
+    startMockInterview,
+    isStartingMockInterview,
+    mockInterviewMessage,
+  } = useMockInterviewLauncher({ candidateId: profile.id });
 
   if (isLoading) {
     return (
@@ -107,11 +113,21 @@ const CandidateDashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <GlobalHeader userName={profile.fullName} />
+      <GlobalHeader
+        userName={profile.fullName}
+        onMockInterviewClick={startMockInterview}
+        isStartingMockInterview={isStartingMockInterview}
+      />
 
       <main className="dashboard-main">
         <div className="dashboard-content-wrapper">
           <WelcomeSection profile={profile} stats={stats} />
+
+          {mockInterviewMessage ? (
+            <div className="mock-interview-error" role="alert">
+              {mockInterviewMessage}
+            </div>
+          ) : null}
 
           <JobMatchesSection
             jobs={jobMatches}
