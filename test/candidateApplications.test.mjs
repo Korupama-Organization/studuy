@@ -40,3 +40,45 @@ test("matches company endpoint descriptions by the requested company id", async 
   assert.match(source, /extractCompanyDescription\(payload, companyId\)/);
   assert.match(source, /recordMatchesCompanyId/);
 });
+
+
+test("normalizes candidate application status returned by /api/applications", () => {
+  const application = normalizeCandidateApplication({
+    jobId: "job-1",
+    applicationId: "application-1",
+    applicationStatus: "applied",
+    appliedAt: "2026-05-27T08:00:00.000Z",
+    jobInfo: {
+      _id: "job-1",
+      basicInfo: {
+        title: "Frontend Developer",
+      },
+    },
+  });
+
+  assert.equal(application.hasApplied, true);
+  assert.equal(application.applicationId, "application-1");
+  assert.equal(application.status, "applied");
+  assert.equal(application.currentProcessIndex, 0);
+  assert.equal(application.currentStageLabel, "Ứng tuyển");
+  assert.equal(application.currentStageLoggedAt, "2026-05-27T08:00:00.000Z");
+});
+
+test("keeps unpublished application rows actionable before the candidate applies", () => {
+  const application = normalizeCandidateApplication({
+    jobId: "job-1",
+    applicationStatus: null,
+    applicationId: null,
+    jobInfo: {
+      _id: "job-1",
+      basicInfo: {
+        title: "Frontend Developer",
+      },
+    },
+  });
+
+  assert.equal(application.hasApplied, false);
+  assert.equal(application.applicationId, "");
+  assert.equal(application.currentProcessIndex, -1);
+  assert.equal(application.currentStageLabel, "Chưa ứng tuyển");
+});

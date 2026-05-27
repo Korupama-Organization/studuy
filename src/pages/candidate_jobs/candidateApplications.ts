@@ -1,6 +1,7 @@
 ﻿export interface CandidateApplicationCard {
   id: string;
   jobId: string;
+  applicationId: string;
   companyId: string;
   companyName: string;
   companyDetail: string;
@@ -9,6 +10,8 @@
   location: string;
   logoUrl?: string;
   status: string;
+  hasApplied: boolean;
+  appliedAt: string;
   currentProcessIndex: number;
   currentStageNote: string;
   currentStageLoggedAt: string;
@@ -42,14 +45,17 @@ const STATUS_INDEX: Record<string, number> = {
   pending: 0,
   submitted: 0,
   screening: 1,
+  screening_passed: 1,
   sang_loc: 1,
   in_review: 1,
   reviewed: 1,
   interview: 2,
+  ai_interview_completed: 2,
   hr_interview: 2,
   phong_van: 2,
   phong_van_hr: 2,
   technical_interview: 3,
+  manual_interview_completed: 3,
   tech_interview: 3,
   phong_van_ky_thuat: 3,
   offer: 4,
@@ -111,6 +117,20 @@ const getLocation = (job: Record<string, unknown>, basicInfo: Record<string, unk
   return getString(basicInfo.location, job.location, job.workLocation);
 };
 
+const normalizeStatusKey = (status: string): string => {
+  return status
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+};
+
+const isKnownApplicationStatus = (status: string): boolean => {
+  return Boolean(status && STATUS_INDEX[normalizeStatusKey(status)] !== undefined);
+};
+
 const getProcessIndex = (record: Record<string, unknown>, status: string): number => {
   const explicitStep = record.currentStep ?? record.processStep ?? record.stageIndex;
 
@@ -125,15 +145,7 @@ const getProcessIndex = (record: Record<string, unknown>, status: string): numbe
     }
   }
 
-  const normalizedStatus = status
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-
-  return STATUS_INDEX[normalizedStatus] ?? 0;
+  return STATUS_INDEX[normalizeStatusKey(status)] ?? 0;
 };
 
 const getTimestamp = (value: string): number => {
@@ -218,8 +230,27 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
   const jobCompany = Object.keys(companyId).length > 0 ? companyId : getNestedRecord(job, "company");
   const requirements = getNestedRecord(job, "requirements");
   const currentStatus = getNestedRecord(raw, "currentStatus");
-  const statusLogs = normalizeStatusLogs(getRecordArray(raw.applicationStatus, raw.statusHistory, raw.logs));
-  const status = getString(currentStatus.status, raw.status, raw.stage, raw.process, statusLogs.at(-1)?.status, "Ứng tuyển");
+  const statusLogs = normalizeStatusLogs(getRecordArray(raw.applicationStatus, raw.applicationStatusHistory, raw.statusHistory, raw.logs));
+  const explicitApplicationId = getString(raw.applicationId);
+  const applicationStatus = getString(raw.applicationStatus, raw.latestStatus, raw.currentApplicationStatus);
+  const rawStatus = getString(raw.status);
+  const rawApplicationStatus = isKnownApplicationStatus(rawStatus) ? rawStatus : "";
+  const appliedAt = getString(raw.appliedAt, raw.applied_at);
+  const hasApplied = Boolean(
+    explicitApplicationId || applicationStatus || appliedAt || statusLogs.length > 0 || rawApplicationStatus,
+  );
+  const applicationId = hasApplied ? getString(explicitApplicationId, raw._id, raw.id) : "";
+  const status = hasApplied
+    ? getString(
+        currentStatus.status,
+        applicationStatus,
+        statusLogs.at(-1)?.status,
+        raw.stage,
+        raw.process,
+        rawApplicationStatus,
+        "applied",
+      )
+    : "Chưa ứng tuyển";
   const companyDescription = getString(
     company.description,
     jobCompany.description,
@@ -252,12 +283,18 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
     rawCompanyId._id,
     rawCompanyId.id,
   );
-  const currentProcessIndex = getProcessIndex(Object.keys(currentStatus).length > 0 ? currentStatus : raw, status);
+  const currentProcessIndex = hasApplied
+    ? getProcessIndex(Object.keys(currentStatus).length > 0 ? currentStatus : raw, status)
+    : -1;
   const currentStatusLog = getCurrentStatusLog(statusLogs, currentProcessIndex, currentStatus);
+  const defaultStageNote = hasApplied
+    ? "Bạn đã ứng tuyển vào vị trí này."
+    : "Bạn chưa ứng tuyển vào vị trí này.";
 
   return {
-    id: getString(raw.applicationId, raw._id, raw.id, jobId, crypto.randomUUID()),
+    id: getString(applicationId, raw._id, raw.id, jobId, crypto.randomUUID()),
     jobId,
+    applicationId,
     companyId: resolvedCompanyId,
     companyName: getString(company.name, jobCompany.name, raw.companyName, job.companyName, "Tên công ty"),
     companyDescription,
@@ -272,10 +309,12 @@ export const normalizeCandidateApplication = (raw: Record<string, unknown>): Can
     location: getLocation(job, basicInfo) || "Vị trí",
     logoUrl: getString(company.logoUrl, company.logo, jobCompany.logoUrl, jobCompany.logo) || undefined,
     status,
+    hasApplied,
+    appliedAt,
     currentProcessIndex,
-    currentStageNote: currentStatusLog?.note || "Chưa có ghi chú cho giai đoạn này.",
-    currentStageLoggedAt: currentStatusLog?.createdAt || currentStatusLog?.updatedAt || getString(raw.createdAt, raw.created_at),
-    currentStageLabel: PROCESS_LABELS[currentProcessIndex] || status,
+    currentStageNote: currentStatusLog?.note || defaultStageNote,
+    currentStageLoggedAt: currentStatusLog?.createdAt || currentStatusLog?.updatedAt || appliedAt || getString(raw.createdAt, raw.created_at),
+    currentStageLabel: hasApplied ? PROCESS_LABELS[currentProcessIndex] || status : "Chưa ứng tuyển",
     summary,
     jobDescription,
     requirements: getString(
