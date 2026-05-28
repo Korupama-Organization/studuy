@@ -206,7 +206,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Job Title <span className="text-red-500">*</span>
+              Tên vị trí <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -220,7 +220,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Job description <span className="text-red-500">*</span>
+              Mô tả công việc <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="jobDescription"
@@ -234,7 +234,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Short Description <span className="text-red-500">*</span>
+              Mô tả ngắn <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="shortDescription"
@@ -249,7 +249,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Work Model <span className="text-red-500">*</span>
+                Mô hình làm việc <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="workModel"
@@ -257,7 +257,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
                   required>
-                  <option value="">Select work model</option>
+                  <option value="">Chọn mô hình làm việc</option>
                   {WORK_MODEL_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -284,7 +284,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Job Type <span className="text-red-500">*</span>
+                  Loại hợp đồng <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="jobType"
@@ -292,7 +292,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
                   required>
-                  <option value="">Select job type</option>
+                  <option value="">Chọn loại hợp đồng</option>
                   {JOB_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -300,7 +300,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Role Type <span className="text-red-500">*</span>
+                  Vai trò <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="roleType"
@@ -308,7 +308,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
                   required>
-                  <option value="">Select role type</option>
+                  <option value="">Chọn vai trò</option>
                   {ROLE_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -319,7 +319,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Headcount <span className="text-red-500">*</span>
+                  Số lượng cần tuyển <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -339,7 +339,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Min Experience (months) <span className="text-red-500">*</span>
+                  Kinh nghiệm tối thiểu (tháng) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -361,7 +361,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Required Skills <span className="text-red-500">*</span>
+                Kỹ năng yêu cầu <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -376,7 +376,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Preferred Skills
+                Kỹ năng ưu tiên
               </label>
               <input
                 type="text"
@@ -390,7 +390,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Min GPA</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">GPA tối thiểu</label>
                 <input
                   type="number"
                   name="minGpa"
@@ -406,7 +406,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Required Languages
+                  Ngoại ngữ yêu cầu
                 </label>
                 <input
                   type="text"
@@ -421,7 +421,7 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Portfolio Expected
+                Portfolio 
               </label>
               <input
                 type="text"
@@ -439,14 +439,14 @@ export default function UpdateJobModal({ isOpen, onClose, job, onUpdate, onDelet
                 onClick={onClose}
                 className="rounded-2xl border border-slate-200 bg-slate-100 px-6 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
                 disabled={isSubmitting}>
-                Cancel
+                Hủy
               </button>
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
                 className="rounded-2xl bg-red-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
                 disabled={isSubmitting}>
-                Delete
+                Xóa
               </button>
               <button
                 type="submit"

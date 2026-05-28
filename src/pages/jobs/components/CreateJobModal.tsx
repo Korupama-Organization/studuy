@@ -155,7 +155,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-            <h2 className="text-xl font-bold text-slate-900">Create Job</h2>
+            <h2 className="text-xl font-bold text-slate-900">Tạo vị trí</h2>
             <button
               onClick={handleClose}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition"
@@ -169,7 +169,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Job Title <span className="text-red-500">*</span>
+                Tên vị trí <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -184,7 +184,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Job description <span className="text-red-500">*</span>
+                Mô tả công việc <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="jobDescription"
@@ -198,7 +198,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Short Description <span className="text-red-500">*</span>
+                Mô tả ngắn <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="shortDescription"
@@ -212,7 +212,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Location <span className="text-red-500">*</span>
+                Địa chỉ <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -227,7 +227,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Required Education <span className="text-red-500">*</span>
+                Trình độ học vấn yêu cầu <span className="text-red-500">*</span>
               </label>
               <textarea
                 name="requiredEducation"
@@ -242,7 +242,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Work Model <span className="text-red-500">*</span>
+                  Hình thức làm việc <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="workModel"
@@ -250,7 +250,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
                   required>
-                  <option value="">Select work model</option>
+                  <option value="">Chọn hình thức làm việc</option>
                   {WORK_MODEL_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -258,7 +258,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Level <span className="text-red-500">*</span>
+                  Cấp độ (Intern/Fresher/...) <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="level"
@@ -266,7 +266,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
                   required>
-                  <option value="">Select level</option>
+                  <option value="">Chọn cấp độ</option>
                   {LEVEL_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -277,7 +277,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Job Type <span className="text-red-500">*</span>
+                  Loại hợp đồng <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="jobType"
@@ -285,7 +285,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
                   required>
-                  <option value="">Select job type</option>
+                  <option value="">Chọn loại hợp đồng</option>
                   {JOB_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -293,7 +293,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Role Type <span className="text-red-500">*</span>
+                  Vai trò <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="roleType"
@@ -301,7 +301,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-900 focus:border-[#5B5BF6] focus:outline-none"
                   required>
-                  <option value="">Select role type</option>
+                  <option value="">Chọn vai trò</option>
                   {ROLE_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -312,7 +312,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Headcount <span className="text-red-500">*</span>
+                  Số lượng cần tuyển <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -332,7 +332,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Min Experience (months) <span className="text-red-500">*</span>
+                  Kinh nghiệm tối thiểu (tháng) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -354,7 +354,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Required Skills <span className="text-red-500">*</span>
+                Kỹ năng yêu cầu <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -369,7 +369,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Preferred Skills
+                Kỹ năng ưu tiên
               </label>
               <input
                 type="text"
@@ -383,7 +383,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-2">Min GPA</label>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">GPA tối thiểu</label>
                 <input
                   type="number"
                   name="minGpa"
@@ -399,7 +399,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-900 mb-2">
-                  Required Languages
+                  Ngoại ngữ yêu cầu
                 </label>
                 <input
                   type="text"
@@ -414,7 +414,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
 
             <div>
               <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Portfolio Expected
+                Portfolio
               </label>
               <input
                 type="text"
@@ -432,7 +432,7 @@ export default function CreateJobModal({ isOpen, onClose, onCreate }: CreateJobM
                 onClick={handleClose}
                 className="flex-1 rounded-2xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
                 disabled={isSubmitting}>
-                Cancel
+                Hủy
               </button>
               <button
                 type="submit"
