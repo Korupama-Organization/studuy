@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import GlobalHeader from "../../components/GlobalHeader";
 import { useMockInterviewLauncher } from "../../hooks/useMockInterviewLauncher";
@@ -11,6 +11,30 @@ import {
 import "./candidateJobs.css";
 
 type CandidateApplicationSort = "newest" | "oldest";
+type CandidateJobsToastTone = "success" | "error";
+
+type CandidateJobsToast = {
+  id: string;
+  message: string;
+  tone: CandidateJobsToastTone;
+};
+
+const createToast = (message: string, tone: CandidateJobsToastTone): CandidateJobsToast => ({
+  id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  message,
+  tone,
+});
+
+const isErrorToastMessage = (message: string): boolean => {
+  const normalizedMessage = message.toLowerCase();
+
+  return (
+    normalizedMessage.includes("thất bại") ||
+    normalizedMessage.includes("không thể") ||
+    normalizedMessage.includes("không tìm thấy") ||
+    normalizedMessage.includes("lỗi")
+  );
+};
 
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem("accessToken") || "";
@@ -315,6 +339,42 @@ function DetailDialog({
   );
 }
 
+function FloatingToast({
+  toast,
+  onClose,
+}: {
+  toast: CandidateJobsToast;
+  onClose: () => void;
+}) {
+  const isError = toast.tone === "error";
+
+  return (
+    <div className="candidate-jobs-toast-viewport" aria-live={isError ? "assertive" : "polite"} aria-atomic="true">
+      <div className={`candidate-jobs-toast candidate-jobs-toast--${toast.tone}`} role={isError ? "alert" : "status"}>
+        <span className="candidate-jobs-toast__icon" aria-hidden="true">
+          {isError ? (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v5" />
+              <path d="M12 16h.01" />
+            </svg>
+          ) : (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 7 10 17l-5-5" />
+            </svg>
+          )}
+        </span>
+
+        <p>{toast.message}</p>
+
+        <button className="candidate-jobs-toast__close" type="button" onClick={onClose} aria-label="Đóng thông báo">
+          ×
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CandidateJobCard({
   application,
   isApplying,
@@ -397,7 +457,7 @@ function CandidateJobCard({
 
 export default function CandidateJobsPage() {
   const queryClient = useQueryClient();
-  const [applyMessage, setApplyMessage] = useState("");
+  const [toast, setToast] = useState<CandidateJobsToast | null>(null);
   const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<CandidateApplicationSort>("newest");
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -406,6 +466,26 @@ export default function CandidateJobsPage() {
     isStartingMockInterview,
     mockInterviewMessage,
   } = useMockInterviewLauncher();
+
+  useEffect(() => {
+    if (!toast) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setToast((currentToast) => (currentToast?.id === toast.id ? null : currentToast));
+    }, 3200);
+
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  useEffect(() => {
+    if (!mockInterviewMessage) {
+      return;
+    }
+
+    setToast(createToast(mockInterviewMessage, isErrorToastMessage(mockInterviewMessage) ? "error" : "success"));
+  }, [mockInterviewMessage]);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["candidate-applications"],
@@ -509,11 +589,11 @@ export default function CandidateJobsPage() {
       return readJsonResponse(response);
     },
     onMutate: (application) => {
-      setApplyMessage("");
+      setToast(null);
       setApplyingJobId(application.jobId);
     },
     onSuccess: async (payload, application) => {
-      setApplyMessage("Ứng tuyển thành công.");
+      setToast(createToast("Ứng tuyển thành công.", "success"));
 
       const createdApplication = isRecord(payload) ? getNestedRecord(payload, "application") : {};
       const createdStatusLogs = Array.isArray(createdApplication.applicationStatus)
@@ -557,7 +637,7 @@ export default function CandidateJobsPage() {
       await queryClient.invalidateQueries({ queryKey: ["candidate-applications"] });
     },
     onError: (mutationError) => {
-      setApplyMessage(mutationError instanceof Error ? mutationError.message : "Ứng tuyển thất bại.");
+      setToast(createToast(mutationError instanceof Error ? mutationError.message : "Ứng tuyển thất bại.", "error"));
     },
     onSettled: () => {
       setApplyingJobId(null);
@@ -591,6 +671,8 @@ export default function CandidateJobsPage() {
 
   return (
     <div className="candidate-jobs-page">
+      {toast ? <FloatingToast toast={toast} onClose={() => setToast(null)} /> : null}
+
       <GlobalHeader
         onMockInterviewClick={startMockInterview}
         isStartingMockInterview={isStartingMockInterview}
@@ -643,8 +725,6 @@ export default function CandidateJobsPage() {
 
           {isLoading ? <p className="candidate-jobs-loading">Đang tải danh sách ứng tuyển...</p> : null}
           {errorMessage ? <p className="candidate-jobs-notice">{errorMessage}</p> : null}
-          {applyMessage ? <p className="candidate-jobs-notice">{applyMessage}</p> : null}
-          {mockInterviewMessage ? <p className="candidate-jobs-notice">{mockInterviewMessage}</p> : null}
 
           {!isLoading && !errorMessage && applications.length === 0 ? (
             <div className="candidate-jobs-empty">
