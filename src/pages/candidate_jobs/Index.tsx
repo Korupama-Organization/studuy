@@ -1,6 +1,7 @@
 ﻿import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import GlobalHeader from "../../components/GlobalHeader";
+import { useMockInterviewLauncher } from "../../hooks/useMockInterviewLauncher";
 import { buildApiUrl, getStoredUser } from "../../services/auth";
 import {
   extractCandidateApplications,
@@ -346,12 +347,12 @@ function CandidateJobCard({
           <h3>{application.jobTitle}</h3>
           <p className="candidate-job-company__location">{application.location}</p>
           <button
-            className="candidate-job-apply"
+            className={`candidate-job-apply${application.hasApplied ? " candidate-job-apply--applied" : ""}`}
             type="button"
             onClick={() => onApply(application)}
-            disabled={isApplying || !application.jobId}
+            disabled={isApplying || application.hasApplied || !application.jobId}
           >
-            {isApplying ? "Đang apply..." : "Apply"}
+            {application.hasApplied ? "Đã apply" : isApplying ? "Đang apply..." : "Apply"}
           </button>
         </div>
 
@@ -364,7 +365,7 @@ function CandidateJobCard({
             <span className="candidate-job-stage-note__label">{application.currentStageLabel}</span>
             <p>{application.currentStageNote}</p>
             <div className="candidate-job-stage-note__meta">
-              <span>Ngày tạo tin</span>
+              <span>{application.hasApplied ? "Ngày apply" : "Ngày tạo tin"}</span>
               <time dateTime={application.currentStageLoggedAt || undefined}>
                 {formatLogTime(application.currentStageLoggedAt)}
               </time>
@@ -400,6 +401,11 @@ export default function CandidateJobsPage() {
   const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<CandidateApplicationSort>("newest");
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const {
+    startMockInterview,
+    isStartingMockInterview,
+    mockInterviewMessage,
+  } = useMockInterviewLauncher();
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["candidate-applications"],
@@ -457,7 +463,9 @@ export default function CandidateJobsPage() {
         return resolvedApplications.map((application) => ({
           ...application,
           companyDescription: companyDescriptions.get(application.companyId) || application.companyDescription,
-          currentStageLoggedAt: jobCreatedDates.get(application.jobId) || application.currentStageLoggedAt,
+          currentStageLoggedAt: application.hasApplied
+            ? application.currentStageLoggedAt
+            : jobCreatedDates.get(application.jobId) || application.currentStageLoggedAt,
         }));
       } catch {
         const companyIds = [...new Set(applications.map((application) => application.companyId).filter(Boolean))];
@@ -497,13 +505,55 @@ export default function CandidateJobsPage() {
       if (!response.ok) {
         throw new Error(await getResponseErrorMessage(response, "Ứng tuyển thất bại."));
       }
+
+      return readJsonResponse(response);
     },
     onMutate: (application) => {
       setApplyMessage("");
       setApplyingJobId(application.jobId);
     },
-    onSuccess: async () => {
+    onSuccess: async (payload, application) => {
       setApplyMessage("Ứng tuyển thành công.");
+
+      const createdApplication = isRecord(payload) ? getNestedRecord(payload, "application") : {};
+      const createdStatusLogs = Array.isArray(createdApplication.applicationStatus)
+        ? createdApplication.applicationStatus.filter(isRecord)
+        : [];
+      const latestStatus = createdStatusLogs.at(-1);
+      const status = getString(latestStatus?.status, "applied");
+      const applicationId = getString(createdApplication._id, createdApplication.id, application.applicationId);
+      const appliedAt = getString(
+        createdApplication.createdAt,
+        latestStatus?.createdAt,
+        latestStatus?.updatedAt,
+        new Date().toISOString(),
+      );
+
+      queryClient.setQueryData<CandidateApplicationCard[]>(["candidate-applications"], (currentApplications) => {
+        if (!currentApplications) {
+          return currentApplications;
+        }
+
+        return currentApplications.map((currentApplication) => {
+          if (currentApplication.jobId !== application.jobId) {
+            return currentApplication;
+          }
+
+          return {
+            ...currentApplication,
+            id: applicationId || currentApplication.id,
+            applicationId,
+            status,
+            hasApplied: true,
+            appliedAt,
+            currentProcessIndex: 0,
+            currentStageLabel: "Ứng tuyển",
+            currentStageNote: "Bạn đã ứng tuyển vào vị trí này.",
+            currentStageLoggedAt: appliedAt,
+          };
+        });
+      });
+
       await queryClient.invalidateQueries({ queryKey: ["candidate-applications"] });
     },
     onError: (mutationError) => {
@@ -541,7 +591,10 @@ export default function CandidateJobsPage() {
 
   return (
     <div className="candidate-jobs-page">
-      <GlobalHeader />
+      <GlobalHeader
+        onMockInterviewClick={startMockInterview}
+        isStartingMockInterview={isStartingMockInterview}
+      />
 
       <main className="candidate-jobs-main">
         <div className="candidate-jobs-shell">
@@ -591,6 +644,7 @@ export default function CandidateJobsPage() {
           {isLoading ? <p className="candidate-jobs-loading">Đang tải danh sách ứng tuyển...</p> : null}
           {errorMessage ? <p className="candidate-jobs-notice">{errorMessage}</p> : null}
           {applyMessage ? <p className="candidate-jobs-notice">{applyMessage}</p> : null}
+          {mockInterviewMessage ? <p className="candidate-jobs-notice">{mockInterviewMessage}</p> : null}
 
           {!isLoading && !errorMessage && applications.length === 0 ? (
             <div className="candidate-jobs-empty">

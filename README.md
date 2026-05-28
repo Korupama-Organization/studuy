@@ -51,6 +51,7 @@ Tạo file `.env` ở thư mục gốc nếu chưa có:
 ```env
 VITE_API_BASE_URL=http://localhost:3000
 VITE_UIT_AUTH_SECRET=your-secret-here
+VITE_INTERVIEW_BASE_URL=https://seed-interview.vercel.app
 ```
 
 - `VITE_API_BASE_URL` trỏ đến backend API.

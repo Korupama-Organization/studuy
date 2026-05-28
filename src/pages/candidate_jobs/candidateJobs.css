@@ -72,6 +72,18 @@
   cursor: default;
 }
 
+.candidate-jobs-nav__link--button {
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.candidate-jobs-nav__link--button:disabled {
+  cursor: default;
+  opacity: 0.64;
+}
+
 .candidate-jobs-nav__link--active {
   color: #ffffff;
   background: linear-gradient(180deg, #7a58e8 0%, #df6be4 100%);
@@ -197,15 +209,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  min-width: 230px;
-  min-height: 88px;
-  padding: 0 26px;
-  border: 3px solid #0d66d0;
-  border-radius: 20px;
+  gap: 16px;
+  min-width: 180px;
+  min-height: 66px;
+  padding: 0 20px;
+  border: 2px solid #0d66d0;
+  border-radius: 18px;
   background: #ffffff;
   color: #111827;
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
@@ -231,16 +243,21 @@
   color: #111827;
 }
 
+.candidate-jobs-sort__chevron svg {
+  width: 18px;
+  height: 18px;
+}
+
 .candidate-jobs-sort__menu {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
   z-index: 25;
   width: 100%;
-  min-width: 230px;
+  min-width: 180px;
   overflow: hidden;
   border: 1px solid rgba(13, 102, 208, 0.18);
-  border-radius: 16px;
+  border-radius: 14px;
   background: #ffffff;
   box-shadow: 0 18px 36px rgba(31, 25, 75, 0.18);
 }
@@ -249,12 +266,12 @@
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 56px;
-  padding: 0 20px;
+  min-height: 48px;
+  padding: 0 18px;
   border: 0;
   background: #ffffff;
   color: #1f2937;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 800;
   text-align: left;
   cursor: pointer;
@@ -736,9 +753,9 @@
 
   .candidate-jobs-sort__trigger {
     justify-content: space-between;
-    min-height: 64px;
+    min-height: 58px;
     min-width: 0;
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .candidate-jobs-notice,
